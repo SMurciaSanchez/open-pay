@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, ArrowRightLeft, Clock,
   Settings, HelpCircle, LogOut, Menu, X, ChevronDown,
-  Shield, Zap, Building2, ShieldCheck,
+  Shield, Zap, ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -25,7 +25,6 @@ const mainNavItems: NavItem[] = [
   { title: 'Panel Principal', href: '/dashboard',    icon: LayoutDashboard },
   { title: 'Enviar dinero',   href: '/send-money',   icon: ArrowRightLeft },
   { title: 'Transacciones',   href: '/transactions', icon: Clock },
-  { title: 'Pagar entidad',   href: '/pay-entity',   icon: Building2 },
 ];
 
 const bottomNavItems: NavItem[] = [

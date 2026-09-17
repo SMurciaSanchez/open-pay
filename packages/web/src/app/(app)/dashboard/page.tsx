@@ -9,7 +9,7 @@ import { TransactionsList } from '@/components/transactions/TransactionsList';
 import { Toaster } from '@/components/ui/toaster';
 import api, { Account } from '@/lib/api';
 import {
-  Send, Download, CreditCard, Users,
+  Send, Download, Users,
   TrendingUp, TrendingDown, ArrowUpRight,
   ArrowDownLeft, ShieldCheck, Wallet, Eye, EyeOff,
 } from 'lucide-react';
@@ -28,7 +28,6 @@ const item: Variants = {
 const quickActions = [
   { label: 'Enviar',     href: '/send-money',        icon: Send,     bg: 'bg-violet-100',  color: 'text-violet-600' },
   { label: 'Recibir',    href: '/dashboard/receive',  icon: Download, bg: 'bg-emerald-100', color: 'text-emerald-600' },
-  { label: 'Pagar',      href: '/pay-entity',         icon: CreditCard, bg: 'bg-sky-100',   color: 'text-sky-600' },
 ];
 
 const money = (n: number) =>
