@@ -6,7 +6,7 @@
 
 - **Detectado**: 16/09/2026
 - **Severidad**: 🔴 Crítica (repo `SMurciaSanchez/open-pay-mvp` es público en GitHub)
-- **Estado**: 🟡 Contenido — **pendiente rotar**
+- **Estado**: 🟡 Contenido — rotación imposible (ver actualización)
 
 ### Credenciales afectadas
 
@@ -31,3 +31,25 @@
 - Nunca escribir credenciales en scripts ni documentación; usar variables de entorno y `.env.example` con valores vacíos.
 - El `.gitignore` de la raíz estaba en UTF-16 y git no lo leía: revisar codificación de archivos de configuración.
 - Pendiente: agregar escaneo de secretos (p. ej. `gitleaks` como pre-commit o GitHub secret scanning).
+
+## INC-002 — Correo y contraseña de un usuario en scripts de prueba
+
+- **Detectado**: 16/09/2026
+- **Severidad**: 🔴 Alta (credencial personal, pública desde 20/04/2025)
+- **Estado**: 🟡 Contenido — **pendiente cambiar la contraseña**
+
+### Qué pasó
+
+`packages/web/test-supabase.js` y `packages/web/test-supabase-queries.js` (commit `fdf3667`, primer commit de `open-pay-mvp`) tenían escrito el correo de un fundador junto con la contraseña de su cuenta, para iniciar sesión desde el script. También tenían la clave `anon` del proyecto `garzwhnenhtmpfvfntmk` (pública por diseño; se reemplazó igual en la documentación).
+
+### Pasos
+
+- [x] Archivos excluidos del repositorio nuevo `open-pay`; clave `anon` reemplazada por `<TU_ANON_KEY>` en `INSTRUCCIONES_VERCEL.md` y `VERCEL_DEPLOYMENT.md`.
+- [ ] Cambiar esa contraseña en todos los servicios donde se reutilice (correo primero) y activar 2FA.
+- [ ] Pasar `open-pay-mvp` a privado.
+- [ ] Marcar este incidente como ✅ Cerrado.
+
+### Lecciones
+
+- Los scripts de prueba inician sesión con usuarios de prueba creados para eso, nunca con cuentas personales, y leen las credenciales del entorno.
+- Antes de publicar un repositorio, escanear el árbol completo (no solo los `.env`).
