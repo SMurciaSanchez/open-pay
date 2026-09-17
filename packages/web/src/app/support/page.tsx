@@ -1,11 +1,43 @@
 'use client';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ContactForm } from '@/components/support/ContactForm';
-import { HelpCircle, Mail, MessageSquare, Phone } from 'lucide-react';
+import { BookOpen, Bug, HelpCircle, Mail, ShieldAlert } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Toaster } from '@/components/ui/toaster';
-import Link from 'next/link';
+
+const REPO = 'https://github.com/SMurciaSanchez/open-pay';
+
+// Solo canales y respuestas que existen hoy. OpenPay es un proyecto en desarrollo:
+// no hay teléfono, chat ni formulario de soporte atendido.
+const faqs = [
+  {
+    q: '¿Cómo envío dinero?',
+    a: 'En "Enviar dinero" escribe el correo del destinatario (debe tener cuenta en OpenPay), el monto y el concepto. La operación se valida contra tu saldo y, si se reintenta, no se cobra dos veces.',
+  },
+  {
+    q: '¿Cómo recargo mi cuenta?',
+    a: 'Todavía no se puede. OpenPay está en desarrollo y no mueve dinero real: los saldos que ves son de prueba.',
+  },
+  {
+    q: '¿Cómo cambio mi contraseña?',
+    a: 'En "Seguridad" encontrarás la opción para cambiarla mientras tienes la sesión iniciada.',
+  },
+  {
+    q: '¿Qué hago si olvidé mi contraseña?',
+    a: 'La recuperación por correo aún no está disponible. Mientras tanto, abre un reporte en GitHub (sin incluir datos personales).',
+  },
+  {
+    q: '¿Quién puede ver mi información?',
+    a: 'Solo tú ves tu perfil, tu saldo y tus movimientos; la base de datos lo impone con reglas por fila, no solo la app. El detalle de qué dato ve quién está en la política de datos.',
+  },
+];
+
+const docs = [
+  { href: `${REPO}#readme`, label: 'Qué es OpenPay' },
+  { href: `${REPO}/blob/main/docs/PLAN_OPENPAY_ZK.md`, label: 'Plan técnico y hoja de ruta' },
+  { href: `${REPO}/blob/main/docs/POLITICA_DATOS.md`, label: 'Política de datos (quién ve qué)' },
+  { href: `${REPO}/blob/main/docs/MODELO_AMENAZA.md`, label: 'Modelo de amenaza' },
+  { href: `${REPO}/blob/main/docs/SEGURIDAD_INCIDENTES.md`, label: 'Registro de incidentes de seguridad' },
+];
 
 export default function SupportPage() {
   return (
@@ -13,10 +45,10 @@ export default function SupportPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Soporte</h1>
         <p className="text-muted-foreground mt-2">
-          Estamos aquí para ayudarte. Encuentra respuestas o contáctanos directamente.
+          OpenPay es un proyecto de código abierto en desarrollo. El soporte se hace en público, en GitHub.
         </p>
       </div>
-      
+
       <Tabs defaultValue="contact" className="space-y-6">
         <TabsList className="grid grid-cols-3 w-full max-w-md mb-4">
           <TabsTrigger value="contact" className="flex items-center gap-2">
@@ -28,213 +60,102 @@ export default function SupportPage() {
             <span className="hidden sm:inline">FAQ</span>
           </TabsTrigger>
           <TabsTrigger value="resources" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">Recursos</span>
+            <BookOpen className="h-4 w-4" />
+            <span className="hidden sm:inline">Documentos</span>
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="contact">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <ContactForm />
-            </div>
-            
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-5 w-5 text-primary" />
-                    Contacto directo
-                  </CardTitle>
-                  <CardDescription>
-                    Contáctanos directamente por teléfono
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    <li className="flex flex-col">
-                      <span className="text-sm font-medium">Servicio al cliente</span>
-                      <span className="text-sm">(800) 123-4567</span>
-                      <span className="text-xs text-muted-foreground">Lun-Vie, 9am-6pm</span>
-                    </li>
-                    <li className="flex flex-col">
-                      <span className="text-sm font-medium">Soporte técnico</span>
-                      <span className="text-sm">(800) 765-4321</span>
-                      <span className="text-xs text-muted-foreground">24/7</span>
-                    </li>
-                    <li className="flex flex-col">
-                      <span className="text-sm font-medium">Reportar fraude</span>
-                      <span className="text-sm">(800) 987-6543</span>
-                      <span className="text-xs text-muted-foreground">24/7</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-primary" />
-                    Chat en vivo
-                  </CardTitle>
-                  <CardDescription>
-                    Habla con un representante en tiempo real
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm mb-4">
-                    Nuestro chat en vivo está disponible de lunes a viernes de 9:00 AM a 8:00 PM (CST).
-                  </p>
-                  <Link
-                    href="#"
-                    className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                  >
-                    Iniciar chat
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bug className="h-5 w-5 text-primary" />
+                  Errores y preguntas
+                </CardTitle>
+                <CardDescription>Abre un reporte (issue) en GitHub</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-4">
+                  Describe qué hiciste, qué esperabas y qué pasó. No incluyas contraseñas, documentos ni
+                  datos personales: los reportes son públicos.
+                </p>
+                <a
+                  href={`${REPO}/issues/new`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  Abrir reporte
+                </a>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldAlert className="h-5 w-5 text-primary" />
+                  Problemas de seguridad
+                </CardTitle>
+                <CardDescription>Repórtalos en privado</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-4">
+                  Si encontraste una vulnerabilidad, no abras un reporte público: usa el reporte privado de
+                  seguridad de GitHub.
+                </p>
+                <a
+                  href={`${REPO}/security/advisories/new`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10"
+                >
+                  Reportar en privado
+                </a>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="faq">
           <Card className="bg-white card-shadow border-border">
             <CardHeader>
               <CardTitle>Preguntas frecuentes</CardTitle>
-              <CardDescription>
-                FAQ — Encuentra respuestas a las preguntas más comunes sobre OpenPay
-              </CardDescription>
+              <CardDescription>Lo que OpenPay hace hoy, y lo que todavía no</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-6 faq-list">
-                <li className="space-y-1">
-                  <h3 className="text-base font-medium">¿Cómo puedo enviar dinero?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Para enviar dinero, ve a la sección "Enviar dinero" en el dashboard, ingresa el correo electrónico del destinatario, la cantidad y el concepto. Después confirma la transacción.
-                  </p>
-                </li>
-                <li className="space-y-1">
-                  <h3 className="text-base font-medium">¿Cómo recargo fondos a mi cuenta?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Puedes recargar fondos mediante transferencia bancaria SPEI, tarjeta de débito o crédito. Ve a la sección "Recargar" para ver todas las opciones disponibles.
-                  </p>
-                </li>
-                <li className="space-y-1">
-                  <h3 className="text-base font-medium">¿Cómo cambio mi contraseña?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Para cambiar tu contraseña, ve al menú de &quot;Configuración&quot; &gt; &quot;Seguridad&quot; y selecciona la opción &quot;Cambiar contraseña&quot;.
-                  </p>
-                </li>
-                <li className="space-y-1">
-                  <h3 className="text-base font-medium">¿Qué hago si olvidé mi contraseña?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    En la pantalla de inicio de sesión, selecciona la opción "¿Olvidaste tu contraseña?". Recibirás un correo con instrucciones para restablecerla.
-                  </p>
-                </li>
-                <li className="space-y-1">
-                  <h3 className="text-base font-medium">¿Cómo verifico mi identidad?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Para verificar tu identidad, ve a &quot;Configuración&quot; &gt; &quot;Verificación&quot; y sigue las instrucciones para subir una identificación oficial y completar el proceso.
-                  </p>
-                </li>
-                <li className="space-y-1">
-                  <h3 className="text-base font-medium">¿Es segura mi información?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    OpenPay utiliza encriptación de datos y medidas de seguridad de nivel bancario para proteger tu información personal y financiera. Nunca compartimos tus datos con terceros sin tu consentimiento.
-                  </p>
-                </li>
+                {faqs.map(({ q, a }) => (
+                  <li key={q} className="space-y-1">
+                    <h3 className="text-base font-medium">{q}</h3>
+                    <p className="text-sm text-muted-foreground">{a}</p>
+                  </li>
+                ))}
               </ul>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="resources">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Guías y tutoriales</CardTitle>
-                <CardDescription>
-                  Aprende a usar OpenPay con nuestras guías detalladas
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Documentation
-                    </Link>
+          <Card>
+            <CardHeader>
+              <CardTitle>Documentos del proyecto</CardTitle>
+              <CardDescription>Cómo funciona OpenPay y qué promete (y qué no)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {docs.map(({ href, label }) => (
+                  <li key={href}>
+                    <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      {label}
+                    </a>
                   </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Cómo comenzar con OpenPay
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Guía de seguridad para usuarios
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Cómo verificar tu cuenta
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Tutorial: Envío de dinero
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Preguntas frecuentes sobre transacciones
-                    </Link>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Centro de ayuda</CardTitle>
-                <CardDescription>
-                  Explora recursos adicionales de soporte
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Blog de OpenPay
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Avisos de seguridad
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Términos y condiciones
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Política de privacidad
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#" className="text-primary hover:underline">
-                      Comunidad de OpenPay
-                    </Link>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
-      
-      <Toaster />
     </div>
   );
-} 
+}
