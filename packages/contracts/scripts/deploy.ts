@@ -1,3 +1,6 @@
+// Despliega CommitmentRegistry (el registro de raíces de Merkle).
+// El contrato anterior, TransactionRegistry, se retiró: publicaba montos y
+// hasta el concepto del pago en la cadena, justo lo que la Fase 2 prohíbe.
 import { ethers, network, run } from "hardhat";
 
 async function main() {
@@ -8,7 +11,7 @@ async function main() {
   console.log(`Deployer:             ${deployer.address}`);
   console.log(`Balance:              ${ethers.formatEther(balance)} ETH`);
 
-  const Factory = await ethers.getContractFactory("TransactionRegistry");
+  const Factory = await ethers.getContractFactory("CommitmentRegistry");
   const registry = await Factory.deploy();
   await registry.waitForDeployment();
 

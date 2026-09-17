@@ -188,7 +188,7 @@ App móvil · panel de admin con datos simulados · pagos a entidades · chatbot
 |---|---|---|
 | **0. Incendios** (esta semana) | Seguridad, visión acordada entre fundadores, rama `pivot/trazabilidad` | Ambas contraseñas rotadas, migración aplicada, repo limpio |
 | **1. Validación** (4–6 semanas; **pospuesta**, obligatoria antes de la Fase 4) | 15–20 entrevistas (fundaciones, ONG, revisores fiscales, cooperación, veedurías); primera asesoría legal (datos, SARLAFT, licencia; innovasfc, consultorios jurídicos) | **2–3 organizaciones dispuestas a pilotear** |
-| **2. Cimientos** (en curso) | Clasificación de datos ([`POLITICA_DATOS.md`](POLITICA_DATOS.md) ✅); modelo de amenaza ([`MODELO_AMENAZA.md`](MODELO_AMENAZA.md) ✅); modelo de mandatos; `AuditLog` de accesos; conciliación bancaria; `CommitmentRegistry` con Poseidon y lotes | Ningún monto, nombre o descripción on-chain |
+| **2. Cimientos** ✅ | Clasificación de datos ([`POLITICA_DATOS.md`](POLITICA_DATOS.md) ✅); modelo de amenaza ([`MODELO_AMENAZA.md`](MODELO_AMENAZA.md) ✅); modelo de mandatos ✅; `AccessLog` de accesos ✅; conciliación bancaria ✅; `CommitmentRegistry` con Poseidon y lotes ✅ | Ningún monto, nombre o descripción on-chain — **cumplido**: `publishRoot` solo recibe `bytes32` y no existe función que acepte texto ni montos |
 | **3. Primera prueba end-to-end** | Regla ZK "proveedor autorizado + dentro del presupuesto"; portal público de verificación; primera revisión de seguridad externa | Cualquiera verifica una prueba desde el navegador sin cuenta |
 | **4. Piloto** | Una organización real, datos reales, sin mover dinero | Medir reducción de tiempo de auditoría y uso por donantes |
 | **5. Anticorrupción** | CUFE, SECOP II, alertas de precios, actas de entrega firmadas, prueba de exclusión para conflictos de interés, denuncia anónima verificable (p. ej. Semaphore) | Las cuatro puertas cubiertas |
@@ -216,9 +216,39 @@ cd packages/web
 npm install
 npm run dev
 
-# Contratos
+# Contratos y compromisos (Poseidon, árboles de Merkle)
 cd packages/contracts
 npm install
 npx hardhat test
 npx hardhat run scripts/deploy.ts --network baseSepolia
 ```
+
+```sh
+# Base de datos: aplica todas las migraciones dos veces en un Postgres
+# desechable y corre las 147 pruebas. Requiere Docker, no toca Supabase.
+sh packages/web/supabase/tests/run.sh
+```
+
+## 10. Cómo encajan las piezas de la Fase 2
+
+```
+Pago (DRAFT)
+  → decide_payment()        APPROVED   quien lo crea no lo aprueba
+  → reconcile_payment()     RECONCILED hay un movimiento en un extracto sellado,
+                                       del mismo monto y posterior a la aprobación
+  → record_payment_batch()  el compromiso Poseidon del pago entra a un árbol
+  → anchor_payment_batch()  la raíz queda en CommitmentRegistry (Base)
+```
+
+Un pago solo llega a la cadena si pasó por todos los pasos, y a la cadena solo
+llega la raíz. El contrato guarda `bytes32` y nada más; el monto, el proveedor y
+el concepto se quedan en la base, y la sal que los protege (`Payment.salt`, N4)
+no la puede leer ningún rol de cliente.
+
+**Lo que esto prueba:** que un conjunto de pagos existía, con esos valores, y no
+cambió desde la fecha anclada. **Lo que no prueba:** que el banco movió el
+dinero. El extracto lo importa la propia organización; lo que se gana es que
+quede sellado, cuadrado contra sus saldos y con el SHA-256 del archivo original,
+de modo que manipularlo exija falsificar también el PDF del banco (supuesto S5
+de [`MODELO_AMENAZA.md`](MODELO_AMENAZA.md)). La confirmación directa con el
+banco es Fase 6.
