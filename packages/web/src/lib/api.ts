@@ -104,6 +104,28 @@ const api = {
     if (error) throw new Error(error.message);
     return { transactions: data || [] };
   },
+
+  // Totales del mes en curso a partir de las transacciones reales del usuario
+  getMonthSummary: async (): Promise<{ income: number; expenses: number; count: number }> => {
+    const profile = await getOrCreateProfile();
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const { data, error } = await supabase
+      .from('Transaction')
+      .select('senderId, receiverId, amount')
+      .or(`senderId.eq.${profile.id},receiverId.eq.${profile.id}`)
+      .eq('status', 'COMPLETED')
+      .gte('createdAt', monthStart);
+
+    if (error) throw new Error(error.message);
+    let income = 0;
+    let expenses = 0;
+    for (const tx of data || []) {
+      if (tx.receiverId === profile.id) income += Number(tx.amount);
+      if (tx.senderId === profile.id) expenses += Number(tx.amount);
+    }
+    return { income, expenses, count: data?.length ?? 0 };
+  },
 };
 
 export default api;

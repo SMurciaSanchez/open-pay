@@ -26,29 +26,33 @@ const item: Variants = {
 
 // ── Quick actions ──────────────────────────────────────────────
 const quickActions = [
-  { label: 'Enviar',     href: '/dashboard/send',    icon: Send,     bg: 'bg-violet-100',  color: 'text-violet-600' },
+  { label: 'Enviar',     href: '/send-money',        icon: Send,     bg: 'bg-violet-100',  color: 'text-violet-600' },
   { label: 'Recibir',    href: '/dashboard/receive',  icon: Download, bg: 'bg-emerald-100', color: 'text-emerald-600' },
-  { label: 'Servicios',  href: '/services',           icon: CreditCard, bg: 'bg-sky-100',   color: 'text-sky-600' },
-  { label: 'Contactos',  href: '/contacts',           icon: Users,    bg: 'bg-amber-100',   color: 'text-amber-600' },
+  { label: 'Pagar',      href: '/pay-entity',         icon: CreditCard, bg: 'bg-sky-100',   color: 'text-sky-600' },
 ];
 
-// ── Stat cards ─────────────────────────────────────────────────
-const stats = [
-  { label: 'Ingresos del mes',  value: '$45,200', change: '+12.5%', up: true,  icon: TrendingUp,   bg: 'bg-emerald-50', color: 'text-emerald-600' },
-  { label: 'Gastos del mes',    value: '$12,380', change: '-3.2%',  up: false, icon: TrendingDown, bg: 'bg-rose-50',    color: 'text-rose-500' },
-  { label: 'Transferencias',    value: '24',      change: '+4 esta semana', up: true, icon: ArrowUpRight, bg: 'bg-violet-50', color: 'text-violet-600' },
-];
+const money = (n: number) =>
+  `$${n.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 
 export default function DashboardPage() {
   const router = useRouter();
   const [account, setAccount] = useState<Account | null>(null);
   const [showBalance, setShowBalance] = useState(true);
+  const [summary, setSummary] = useState({ income: 0, expenses: 0, count: 0 });
 
   useEffect(() => {
     api.getAccounts().then(accounts => {
       if (accounts.length > 0) setAccount(accounts[0]);
     }).catch(() => {});
+    api.getMonthSummary().then(setSummary).catch(() => {});
   }, []);
+
+  // Cifras reales del mes en curso (sin comparaciones inventadas)
+  const stats = [
+    { label: 'Recibido este mes', value: money(summary.income),   icon: TrendingUp,   bg: 'bg-emerald-50', color: 'text-emerald-600' },
+    { label: 'Enviado este mes',  value: money(summary.expenses), icon: TrendingDown, bg: 'bg-rose-50',    color: 'text-rose-500' },
+    { label: 'Movimientos del mes', value: String(summary.count), icon: ArrowUpRight, bg: 'bg-violet-50', color: 'text-violet-600' },
+  ];
 
   const balance = account?.balance ?? 0;
   const displayBalance = showBalance
@@ -110,21 +114,21 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-1 text-violet-300 text-xs mb-0.5">
                     <ArrowDownLeft className="h-3.5 w-3.5" /> Ingresos
                   </div>
-                  <p className="text-white font-semibold text-sm">+$45,200</p>
+                  <p className="text-white font-semibold text-sm">+{money(summary.income)}</p>
                 </div>
                 <div className="h-8 w-px bg-white/20" />
                 <div>
                   <div className="flex items-center gap-1 text-violet-300 text-xs mb-0.5">
                     <ArrowUpRight className="h-3.5 w-3.5" /> Gastos
                   </div>
-                  <p className="text-white font-semibold text-sm">-$12,380</p>
+                  <p className="text-white font-semibold text-sm">-{money(summary.expenses)}</p>
                 </div>
                 <div className="h-8 w-px bg-white/20" />
                 <div>
                   <div className="flex items-center gap-1 text-violet-300 text-xs mb-0.5">
                     <ShieldCheck className="h-3.5 w-3.5" /> Cuenta
                   </div>
-                  <p className="text-white font-semibold text-sm">Verificada</p>
+                  <p className="text-white font-semibold text-sm">{account?.status === 'ACTIVE' ? 'Activa' : '—'}</p>
                 </div>
               </div>
             </div>
@@ -132,7 +136,7 @@ export default function DashboardPage() {
             {/* CTA buttons */}
             <div className="flex gap-3 shrink-0">
               <Button
-                onClick={() => router.push('/dashboard/send')}
+                onClick={() => router.push('/send-money')}
                 className="font-semibold rounded-xl shadow-lg border-0 transition-all duration-200 hover:-translate-y-0.5"
                 style={{ background: 'rgba(255,255,255,0.95)', color: '#7c3aed', boxShadow: '0 8px 25px rgba(0,0,0,0.2)' }}
               >
@@ -146,7 +150,7 @@ export default function DashboardPage() {
                 variant="ghost"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Recargar
+                Recibir
               </Button>
             </div>
           </div>
@@ -154,7 +158,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* ── QUICK ACTIONS ────────────────────────────────────── */}
-      <motion.div variants={item} className="grid grid-cols-4 gap-3">
+      <motion.div variants={item} className="grid grid-cols-3 gap-3">
         {quickActions.map((action, i) => (
           <motion.button
             key={action.href}
@@ -188,9 +192,6 @@ export default function DashboardPage() {
               <div>
                 <p className="text-xs text-slate-500 font-medium">{stat.label}</p>
                 <p className="text-2xl font-bold text-slate-900 mt-1.5">{stat.value}</p>
-                <span className={`mt-2 inline-block ${stat.up ? 'stat-up' : 'stat-down'}`}>
-                  {stat.change}
-                </span>
               </div>
               <div className={`h-11 w-11 rounded-xl ${stat.bg} flex items-center justify-center`}>
                 <stat.icon className={`h-5 w-5 ${stat.color}`} />

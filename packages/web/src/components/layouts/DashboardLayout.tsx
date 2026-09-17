@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, ArrowRightLeft, CreditCard, Users, Clock,
+  LayoutDashboard, ArrowRightLeft, Clock,
   Settings, HelpCircle, LogOut, Menu, X, ChevronDown,
   Shield, Zap, Building2, ShieldCheck,
 } from 'lucide-react';
@@ -23,11 +23,9 @@ interface NavItem {
 
 const mainNavItems: NavItem[] = [
   { title: 'Panel Principal', href: '/dashboard',    icon: LayoutDashboard },
-  { title: 'Transferencias',  href: '/transfers',    icon: ArrowRightLeft },
+  { title: 'Enviar dinero',   href: '/send-money',   icon: ArrowRightLeft },
   { title: 'Transacciones',   href: '/transactions', icon: Clock },
   { title: 'Pagar entidad',   href: '/pay-entity',   icon: Building2 },
-  { title: 'Servicios',       href: '/services',     icon: CreditCard },
-  { title: 'Contactos',       href: '/contacts',     icon: Users },
 ];
 
 const bottomNavItems: NavItem[] = [

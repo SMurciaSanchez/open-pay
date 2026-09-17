@@ -1,4 +1,4 @@
-import { IdentityVerification } from '@/components/security/IdentityVerification';
+import IdentityVerification from '@/components/security/IdentityVerification';
 
 export default function VerificationPage() {
   return (
