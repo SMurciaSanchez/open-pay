@@ -1,11 +1,12 @@
 import { LoginForm } from '@/components/auth/LoginForm'
-import { ShieldCheck, Zap, TrendingUp, Lock, Sparkles } from 'lucide-react'
+import { EyeOff, Zap, Lock, Code2, CheckCircle2, BadgeCheck } from 'lucide-react'
 
+// Solo afirmaciones que el código cumple hoy (ver docs/POLITICA_DATOS.md)
 const features = [
-  { icon: ShieldCheck, text: 'Cifrado bancario de extremo a extremo' },
-  { icon: Lock,        text: 'Autenticación en dos factores (2FA)' },
-  { icon: TrendingUp,  text: 'Monitoreo de fraude en tiempo real' },
-  { icon: Sparkles,    text: 'Transferencias instantáneas y seguras' },
+  { icon: EyeOff,       text: 'Solo tú ves tus datos y tus movimientos' },
+  { icon: Lock,         text: 'Tu saldo solo cambia con operaciones validadas' },
+  { icon: CheckCircle2, text: 'Una transferencia nunca se cobra dos veces' },
+  { icon: Code2,        text: 'Código abierto: cualquiera puede revisarlo' },
 ]
 
 export default function LoginPage() {
@@ -48,20 +49,20 @@ export default function LoginPage() {
           <div>
             <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 mb-5">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-emerald-300 text-xs font-semibold">Disponible 24/7 · Regulado y seguro</span>
+              <span className="text-emerald-300 text-xs font-semibold">Proyecto en desarrollo · Código abierto</span>
             </div>
             <h1 className="text-5xl font-bold text-white leading-[1.15] tracking-tight">
-              Tu dinero,<br />
+              Dinero ajeno,<br />
               <span style={{
                 background: 'linear-gradient(90deg, #c4b5fd, #a78bfa, #818cf8)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}>
-                sin límites.
+                cuentas claras.
               </span>
             </h1>
             <p className="text-indigo-300 mt-4 text-lg leading-relaxed max-w-md">
-              La plataforma financiera moderna que te da control total sobre tus finanzas personales.
+              Trazabilidad verificable para quien administra dinero de otros, y privacidad para las personas.
             </p>
           </div>
 
@@ -84,35 +85,35 @@ export default function LoginPage() {
             ))}
           </ul>
 
-          {/* Mock balance card */}
+          {/* Tarjeta ilustrativa: muestra la visión, no datos reales */}
           <div
             className="glass rounded-2xl p-5 max-w-xs animate-float"
             style={{ animationDelay: '0.5s' }}
           >
-            <p className="text-indigo-300 text-xs font-medium mb-1">Saldo disponible</p>
-            <p className="text-white text-3xl font-bold">$24,850.00</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-indigo-300 text-xs font-medium">Fondo Salud Rural</p>
+              <span className="text-[10px] uppercase tracking-wide text-indigo-400 border border-indigo-400/40 rounded-full px-2 py-0.5">
+                Ejemplo
+              </span>
+            </div>
+            <p className="text-white text-3xl font-bold">62% ejecutado</p>
             <div className="flex items-center gap-2 mt-3">
               <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                <BadgeCheck className="h-3.5 w-3.5 text-emerald-400" />
               </div>
-              <span className="text-emerald-400 text-xs font-semibold">+18.5% este mes</span>
+              <span className="text-emerald-400 text-xs font-semibold">
+                Pagos solo a proveedores autorizados
+              </span>
             </div>
-            <div className="mt-3 flex gap-2">
-              {['**** 3420', '**** 7891'].map(card => (
-                <span
-                  key={card}
-                  className="glass rounded-lg px-2.5 py-1 text-[11px] text-indigo-300 font-mono"
-                >
-                  {card}
-                </span>
-              ))}
-            </div>
+            <p className="mt-3 text-[11px] text-indigo-300">
+              Verificable sin revelar a quién se pagó ni cuánto.
+            </p>
           </div>
         </div>
 
         {/* Footer */}
         <p className="text-indigo-500 text-xs animate-fade-in" style={{ animationDelay: '0.6s' }}>
-          © 2025 OpenPay · Todos los derechos reservados
+          © {new Date().getFullYear()} OpenPay · Proyecto en desarrollo
         </p>
       </div>
 
