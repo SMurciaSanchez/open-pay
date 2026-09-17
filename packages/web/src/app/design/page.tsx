@@ -463,7 +463,7 @@ export default function DesignPage() {
                 <motion.div
                   key={a.label}
                   whileHover={{ y: -3 }}
-                  className="quick-action"
+                  className="quick-action group"
                 >
                   <div className={`quick-action-icon ${a.bg}`}>
                     <a.icon className={`h-5 w-5 ${a.color}`} />

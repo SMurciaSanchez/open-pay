@@ -159,7 +159,7 @@ export default function DashboardPage() {
           <motion.button
             key={action.href}
             onClick={() => router.push(action.href)}
-            className="quick-action"
+            className="quick-action group"
             whileHover={{ y: -3, scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}

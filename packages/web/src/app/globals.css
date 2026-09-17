@@ -228,7 +228,7 @@
   .quick-action {
     @apply flex flex-col items-center gap-2.5 p-4 bg-white rounded-2xl
            border border-violet-100 hover:border-violet-300
-           transition-all duration-200 cursor-pointer group;
+           transition-all duration-200 cursor-pointer;
     box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);
   }
   .quick-action:hover {
