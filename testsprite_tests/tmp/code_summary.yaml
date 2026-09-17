@@ -1,0 +1,256 @@
+version: "2"
+type: frontend
+tech_stack:
+  - language: TypeScript
+  - framework: Next.js 14 (App Router)
+  - ui_library: Tailwind CSS, shadcn/ui, Radix UI
+  - other: Supabase (auth + database), Lucide React icons, React Hook Form
+routes:
+  - path: /
+    file: src/app/page.tsx
+    auth_required: false
+    description: Landing page, redirects to /login
+  - path: /login
+    file: src/app/login/page.tsx
+    auth_required: false
+    description: User login page with email/password form
+  - path: /register
+    file: src/app/register/page.tsx
+    auth_required: false
+    description: User registration page
+  - path: /dashboard
+    file: src/app/dashboard/page.tsx
+    auth_required: true
+    description: Main dashboard showing balance, quick actions, recent transactions
+  - path: /dashboard/send
+    file: src/app/dashboard/send/page.tsx
+    auth_required: true
+    description: Send money subpage within dashboard
+  - path: /dashboard/receive
+    file: src/app/dashboard/receive/page.tsx
+    auth_required: true
+    description: Receive money subpage within dashboard
+  - path: /transactions
+    file: src/app/transactions/page.tsx
+    auth_required: true
+    description: Full transactions history list
+  - path: /transactions/[id]
+    file: src/app/transactions/[id]/page.tsx
+    auth_required: true
+    description: Individual transaction detail page
+  - path: /services
+    file: src/app/services/page.tsx
+    auth_required: true
+    description: Service payments page with payment form and history tabs
+  - path: /services/payment
+    file: src/app/services/payment/page.tsx
+    auth_required: true
+    description: Service payment processing page
+  - path: /services/payment-success
+    file: src/app/services/payment-success/page.tsx
+    auth_required: true
+    description: Payment success confirmation page
+  - path: /security
+    file: src/app/security/page.tsx
+    auth_required: true
+    description: Security settings with password change, 2FA, and biometrics tabs
+  - path: /support
+    file: src/app/support/page.tsx
+    auth_required: true
+    description: Support page with contact form, FAQ, and resources tabs
+  - path: /send-money
+    file: src/app/send-money/page.tsx
+    auth_required: true
+    description: Send money page
+  - path: /transfers
+    file: src/app/transfers/page.tsx
+    auth_required: true
+    description: Transfers listing page
+  - path: /transfers/new
+    file: src/app/transfers/new/page.tsx
+    auth_required: true
+    description: Create new transfer page
+  - path: /contacts
+    file: src/app/contacts/page.tsx
+    auth_required: true
+    description: Contact list management
+  - path: /settings
+    file: src/app/settings/page.tsx
+    auth_required: true
+    description: User settings page
+  - path: /settings/profile
+    file: src/app/settings/profile/page.tsx
+    auth_required: true
+    description: Profile settings
+  - path: /settings/notifications
+    file: src/app/settings/notifications/page.tsx
+    auth_required: true
+    description: Notification settings
+  - path: /verification
+    file: src/app/verification/page.tsx
+    auth_required: true
+    description: Identity verification page
+  - path: /admin
+    file: src/app/admin/page.tsx
+    auth_required: true
+    description: Admin panel page
+features:
+  - name: User Authentication - Login
+    description: Users can log in with email and password via Supabase auth
+    files:
+      - src/app/login/page.tsx
+      - src/components/auth/LoginForm.tsx
+      - src/lib/supabase.ts
+    entry_route: /login
+    user_interactions:
+      - Fill email input field
+      - Fill password input field
+      - Click "Iniciar sesión" (Login) button
+      - See error message on invalid credentials
+      - Navigate to register page via link
+      - Use "Forgot password" link
+    api_calls:
+      - method: POST
+        endpoint: Supabase auth.signInWithPassword
+    auth_required: false
+  - name: User Registration
+    description: New users can create an account with name, email, and password
+    files:
+      - src/app/register/page.tsx
+      - src/components/auth/RegisterForm.tsx
+      - src/lib/supabase.ts
+    entry_route: /register
+    user_interactions:
+      - Fill full name input
+      - Fill email input
+      - Fill password input
+      - Fill confirm password input
+      - Click "Crear cuenta" (Create Account) button
+      - See validation errors
+      - Navigate to login page
+    api_calls:
+      - method: POST
+        endpoint: Supabase auth.signUp
+    auth_required: false
+  - name: Dashboard
+    description: Main financial overview with balance, quick actions, and recent transactions
+    files:
+      - src/app/dashboard/page.tsx
+      - src/components/dashboard/BalanceCard.tsx
+      - src/components/dashboard/QuickActions.tsx
+      - src/components/dashboard/RecentTransactions.tsx
+      - src/components/transactions/TransactionsList.tsx
+      - src/components/transactions/SendMoneyForm.tsx
+    entry_route: /dashboard
+    user_interactions:
+      - View account balance
+      - Click "Enviar" (Send) quick action button
+      - Click "Recargar" (Top-up) quick action button
+      - View recent transactions list
+      - Use send money form in sidebar
+    api_calls:
+      - method: GET
+        endpoint: Supabase Profile table
+      - method: GET
+        endpoint: Supabase Account table
+      - method: GET
+        endpoint: Supabase Transaction table
+    auth_required: true
+  - name: Transaction History
+    description: Full list of all user transactions with filtering
+    files:
+      - src/app/transactions/page.tsx
+      - src/components/transactions/TransactionsList.tsx
+    entry_route: /transactions
+    user_interactions:
+      - View paginated transaction list
+      - Filter transactions by type
+      - Click on individual transaction to see details
+    api_calls:
+      - method: GET
+        endpoint: Supabase Transaction table
+    auth_required: true
+  - name: Service Payments
+    description: Pay utility services (electricity, water, internet, phone, etc.)
+    files:
+      - src/app/services/page.tsx
+      - src/components/services/ServicePaymentForm.tsx
+      - src/app/api/services/payment/route.ts
+      - src/app/api/services/providers/route.ts
+    entry_route: /services
+    user_interactions:
+      - Select service provider from dropdown
+      - Enter account/reference number
+      - Enter payment amount
+      - Click "Pagar" (Pay) button
+      - View payment history tab
+    api_calls:
+      - method: POST
+        endpoint: /api/services/payment
+      - method: GET
+        endpoint: /api/services/providers
+    auth_required: true
+  - name: Security Settings
+    description: Manage account security including password, 2FA, and biometrics
+    files:
+      - src/app/security/page.tsx
+      - src/components/security/ChangePasswordCard.tsx
+      - src/components/security/TwoFactorAuthentication.tsx
+      - src/components/security/BiometricAuthentication.tsx
+    entry_route: /security
+    user_interactions:
+      - Switch between Password, 2FA, and Biometrics tabs
+      - Fill current password field
+      - Fill new password field
+      - Fill confirm new password field
+      - Click "Cambiar contraseña" (Change Password) button
+      - Toggle 2FA enable/disable
+      - Set up biometric authentication
+    api_calls:
+      - method: POST
+        endpoint: Supabase auth.updateUser
+    auth_required: true
+  - name: Customer Support
+    description: Contact form, FAQ, and resource links for user assistance
+    files:
+      - src/app/support/page.tsx
+      - src/components/support/ContactForm.tsx
+    entry_route: /support
+    user_interactions:
+      - Switch between Contact, FAQ, and Resources tabs
+      - Fill contact form subject
+      - Fill contact form message
+      - Submit contact form
+      - Read FAQ items
+      - Click resource links
+    api_calls: []
+    auth_required: true
+  - name: Send Money
+    description: Transfer funds to other OpenPay users by email
+    files:
+      - src/app/send-money/page.tsx
+      - src/components/transactions/SendMoneyForm.tsx
+    entry_route: /send-money
+    user_interactions:
+      - Enter recipient email address
+      - Enter transfer amount
+      - Enter description/concept
+      - Click "Enviar dinero" (Send Money) button
+      - See success or error message
+    api_calls:
+      - method: POST
+        endpoint: Supabase transfer RPC function
+    auth_required: true
+known_limitations:
+  - issue: Dashboard shows hardcoded mock data alongside real API data
+    location: src/app/dashboard/page.tsx
+    impact: Balance displayed as $12,520.35 is hardcoded, not from real account
+  - issue: Service payment history tab shows empty state with no real data
+    location: src/app/services/page.tsx
+    impact: Users cannot see past service payments
+  - issue: / (root) immediately redirects to /login without a landing page
+    location: src/app/page.tsx
+    impact: No marketing landing page, direct redirect to auth
+  - issue: Admin page may not have proper role-based access control
+    location: src/app/admin/page.tsx
+    impact: Potential unauthorized access to admin functions

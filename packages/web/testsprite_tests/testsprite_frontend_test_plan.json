@@ -1,0 +1,3236 @@
+[
+  {
+    "id": "TC001",
+    "title": "Dashboard loads after login and shows key widgets",
+    "description": "Verifies an authenticated user can reach the Dashboard and see the main dashboard sections rendered.",
+    "category": "Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Dashboard\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Account balance\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Recent transactions\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Quick action Enviar navigates to /dashboard/send",
+    "description": "Verifies the Enviar quick action from the Dashboard takes the user to the Send page.",
+    "category": "Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar\" (Send) quick action button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/send\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Enviar\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Quick action Recargar navigates to /dashboard/receive",
+    "description": "Verifies the Recargar quick action from the Dashboard takes the user to the Receive page.",
+    "category": "Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Recargar\" (Top-up) quick action button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard/receive\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Recibir\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Recent transactions list is visible on Dashboard",
+    "description": "Verifies the Dashboard shows a visible recent transactions section/list for an authenticated user.",
+    "category": "Dashboard",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Recent transactions\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Transacciones\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Sidebar send money form is visible on Dashboard",
+    "description": "Verifies the send money form in the Dashboard sidebar renders and is usable at a basic UI level.",
+    "category": "Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Send money form\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Recipient\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Amount\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Send money form validation: attempt submit with empty fields",
+    "description": "Verifies the sidebar send money form prevents submission and shows visible validation errors when required fields are empty.",
+    "category": "Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Enviar\" (Send) button within the sidebar send money form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"obligatorio\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Validation error\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Send money form validation: non-numeric amount shows error",
+    "description": "Verifies the sidebar send money form shows a visible error when the amount is not a valid number.",
+    "category": "Dashboard",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"test\" into the \"Amount\" field in the sidebar send money form"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Enviar\" (Send) button within the sidebar send money form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"monto\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Validation error\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Dashboard supports scrolling and keeps key sections accessible",
+    "description": "Verifies the user can scroll the Dashboard and still see the recent transactions section content rendered.",
+    "category": "Dashboard",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Login) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the \"Recent transactions\" section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Transacciones\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Paginate forward in the transactions list",
+    "description": "Verifies an authenticated user can move to the next page of the paginated transactions list.",
+    "category": "Transaction History",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transacciones\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Siguiente\" pagination button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Paginate backward in the transactions list",
+    "description": "Verifies an authenticated user can move back to the previous page after navigating forward.",
+    "category": "Transaction History",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transacciones\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Siguiente\" pagination button"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Anterior\" pagination button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Filter transactions by each available type option",
+    "description": "Verifies the transaction type filter can be changed and the list remains usable after each change.",
+    "category": "Transaction History",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transacciones\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Todas\" from the transaction type filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Recibidas\" from the transaction type filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Enviadas\" from the transaction type filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Transactions page shows a loading state before list appears",
+    "description": "Verifies the transactions page displays a visible loading state while fetching transactions, then shows the list.",
+    "category": "Transaction History",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transacciones\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Loading transactions\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Wait for element \"Transactions list\" to appear"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Graceful empty state when no transactions match a filter",
+    "description": "Verifies the UI shows a clear empty state when a selected transaction type has no results.",
+    "category": "Transaction History",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transacciones\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Transactions list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select \"Reembolsos\" from the transaction type filter dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"No hay transacciones\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Successful service payment redirects to payment processing and success pages",
+    "description": "Verifies a user can submit a valid service payment and is redirected through processing to the success confirmation page.",
+    "category": "Service Payments",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Servicios\" (Services) in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      },
+      {
+        "type": "action",
+        "description": "Select a service provider from the provider dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1234567890\" into the account/reference number field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"50\" into the payment amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Pagar\" (Pay) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services/payment\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services/payment-success\""
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Providers list is visible when opening provider dropdown",
+    "description": "Verifies the provider dropdown displays a list of providers for selection.",
+    "category": "Service Payments",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Servicios\" (Services) in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      },
+      {
+        "type": "action",
+        "description": "Click the provider dropdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Electricidad\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Invalid amount shows a visible payment error message and stays on Services page",
+    "description": "Verifies submitting an invalid amount results in an on-page error and does not navigate to the processing page.",
+    "category": "Service Payments",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Servicios\" (Services) in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      },
+      {
+        "type": "action",
+        "description": "Select a service provider from the provider dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1234567890\" into the account/reference number field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"-10\" into the payment amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Pagar\" (Pay) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"error\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Missing provider prevents payment submission with a visible validation message",
+    "description": "Verifies the form requires selecting a provider before payment can be initiated.",
+    "category": "Service Payments",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Servicios\" (Services) in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"1234567890\" into the account/reference number field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"25\" into the payment amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Pagar\" (Pay) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Proveedor\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Missing account/reference number prevents payment submission with a visible validation message",
+    "description": "Verifies the form requires an account/reference number before payment can be initiated.",
+    "category": "Service Payments",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Servicios\" (Services) in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      },
+      {
+        "type": "action",
+        "description": "Select a service provider from the provider dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"\" into the account/reference number field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"25\" into the payment amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Pagar\" (Pay) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Referencia\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Missing amount prevents payment submission with a visible validation message",
+    "description": "Verifies the form requires an amount before payment can be initiated.",
+    "category": "Service Payments",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Servicios\" (Services) in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      },
+      {
+        "type": "action",
+        "description": "Select a service provider from the provider dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1234567890\" into the account/reference number field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"\" into the payment amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Pagar\" (Pay) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Monto\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Amount with too many decimals is rejected with a visible error",
+    "description": "Verifies the payment amount input enforces a valid currency format and shows an error when invalid.",
+    "category": "Service Payments",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Servicios\" (Services) in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      },
+      {
+        "type": "action",
+        "description": "Select a service provider from the provider dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1234567890\" into the account/reference number field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"10.999\" into the payment amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Pagar\" (Pay) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Monto\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/services\""
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Change password successfully from Security > Password tab",
+    "description": "Verifies a logged-in user can submit the change password form and sees a visible success confirmation.",
+    "category": "Security Settings",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Seguridad\" (Security) option in the app navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contraseña\" (Password) tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Cambiar contraseña\" (Change Password) button is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Password change form validates required fields when submitted empty",
+    "description": "Verifies the password change form shows visible validation when submitted without required inputs.",
+    "category": "Security Settings",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Seguridad\" (Security) option in the app navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contraseña\" (Password) tab"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Cambiar contraseña\" (Change Password) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"obligatorio\" (required) is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Incorrect current password shows error on password change",
+    "description": "Verifies submitting an incorrect current password results in a visible error message.",
+    "category": "Security Settings",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Seguridad\" (Security) option in the app navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contraseña\" (Password) tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"incorrecta-123\" into the current password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Cambiar contraseña\" (Change Password) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"contraseña\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "New password and confirmation mismatch is blocked with validation message",
+    "description": "Verifies the UI prevents submission when the new password and confirmation do not match.",
+    "category": "Security Settings",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log in) button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Seguridad\" (Security) option in the app navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contraseña\" (Password) tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the current password field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"NuevaClave-123\" into the new password field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"NuevaClave-456\" into the confirm new password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Cambiar contraseña\" (Change Password) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"coinciden\" (match) is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC025",
+    "title": "Submit a support request from Contact tab successfully",
+    "description": "Verifies an authenticated user can submit the support contact form and see a visible success confirmation.",
+    "category": "Customer Support",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Support\" in the main navigation/menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/support\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contact\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Consulta sobre mi cuenta\" into the subject field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Necesito ayuda con una duda relacionada con mi cuenta. Por favor, contáctenme.\" into the message field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Submit\" or \"Enviar\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"success\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC026",
+    "title": "Contact form validation when submitting with empty required fields",
+    "description": "Verifies required-field validation is shown when submitting an empty contact form.",
+    "category": "Customer Support",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Support\" in the main navigation/menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/support\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contact\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Submit\" or \"Enviar\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC027",
+    "title": "Contact form validation clears after entering subject and message",
+    "description": "Verifies validation errors can be resolved by providing required inputs and a submit can proceed to success state.",
+    "category": "Customer Support",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Support\" in the main navigation/menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/support\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contact\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Submit\" or \"Enviar\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"required\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Problema con transferencia\" into the subject field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Estoy teniendo problemas para completar una transferencia. ¿Podrían ayudarme?\" into the message field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Submit\" or \"Enviar\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"success\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC028",
+    "title": "Navigate to Support and view FAQ content",
+    "description": "Verifies the FAQ tab is accessible and displays FAQ items that can be read.",
+    "category": "Customer Support",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Support\" in the main navigation/menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/support\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"FAQ\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"FAQ\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"FAQ items list\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC029",
+    "title": "Resources tab shows resource links",
+    "description": "Verifies the Resources tab is accessible and shows visible resource links for users.",
+    "category": "Customer Support",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Support\" in the main navigation/menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/support\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Resources\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Resources\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"resource links\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC030",
+    "title": "Switching tabs preserves navigation and shows correct tab content",
+    "description": "Verifies a user can switch among Contact, FAQ, and Resources tabs and see each tab’s visible content area.",
+    "category": "Customer Support",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Support\" in the main navigation/menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/support\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contact\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"contact form\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"FAQ\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"FAQ items list\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Resources\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"resource links\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC031",
+    "title": "Contact form allows long message content without breaking submission",
+    "description": "Verifies the contact form can accept a long message and still submit to a visible success confirmation.",
+    "category": "Customer Support",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Support\" in the main navigation/menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/support\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Contact\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Solicitud detallada\" into the subject field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Hola, necesito ayuda con un tema. He intentado varias veces resolverlo desde la app y no he podido. Agradezco si me indican los pasos exactos o si pueden revisar mi caso. Gracias.\" into the message field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Submit\" or \"Enviar\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"success\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC032",
+    "title": "Send money successfully with description and verify it appears in transaction history list",
+    "description": "Authenticated user sends money to a valid recipient with an optional description and sees confirmation plus an entry in transaction history.",
+    "category": "Send Money",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log In) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Enviar dinero\" or \"Send Money\" in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/send-money\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"qa.recipient@example.com\" into the recipient email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"5\" into the transfer amount field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Prueba de envío\" into the description/concept field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar dinero\" (Send Money) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Éxito\" or \"Enviado\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transacciones\" (Transactions) in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/transactions\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"qa.recipient@example.com\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC033",
+    "title": "Send money successfully without description (optional field)",
+    "description": "Authenticated user sends money without a description and still gets a success confirmation.",
+    "category": "Send Money",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log In) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Enviar dinero\" or \"Send Money\" in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/send-money\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"qa.recipient@example.com\" into the recipient email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"1\" into the transfer amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar dinero\" (Send Money) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Éxito\" or \"Enviado\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC034",
+    "title": "Invalid recipient email shows an error message",
+    "description": "User enters an invalid recipient email and sees a visible validation or submission error.",
+    "category": "Send Money",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log In) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Enviar dinero\" or \"Send Money\" in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/send-money\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"correo-invalido\" into the recipient email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"5\" into the transfer amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar dinero\" (Send Money) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"email\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC035",
+    "title": "Non-existent recipient email shows invalid recipient error",
+    "description": "User enters a well-formed email that does not belong to an OpenPay user and sees an invalid recipient error.",
+    "category": "Send Money",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log In) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Enviar dinero\" or \"Send Money\" in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/send-money\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"noexiste.openpay.user.999999@example.com\" into the recipient email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"3\" into the transfer amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar dinero\" (Send Money) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"destinatario\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC036",
+    "title": "Insufficient funds error when amount exceeds available balance",
+    "description": "User attempts to send more money than available and sees an insufficient funds error message.",
+    "category": "Send Money",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log In) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Enviar dinero\" or \"Send Money\" in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/send-money\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"qa.recipient@example.com\" into the recipient email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"999999\" into the transfer amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar dinero\" (Send Money) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"fondos\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC037",
+    "title": "Required field validation when submitting with empty recipient and amount",
+    "description": "Submitting the form without filling required fields shows visible validation errors and does not show success.",
+    "category": "Send Money",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log In) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Enviar dinero\" or \"Send Money\" in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/send-money\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar dinero\" (Send Money) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"requer\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC038",
+    "title": "Amount field rejects non-numeric input or shows validation error",
+    "description": "Entering a non-numeric amount results in a visible validation error (or prevents submission) and no success message.",
+    "category": "Send Money",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log In) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Enviar dinero\" or \"Send Money\" in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/send-money\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"qa.recipient@example.com\" into the recipient email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"abc\" into the transfer amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar dinero\" (Send Money) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"monto\" or \"cantidad\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC039",
+    "title": "Zero or negative amount is not allowed",
+    "description": "User enters 0 or a negative number for amount and sees a visible validation error instead of success.",
+    "category": "Send Money",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" (Log In) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Enviar dinero\" or \"Send Money\" in the app navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/send-money\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"qa.recipient@example.com\" into the recipient email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"0\" into the transfer amount field"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Enviar dinero\" (Send Money) button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"monto\" or \"cantidad\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC040",
+    "title": "Create a new transfer and return to transfers list",
+    "description": "Verifies a user can start from Transfers, create a new transfer, submit it, and return to the Transfers list view.",
+    "category": "Transfers",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transfers\" in the app navigation menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/transfers\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Transfers\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC041",
+    "title": "Open the New Transfer page from Transfers list",
+    "description": "Verifies the user can navigate from Transfers list to the Create New Transfer page using the UI control.",
+    "category": "Transfers",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transfers\" in the app navigation menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/transfers\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Create new transfer\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC042",
+    "title": "Submit a new transfer request from /transfers/new",
+    "description": "Verifies the transfer form can be filled and submitted, resulting in a post-submit confirmation or navigation away from the form.",
+    "category": "Transfers",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transfers\" in the app navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Create new transfer\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/transfers/new\""
+      }
+    ]
+  },
+  {
+    "id": "TC043",
+    "title": "Transfer form validation: attempt to submit with empty required fields",
+    "description": "Verifies the new transfer form prevents submission and shows visible validation errors when required fields are missing.",
+    "category": "Transfers",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transfers\" in the app navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Create new transfer\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Submit\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC044",
+    "title": "Cancel out of creating a new transfer and return to Transfers list",
+    "description": "Verifies the user can exit the new transfer flow using a cancel/back control and return to the transfers list.",
+    "category": "Transfers",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transfers\" in the app navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Create new transfer\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Cancel\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC045",
+    "title": "Resilience: Transfers page loads and remains usable after refresh-like navigation",
+    "description": "Verifies the Transfers page can be visited from the dashboard repeatedly without breaking the list UI (basic stability check).",
+    "category": "Transfers",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Transfers\" in the app navigation menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/transfers\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Dashboard\" in the app navigation menu"
+      }
+    ]
+  },
+  {
+    "id": "TC046",
+    "title": "View contacts list page loads and shows list section",
+    "description": "Verifies the Contacts page loads for an authenticated user and displays the contact list area.",
+    "category": "Contacts",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Contacts\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/contacts\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Contacts\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC047",
+    "title": "Add a new contact successfully and see it in the list",
+    "description": "Verifies a user can add a new contact with a valid name and email and then see it listed.",
+    "category": "Contacts",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Contacts\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/contacts\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Add new contact\" button"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Contacto E2E Uno\" into the contact name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"contacto.e2e.uno@example.com\" into the contact email field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Contacto E2E Uno\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC048",
+    "title": "Attempt to add contact with invalid email shows validation error",
+    "description": "Verifies invalid email input is rejected and a validation message is shown.",
+    "category": "Contacts",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Contacts\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/contacts\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Add new contact\" button"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Contacto Email Malo\" into the contact name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"no-es-email\" into the contact email field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"email\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC049",
+    "title": "Invalid email attempt does not create a visible new contact",
+    "description": "Verifies that after a failed save due to invalid email, the contact name does not appear in the list.",
+    "category": "Contacts",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Contacts\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/contacts\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Add new contact\" button"
+      },
+      {
+        "type": "action",
+        "description": "Type \"No Debe Guardarse\" into the contact name field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"invalido@\" into the contact email field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"No Debe Guardarse\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC050",
+    "title": "Required field validation when trying to save with empty name",
+    "description": "Verifies the UI prevents saving a contact when the name field is empty and shows a validation error.",
+    "category": "Contacts",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Contacts\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/contacts\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Add new contact\" button"
+      },
+      {
+        "type": "action",
+        "description": "Type \"contacto.sin.nombre@example.com\" into the contact email field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"name\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC051",
+    "title": "Cancel out of add contact flow without saving",
+    "description": "Verifies the user can exit the add contact UI without creating a contact.",
+    "category": "Contacts",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Contacts\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/contacts\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Add new contact\" button"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Contacto Cancelado\" into the contact name field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Cancel\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Contacto Cancelado\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC052",
+    "title": "Update profile information and save successfully",
+    "description": "Verifies a logged-in user can navigate to Profile settings, update profile fields, save, and see a success confirmation.",
+    "category": "Settings (Profile & Notifications)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" / \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" / \"Configuración\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Profile\" / \"Perfil\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings/profile"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Nombre\" / \"Name\" field with \"QA Nombre Actualizado\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Guardar\" / \"Save changes\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Guardado\" or \"Cambios guardados\" or \"Actualizado\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC053",
+    "title": "Change notification preferences and save successfully",
+    "description": "Verifies a logged-in user can navigate to Notifications settings, toggle preferences, save, and see a confirmation.",
+    "category": "Settings (Profile & Notifications)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" / \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" / \"Configuración\" in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Notifications\" / \"Notificaciones\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings/notifications"
+      },
+      {
+        "type": "action",
+        "description": "Click the first visible notification preference toggle/switch"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Guardar\" / \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Guardado\" or \"Preferencias\" or \"Actualizado\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC054",
+    "title": "Notification preferences persist after page reload",
+    "description": "Verifies a saved notification toggle remains in the chosen state after reloading the Notifications page.",
+    "category": "Settings (Profile & Notifications)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" / \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" / \"Configuración\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Notifications\" / \"Notificaciones\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Click the first visible notification preference toggle/switch"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Guardar\" / \"Save\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Guardado\" or \"Actualizado\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /settings/notifications"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Notifications\" / \"Notificaciones\" heading is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC055",
+    "title": "Profile validation: invalid email format shows error",
+    "description": "Verifies the Profile form blocks saving when email format is invalid and shows a visible validation message.",
+    "category": "Settings (Profile & Notifications)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" / \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" / \"Configuración\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Profile\" / \"Perfil\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings/profile"
+      },
+      {
+        "type": "action",
+        "description": "Fill the email field with \"correo-invalido\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Guardar\" / \"Save changes\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"correo\" or \"email\" and \"inválido\" or \"no válido\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC056",
+    "title": "Profile validation: required fields show errors when cleared",
+    "description": "Verifies required profile fields (if present) show validation errors when emptied and user tries to save.",
+    "category": "Settings (Profile & Notifications)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" / \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" / \"Configuración\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Profile\" / \"Perfil\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Fill the \"Nombre\" / \"Name\" field with \"\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Guardar\" / \"Save changes\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"requerido\" or \"obligatorio\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC057",
+    "title": "Switch between Profile and Notifications tabs without losing page context",
+    "description": "Verifies a logged-in user can switch between settings tabs and the correct page content is shown each time.",
+    "category": "Settings (Profile & Notifications)",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" / \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" / \"Configuración\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Profile\" / \"Perfil\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings/profile"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Notifications\" / \"Notificaciones\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings/notifications"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Profile\" / \"Perfil\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings/profile"
+      }
+    ]
+  },
+  {
+    "id": "TC058",
+    "title": "Cancel/Back behavior (if present) does not save changes implicitly",
+    "description": "Verifies leaving the Profile page without saving does not show a save confirmation (and does not imply changes were saved).",
+    "category": "Settings (Profile & Notifications)",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Iniciar sesión\" / \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Settings\" / \"Configuración\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Profile\" / \"Perfil\" tab"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Nombre\" / \"Name\" field with \"QA Nombre No Guardado\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Notifications\" / \"Notificaciones\" tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/settings/notifications"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Guardado\" or \"Cambios guardados\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC059",
+    "title": "Submit identity verification with official ID documents and see pending status",
+    "description": "Verifies a logged-in user can submit identity verification and sees a pending/in-review status afterward.",
+    "category": "Verification",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Verification\" / \"Verificación\" in the main navigation or user menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/verification\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Verificación\" or \"Identity Verification\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC060",
+    "title": "Verification page shows document upload inputs and submit control",
+    "description": "Verifies the verification page UI contains document upload controls and a way to submit the request.",
+    "category": "Verification",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Verification\" / \"Verificación\" in the main navigation or user menu"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Official ID\" / \"Documento de identidad\" section is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Submit\" / \"Enviar\" / \"Solicitar verificación\" button is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC061",
+    "title": "Attempt to submit verification with required fields missing shows validation errors",
+    "description": "Verifies the user cannot submit verification without providing required document inputs and sees validation feedback.",
+    "category": "Verification",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" or \"Login\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Verification\" / \"Verificación\" in the main navigation or user menu"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Submit\" / \"Enviar\" / \"Solicitar verificación\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"requerido\" or \"required\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC062",
+    "title": "Access Admin Panel as authenticated user and see admin UI shell",
+    "description": "Verifies an authenticated user can load the /admin page and see the admin panel UI elements.",
+    "category": "Admin Panel",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Admin\" navigation link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/admin\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Admin\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC063",
+    "title": "Admin Panel page renders without obvious error state",
+    "description": "Verifies the admin page loads without showing a generic error message or blank/empty screen indicators.",
+    "category": "Admin Panel",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Admin\" navigation link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/admin\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Something went wrong\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC064",
+    "title": "Admin Panel shows at least one actionable control (smoke)",
+    "description": "Verifies the admin page includes at least one visible control suggesting admin functionality is present.",
+    "category": "Admin Panel",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Admin\" navigation link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/admin\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"a button or link that looks like an admin action (for example, labeled 'Crear', 'Guardar', 'Actualizar', or 'Eliminar')\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC065",
+    "title": "Admin Panel navigation persists (can reach Admin from main app shell)",
+    "description": "Verifies the Admin page is reachable through the authenticated app navigation rather than direct URL entry after login.",
+    "category": "Admin Panel",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"primary navigation menu (sidebar or top nav)\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Admin\" navigation link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/admin\""
+      }
+    ]
+  },
+  {
+    "id": "TC066",
+    "title": "Known limitation coverage: non-admin user can access /admin (risk acknowledgement)",
+    "description": "Verifies the currently authenticated user can access /admin even if not an admin, reflecting the documented missing role checks (do not fail as a product bug here).",
+    "category": "Admin Panel",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Iniciar sesión\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/dashboard\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Admin\" navigation link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/admin\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Acceso denegado\" is not visible"
+      }
+    ]
+  }
+]

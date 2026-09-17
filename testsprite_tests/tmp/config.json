@@ -1,0 +1,7 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "serverMode": "production",
+  "localEndpoint": "https://web-kohl-sigma-30.vercel.app",
+  "scope": "codebase"
+}

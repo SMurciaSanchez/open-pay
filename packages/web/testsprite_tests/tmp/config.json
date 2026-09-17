@@ -1,0 +1,18 @@
+{
+  "status": "init",
+  "scope": "codebase",
+  "type": "frontend",
+  "localEndpoint": "http://localhost:3000/",
+  "serverPort": 52704,
+  "executionArgs": {
+    "projectName": "open-pay-mvp",
+    "projectPath": "C:/Users/msseb/Desktop/open-pay-mvp/packages/web",
+    "testIds": [],
+    "additionalInstruction": "Test the OpenPay application at https://web-kohl-sigma-30.vercel.app. Focus on: login page, register page, dashboard, transactions, services, security, and support pages.",
+    "serverMode": "production",
+    "envs": {
+      "API_KEY": "sk-user-15vSyOVfqGQpLzp8r67BPbBMhCNrOrPHXbz7thkLeElhOv-AlRKjdA6T_jULX0cSwiHyx3UUrDg3E-H_DqyQyUYsMvt6bRdz3iRGOHXzz8vEYq-K6sOBf-GSQhzXJerZi5U"
+    }
+  },
+  "proxy": "http://a03c0d94-9cc8-4524-8bf9-218562994c37:Qw1kaNRIMGHJqAE3knNFKsIATfrqgJwO@tun.testsprite.com:8080"
+}

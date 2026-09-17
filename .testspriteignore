@@ -1,0 +1,12 @@
+# Credenciales y secretos - NUNCA enviar a TestSprite
+packages/web/.env
+packages/web/.env.local
+packages/web/.env.production
+
+# Archivos de build
+packages/web/.next/
+packages/web/node_modules/
+
+# Archivos de test SQL (contienen estructura de DB)
+packages/web/*.sql
+packages/web/supabase-*.sql
