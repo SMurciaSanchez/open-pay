@@ -5,7 +5,7 @@ export async function getCurrentProfile() {
   if (!user) return null
 
   const { data, error } = await supabase
-    .from("profiles")
+    .from("Profile")
     .select("*")
     .eq("userId", user.id)
     .single()
@@ -14,11 +14,12 @@ export async function getCurrentProfile() {
   return data
 }
 
-export async function updateProfile(userId: string, updates: Record<string, any>) {
+// RLS solo deja editar el perfil propio, y solo fullName, avatarUrl y phone
+export async function updateProfile(profileId: string, updates: Record<string, any>) {
   const { data, error } = await supabase
-    .from("profiles")
-    .update(updates)
-    .eq("userId", userId)
+    .from("Profile")
+    .update({ ...updates, updatedAt: new Date().toISOString() })
+    .eq("id", profileId)
     .select()
     .single()
 

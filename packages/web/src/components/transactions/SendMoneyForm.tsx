@@ -75,16 +75,14 @@ export function SendMoneyForm({ onSuccess }: SendMoneyFormProps) {
         .single();
       if (senderErr || !senderProfile) throw new Error('Perfil de remitente no encontrado');
 
-      const { data: receiverProfile, error: receiverErr } = await supabase
-        .from('Profile')
-        .select('id')
-        .eq('email', formData.recipient)
-        .single();
-      if (receiverErr || !receiverProfile) throw new Error('Usuario destinatario no encontrado');
+      // Solo devuelve el id: los perfiles ajenos no son legibles (RLS)
+      const { data: receiverId, error: receiverErr } = await supabase
+        .rpc('find_recipient', { p_email: formData.recipient });
+      if (receiverErr || !receiverId) throw new Error('Usuario destinatario no encontrado');
 
       const { data, error } = await supabase.rpc('transfer_funds', {
         p_sender_id:       senderProfile.id,
-        p_receiver_id:     receiverProfile.id,
+        p_receiver_id:     receiverId,
         p_amount:          formData.amount,
         p_description:     formData.concept,
         p_idempotency_key: idempotencyKey.current,
