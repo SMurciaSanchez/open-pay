@@ -6,7 +6,7 @@
 
 - **Detectado**: 16/09/2026
 - **Severidad**: 🔴 Crítica (repo `SMurciaSanchez/open-pay-mvp` es público en GitHub)
-- **Estado**: 🟡 Contenido — rotación imposible (ver actualización)
+- **Estado**: ✅ Cerrado — 16/09/2026 (proyectos fuera de línea, repo privado, proyecto y repo nuevos)
 
 ### Credenciales afectadas
 
@@ -22,7 +22,7 @@
 - [ ] Guardar las nuevas contraseñas **solo** en un gestor de contraseñas (Bitwarden, 1Password) y en `.env` locales (ignorados por git).
 - [ ] Actualizar la variable `DATABASE_URL` / `DB_URL` en Vercel si alguno de los proyectos la usa.
 - [ ] Revisar logs de Supabase (Logs → Postgres) por conexiones desconocidas desde la fecha del primer commit.
-- [ ] Pasar el repositorio a privado.
+- [x] Pasar el repositorio a privado.
 - [ ] (Opcional) Limpiar historial con `git filter-repo` y forzar push. No sustituye la rotación: clones y forks ya pueden tener las claves.
 - [ ] Marcar este incidente como ✅ Cerrado.
 
@@ -46,7 +46,7 @@
 
 - [x] Archivos excluidos del repositorio nuevo `open-pay`; clave `anon` reemplazada por `<TU_ANON_KEY>` en `INSTRUCCIONES_VERCEL.md` y `VERCEL_DEPLOYMENT.md`.
 - [x] Confirmado por el titular: la contraseña era de prueba y no se usa en otros servicios.
-- [ ] Pasar `open-pay-mvp` a privado (también cubre INC-001).
+- [x] Pasar `open-pay-mvp` a privado.
 
 ### Lecciones
 
