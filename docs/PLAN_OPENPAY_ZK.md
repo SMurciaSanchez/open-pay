@@ -189,7 +189,7 @@ App móvil · panel de admin con datos simulados · pagos a entidades · chatbot
 | **0. Incendios** (esta semana) | Seguridad, visión acordada entre fundadores, rama `pivot/trazabilidad` | Ambas contraseñas rotadas, migración aplicada, repo limpio |
 | **1. Validación** (4–6 semanas; **pospuesta**, obligatoria antes de la Fase 4) | 15–20 entrevistas (fundaciones, ONG, revisores fiscales, cooperación, veedurías); primera asesoría legal (datos, SARLAFT, licencia; innovasfc, consultorios jurídicos) | **2–3 organizaciones dispuestas a pilotear** |
 | **2. Cimientos** ✅ | Clasificación de datos ([`POLITICA_DATOS.md`](POLITICA_DATOS.md) ✅); modelo de amenaza ([`MODELO_AMENAZA.md`](MODELO_AMENAZA.md) ✅); modelo de mandatos ✅; `AccessLog` de accesos ✅; conciliación bancaria ✅; `CommitmentRegistry` con Poseidon y lotes ✅ | Ningún monto, nombre o descripción on-chain — **cumplido**: `publishRoot` solo recibe `bytes32` y no existe función que acepte texto ni montos |
-| **3. Primera prueba end-to-end** | Regla ZK "proveedor autorizado + dentro del presupuesto"; portal público de verificación; primera revisión de seguridad externa | Cualquiera verifica una prueba desde el navegador sin cuenta |
+| **3. Primera prueba end-to-end** (en curso) | Regla ZK "proveedor autorizado + dentro del presupuesto" ✅ ([`packages/circuits`](../packages/circuits/README.md)); portal público de verificación ✅ (`/verificar`); ceremonia de confianza ⚠️ ([`CEREMONIA.md`](CEREMONIA.md) — la actual es de desarrollo); anclar la huella de la clave ⬜; primera revisión de seguridad externa ⬜ | Cualquiera verifica una prueba desde el navegador sin cuenta |
 | **4. Piloto** | Una organización real, datos reales, sin mover dinero | Medir reducción de tiempo de auditoría y uso por donantes |
 | **5. Anticorrupción** | CUFE, SECOP II, alertas de precios, actas de entrega firmadas, prueba de exclusión para conflictos de interés, denuncia anónima verificable (p. ej. Semaphore) | Las cuatro puertas cubiertas |
 | **6. Mover dinero** | Aliado regulado; smart wallet con passkeys y recuperación para participantes; derecho de salida técnico; paymaster | Pagos reales con trazabilidad nativa |
@@ -238,6 +238,8 @@ Pago (DRAFT)
                                        del mismo monto y posterior a la aprobación
   → record_payment_batch()  el compromiso Poseidon del pago entra a un árbol
   → anchor_payment_batch()  la raíz queda en CommitmentRegistry (Base)
+  → prove()                 el circuito demuestra la regla sobre ese lote
+  → /verificar              cualquiera comprueba la prueba en su navegador
 ```
 
 Un pago solo llega a la cadena si pasó por todos los pasos, y a la cadena solo

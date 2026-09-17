@@ -5,6 +5,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 const PAYMENT_BATCH = 0;
 const VENDOR_SET = 1;
 const RULE_SET = 2;
+const VERIFICATION_KEY = 3;
 
 const SUBJECT = ethers.keccak256(ethers.toUtf8Bytes('fondo-salud-publico'));
 const ROOT_A = ethers.keccak256(ethers.toUtf8Bytes('raiz-a'));
@@ -56,9 +57,9 @@ describe('CommitmentRegistry', () => {
       expect((await registry.rootAt(1)).kind).to.equal(BigInt(VENDOR_SET));
     });
 
-    it('acepta los tres tipos de conjunto', async () => {
+    it('acepta los cuatro tipos de raíz', async () => {
       const { registry } = await loadFixture(deploy);
-      for (const [i, kind] of [PAYMENT_BATCH, VENDOR_SET, RULE_SET].entries()) {
+      for (const [i, kind] of [PAYMENT_BATCH, VENDOR_SET, RULE_SET, VERIFICATION_KEY].entries()) {
         const root = ethers.keccak256(ethers.toUtf8Bytes(`raiz-${i}`));
         await registry.publishRoot(kind, SUBJECT, root);
         expect((await registry.rootAt(i)).kind).to.equal(BigInt(kind));

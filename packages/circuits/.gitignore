@@ -1,0 +1,6 @@
+# Binario de circom: se baja con scripts/setup-tools.sh (10 MB)
+tools/
+# Artefactos de compilación y ceremonia: se regeneran con npm run build
+build/
+ptau/
+node_modules/

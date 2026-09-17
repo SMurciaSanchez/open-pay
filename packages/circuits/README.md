@@ -1,0 +1,90 @@
+# La regla ZK de OpenPay
+
+Un circuito que demuestra, **sin revelar ningún pago**, que una organización que
+administra dinero ajeno cumplió dos reglas en un período:
+
+1. **Todos** los pagos del lote fueron a proveedores de su lista autorizada.
+2. La suma de esos pagos no superó el presupuesto del rubro.
+
+Quien verifica no ve montos, ni proveedores, ni fechas, ni identificadores, ni
+siquiera cuántos pagos hubo. Solo ve tres números: la raíz del lote, la raíz del
+conjunto de proveedores y el tope del rubro.
+
+## Por qué el circuito recorre el lote entero
+
+Lo barato sería verificar el camino de Merkle de cada pago que el probador
+declara. Pero eso demostraría *"estos pagos están en el lote y son correctos"*,
+que deja abierta la puerta grande: **esconder los pagos incómodos** y no
+declararlos.
+
+Por eso el circuito **recalcula la raíz del lote desde las 64 hojas** y la
+compara con la que está anclada. Si alguien marca un pago real como casilla
+vacía, la raíz que sale no es la anclada y la prueba no se puede construir. Es lo
+que convierte "algunos pagos" en "todos los pagos".
+
+Ese es el motivo de que el árbol tenga 64 hojas y no 1024: la cuenta crece con
+el tamaño del árbol. La prueba de esa decisión está en
+`test/circuit.test.ts`, en el bloque *"no se puede esconder un pago"*.
+
+## Cómo se usa
+
+```sh
+npm install
+sh scripts/setup-tools.sh   # baja circom y comprueba su hash
+npm run build               # compila el circuito y corre la ceremonia
+npm test                    # 42 pruebas
+npm run demo                # genera build/demo-proof.json para el portal
+npm run copy-vkey           # copia la clave de verificación al portal
+npm run vkey-hash           # imprime la huella para anclarla en la cadena
+```
+
+Para probar el portal: `npm run demo`, después `cd ../web && npm run dev`, y
+pegar `build/demo-proof.json` en `/verificar`. Cambiándole un dígito a la prueba,
+la página tiene que decir que no es válida.
+
+## Qué hay acá
+
+| Archivo | Qué hace |
+|---|---|
+| `circuits/authorized_within_budget.circom` | La regla. Es el archivo que hay que leer para saber qué se está probando |
+| `circuits/merkle.circom` | Árboles de Merkle con Poseidon, dentro del circuito |
+| `src/witness.ts` | Arma las entradas del circuito desde los datos de un fondo |
+| `src/prove.ts` | Genera y verifica pruebas; calcula la huella de la clave |
+| `src/demo.ts` | Una prueba de ejemplo con datos inventados |
+| `scripts/build.sh` | Compilación y ceremonia |
+
+El cálculo de los compromisos vive en `packages/contracts/src/commitment.ts` y
+**se importa, no se copia**: el circuito y el constructor de lotes tienen que
+usar el mismo Poseidon, con los mismos campos y en el mismo orden. Si se
+separaran, las pruebas dejarían de verificar sin que nada avisara.
+
+## Lo que este circuito NO demuestra
+
+- **Que el dinero se haya movido.** Eso lo dice la conciliación bancaria, y el
+  banco sigue siendo la fuente (supuesto S5 de `docs/MODELO_AMENAZA.md`).
+- **Que la lista de proveedores esté bien armada.** Demuestra que los pagos
+  fueron a esa lista, no que esa lista sea la correcta. Quién puede modificarla
+  y con qué control es un problema de la capa de mandatos, no del circuito.
+- **Que el precio pagado fuera razonable.** Es otra regla y todavía no existe.
+
+## Advertencia sobre la ceremonia
+
+La ceremonia que corre `scripts/build.sh` es **de desarrollo**: se genera en una
+sola máquina, con un solo participante. Quien tenga esa aleatoriedad podría
+fabricar pruebas falsas — no destapar datos, pero sí probar cosas que no
+ocurrieron.
+
+Antes de cualquier uso real hay que rehacerla. Los pasos están en
+[`docs/CEREMONIA.md`](../../docs/CEREMONIA.md).
+
+## Números del circuito
+
+| | |
+|---|---|
+| Restricciones | 147.100 |
+| Pagos por lote | 64 |
+| Proveedores por fondo | 64 |
+| Señales públicas | 3 |
+| Entradas privadas | 1.152 |
+| Sistema de prueba | Groth16 sobre BN254 |
+| Función de hash | Poseidon (compatible con circomlib) |

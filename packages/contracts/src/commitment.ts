@@ -17,7 +17,7 @@
  * 32 bytes vive en Payment.salt (nivel N4), que ningún rol de cliente puede
  * leer, y sin ella el compromiso no dice nada.
  */
-import { poseidon2, poseidon5 } from 'poseidon-lite';
+import { poseidon1, poseidon2, poseidon5 } from 'poseidon-lite';
 
 /** Orden del campo escalar de BN254: el cuerpo en el que trabaja Poseidon. */
 export const FIELD_SIZE =
@@ -26,8 +26,23 @@ export const FIELD_SIZE =
 /** Hoja de relleno. Las posiciones vacías del árbol valen cero. */
 export const ZERO_LEAF = 0n;
 
-/** Altura por defecto: 1024 hojas por lote. */
-export const DEFAULT_TREE_HEIGHT = 10;
+/**
+ * Altura por defecto: 64 hojas por lote.
+ *
+ * Por qué 64 y no 1024: el circuito de la Fase 3 recalcula la raíz desde TODAS
+ * las hojas, que es lo que le permite afirmar que ningún pago quedó afuera del
+ * lote. Con 1024 hojas esa cuenta se vuelve lenta; con 64 la prueba sale en
+ * segundos. Lo que se cede es que la raíz delata que el lote tenía a lo sumo 64
+ * pagos en vez de a lo sumo 1024 — fuga menor, porque la vista pública
+ * PublicReconciliationStatus ya publica el porcentaje conciliado cuando hay 10
+ * o más pagos en el mes.
+ *
+ * Cambiar esta altura invalida toda raíz ya anclada.
+ */
+export const DEFAULT_TREE_HEIGHT = 6;
+
+/** Altura del árbol de proveedores autorizados: hasta 64 por fondo. */
+export const VENDOR_TREE_HEIGHT = 6;
 
 export interface PaymentInput {
   /** Payment.id (UUID). */
@@ -99,6 +114,26 @@ export function paymentCommitment(payment: PaymentInput): bigint {
     dateToDays(payment.paidOn),
     toField(payment.saltHex),
   ]);
+}
+
+/**
+ * Hoja del conjunto de proveedores autorizados de un fondo.
+ *
+ * Sin sal, a diferencia del compromiso de un pago, y es deliberado: el id de un
+ * proveedor es un UUID, o sea 128 bits impredecibles. Un NIT sí se podría
+ * adivinar —son públicos en Colombia—, pero el UUID no, así que la raíz del
+ * conjunto no permite ir probando proveedores a ver cuáles están.
+ */
+export function vendorLeaf(vendorId: string): bigint {
+  return poseidon1([uuidToField(vendorId)]);
+}
+
+/** El conjunto autorizado de un fondo, listo para anclar su raíz. */
+export function buildVendorSet(
+  vendorIds: string[],
+  height: number = VENDOR_TREE_HEIGHT,
+): MerkleTree {
+  return buildMerkleTree(vendorIds.map(vendorLeaf), height);
 }
 
 /**

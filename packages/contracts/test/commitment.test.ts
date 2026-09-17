@@ -10,6 +10,9 @@ import {
   toField,
   uuidToField,
   verifyMerkleProof,
+  VENDOR_TREE_HEIGHT,
+  buildVendorSet,
+  vendorLeaf,
   type PaymentInput,
 } from '../src/commitment';
 
@@ -106,10 +109,13 @@ describe('compromisos con Poseidon', () => {
       expect(chico.root).to.not.equal(grande.root);
     });
 
-    it('la altura por defecto da 1024 hojas', () => {
+    it('la altura por defecto da 64 hojas', () => {
+      // 64 y no más: el circuito de la Fase 3 recalcula la raíz desde todas las
+      // hojas para poder afirmar que ningún pago quedó afuera, y esa cuenta
+      // crece con el tamaño del árbol.
       const árbol = buildMerkleTree([1n]);
       expect(árbol.height).to.equal(DEFAULT_TREE_HEIGHT);
-      expect(árbol.layers[0].length).to.equal(1024);
+      expect(árbol.layers[0].length).to.equal(64);
     });
 
     it('rechaza un lote más grande que el árbol', () => {
@@ -185,5 +191,47 @@ describe('compromisos con Poseidon', () => {
     it('pedir una hoja fuera del árbol falla', () => {
       expect(() => merkleProof(árbol, 16)).to.throw('fuera del árbol');
     });
+  });
+});
+
+describe('conjunto de proveedores autorizados', () => {
+  const PROVEEDORES = [
+    '3f2504e0-4f89-41d3-9a0c-0305e82c3301',
+    'b7e02f1c-9d3a-4a5b-8c6d-1e2f3a4b5c6d',
+    'c8f13a2d-ae4b-4b6c-9d7e-2f3a4b5c6d7e',
+  ];
+
+  it('la hoja de un proveedor es determinista', () => {
+    expect(vendorLeaf(PROVEEDORES[0])).to.equal(vendorLeaf(PROVEEDORES[0]));
+  });
+
+  it('proveedores distintos dan hojas distintas', () => {
+    expect(vendorLeaf(PROVEEDORES[0])).to.not.equal(vendorLeaf(PROVEEDORES[1]));
+  });
+
+  it('el conjunto usa la altura acordada', () => {
+    const conjunto = buildVendorSet(PROVEEDORES);
+    expect(conjunto.height).to.equal(VENDOR_TREE_HEIGHT);
+  });
+
+  it('cada proveedor del conjunto demuestra que pertenece', () => {
+    const conjunto = buildVendorSet(PROVEEDORES);
+    PROVEEDORES.forEach((id, i) => {
+      const prueba = merkleProof(conjunto, i);
+      expect(verifyMerkleProof(vendorLeaf(id), prueba, conjunto.root), id).to.equal(true);
+    });
+  });
+
+  it('un proveedor ajeno no puede demostrar que pertenece', () => {
+    const conjunto = buildVendorSet(PROVEEDORES);
+    const ajeno = '00000000-0000-4000-8000-000000000999';
+    const prueba = merkleProof(conjunto, 0);
+    expect(verifyMerkleProof(vendorLeaf(ajeno), prueba, conjunto.root)).to.equal(false);
+  });
+
+  it('quitar un proveedor cambia la raíz del conjunto', () => {
+    const antes = buildVendorSet(PROVEEDORES).root;
+    const después = buildVendorSet(PROVEEDORES.slice(0, 2)).root;
+    expect(antes).to.not.equal(después);
   });
 });

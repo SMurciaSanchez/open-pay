@@ -15,6 +15,12 @@ pragma solidity ^0.8.24;
 ///    nunca sale de la base, una hoja no se puede adivinar probando montos.
 ///  - VendorSet: la lista de proveedores autorizados de un fondo, con fecha.
 ///  - RuleSet: las reglas vigentes del fondo, con fecha.
+///  - VerificationKey: la huella SHA-256 de la clave con la que se verifican
+///    las pruebas ZK. No es una raíz de Merkle, y está acá por una razón
+///    concreta: sin ella, quien entra al portal público a verificar una prueba
+///    está confiando en que la página le sirvió la clave correcta. Con la
+///    huella anclada puede compararla en el explorador de bloques y dejar de
+///    confiar en el portal.
 ///
 /// Los árboles se publican con altura fija y se rellenan con hojas vacías, de
 /// modo que la raíz tampoco revela cuántos pagos hubo.
@@ -27,7 +33,8 @@ contract CommitmentRegistry {
     enum RootKind {
         PaymentBatch,
         VendorSet,
-        RuleSet
+        RuleSet,
+        VerificationKey
     }
 
     struct Root {
