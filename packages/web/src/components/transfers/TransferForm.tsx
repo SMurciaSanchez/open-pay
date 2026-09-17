@@ -188,7 +188,7 @@ export default function TransferForm() {
                 placeholder="0.00"
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-neutral-500 sm:text-sm">MXN</span>
+                <span className="text-neutral-500 sm:text-sm">COP</span>
               </div>
             </div>
           </div>
@@ -264,7 +264,7 @@ export default function TransferForm() {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-neutral-500">Monto:</span>
-                <span className="text-sm font-medium">${parseFloat(amount).toFixed(2)} MXN</span>
+                <span className="text-sm font-medium">${parseFloat(amount).toFixed(2)} COP</span>
               </div>
               {description && (
                 <div className="flex justify-between">

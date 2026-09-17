@@ -266,7 +266,7 @@ export function RegisterForm() {
               className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
             />
             <label htmlFor="terms" className="text-xs text-gray-600">
-              Acepto los <Link href="/terms" className="text-primary underline">Términos y Condiciones</Link> y la <Link href="/privacy" className="text-primary underline">Política de Privacidad</Link>
+              Entiendo que OpenPay es un proyecto en desarrollo y acepto la <a href="https://github.com/SMurciaSanchez/open-pay/blob/main/docs/POLITICA_DATOS.md" target="_blank" rel="noopener noreferrer" className="text-primary underline">Política de datos</a>
             </label>
           </div>
           

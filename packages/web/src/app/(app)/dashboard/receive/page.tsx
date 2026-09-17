@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api, { Account } from '@/lib/api';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import QRTransfer from '@/components/dashboard/QRTransfer';
 
 export default function ReceiveMoneyPage() {
@@ -93,7 +92,7 @@ export default function ReceiveMoneyPage() {
   // Si no hay cuentas disponibles
   if (accounts.length === 0) {
     return (
-      <DashboardLayout user={user}>
+      <>
         <div className="rounded-xl bg-white p-8 text-center shadow-md">
           <div className="mb-4 mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-8 w-8 text-primary-600">
@@ -111,12 +110,12 @@ export default function ReceiveMoneyPage() {
             Volver al inicio
           </button>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout user={user}>
+    <>
       <div className="space-y-6">
         {/* Selector de cuenta */}
         {accounts.length > 1 && (
@@ -144,9 +143,9 @@ export default function ReceiveMoneyPage() {
                       {account.type} {account.number.slice(-4)}
                     </p>
                     <p className="text-sm text-neutral-500">
-                      {new Intl.NumberFormat('es-MX', {
+                      {new Intl.NumberFormat('es-CO', {
                         style: 'currency',
-                        currency: 'MXN',
+                        currency: 'COP',
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
                       }).format(account.balance)}
@@ -161,41 +160,7 @@ export default function ReceiveMoneyPage() {
         {/* Componente QR */}
         {selectedAccount && <QRTransfer account={selectedAccount} />}
         
-        {/* Opciones adicionales */}
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          <h2 className="mb-4 text-lg font-medium text-neutral-900">Otras formas de recibir dinero</h2>
-          
-          <div className="space-y-4">
-            <div className="rounded-lg border border-neutral-200 p-4 hover:border-primary-300 hover:bg-primary-50">
-              <div className="flex items-center">
-                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-full bg-success-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-success-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-medium text-neutral-900">Enlace de pago</h3>
-                  <p className="text-sm text-neutral-500">Genera y comparte un enlace para que otros te envíen dinero</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="rounded-lg border border-neutral-200 p-4 hover:border-primary-300 hover:bg-primary-50">
-              <div className="flex items-center">
-                <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-full bg-warning-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-warning-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-medium text-neutral-900">Cobro programado</h3>
-                  <p className="text-sm text-neutral-500">Configura cobros recurrentes para pagos periódicos</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 } 

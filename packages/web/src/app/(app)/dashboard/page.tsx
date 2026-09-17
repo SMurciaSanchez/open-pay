@@ -27,7 +27,7 @@ const item: Variants = {
 // ── Quick actions ──────────────────────────────────────────────
 const quickActions = [
   { label: 'Enviar',     href: '/dashboard/send',    icon: Send,     bg: 'bg-violet-100',  color: 'text-violet-600' },
-  { label: 'Recargar',   href: '/dashboard/receive',  icon: Download, bg: 'bg-emerald-100', color: 'text-emerald-600' },
+  { label: 'Recibir',    href: '/dashboard/receive',  icon: Download, bg: 'bg-emerald-100', color: 'text-emerald-600' },
   { label: 'Servicios',  href: '/services',           icon: CreditCard, bg: 'bg-sky-100',   color: 'text-sky-600' },
   { label: 'Contactos',  href: '/contacts',           icon: Users,    bg: 'bg-amber-100',   color: 'text-amber-600' },
 ];
@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
   const balance = account?.balance ?? 0;
   const displayBalance = showBalance
-    ? balance.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    ? balance.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : '••••••••';
 
   return (
@@ -102,7 +102,7 @@ export default function DashboardPage() {
                 {showBalance && '$'}{displayBalance}
               </motion.h2>
               <p className="text-violet-300 text-sm mt-1.5 font-mono">
-                MXN · {account?.number ?? '**** ****'}
+                COP · {account?.number ?? '**** ****'}
               </p>
 
               <div className="flex items-center gap-5 mt-6">

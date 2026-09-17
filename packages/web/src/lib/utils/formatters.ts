@@ -119,7 +119,7 @@ export function formatFileSize(bytes: number): string {
 export function formatDateTime(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
-  return new Intl.DateTimeFormat('es-MX', {
+  return new Intl.DateTimeFormat('es-CO', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -234,7 +234,7 @@ export function formatReferenceNumber(reference: string): string {
  * Format a number with thousands separators
  */
 export function formatNumber(number: number): string {
-  return new Intl.NumberFormat('es-MX').format(number);
+  return new Intl.NumberFormat('es-CO').format(number);
 }
 
 /**

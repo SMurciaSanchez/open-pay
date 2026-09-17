@@ -49,7 +49,7 @@ export default function NewTransferPage() {
                   
                   <div className="text-sm text-gray-600 flex items-center">
                     <span>¿No encuentras a tu contacto?</span>
-                    <Link href="/contacts/new" className="ml-1 text-primary hover:text-primary-dark">
+                    <Link href="/contacts" className="ml-1 text-primary hover:text-primary-dark">
                       Agregar nuevo
                     </Link>
                   </div>
@@ -91,7 +91,7 @@ export default function NewTransferPage() {
                         placeholder="0.00"
                       />
                       <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <span className="text-gray-500 sm:text-sm">MXN</span>
+                        <span className="text-gray-500 sm:text-sm">COP</span>
                       </div>
                     </div>
                   </div>
@@ -130,15 +130,15 @@ export default function NewTransferPage() {
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Monto:</span>
-                    <span className="font-medium">$0.00 MXN</span>
+                    <span className="font-medium">$0.00 COP</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Comisión:</span>
-                    <span className="font-medium text-green-600">$0.00 MXN</span>
+                    <span className="font-medium text-green-600">$0.00 COP</span>
                   </div>
                   <div className="pt-2 border-t border-gray-200 flex justify-between">
                     <span className="font-medium">Total:</span>
-                    <span className="font-bold">$0.00 MXN</span>
+                    <span className="font-bold">$0.00 COP</span>
                   </div>
                 </div>
               </div>

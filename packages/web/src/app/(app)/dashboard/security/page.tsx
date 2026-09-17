@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import DashboardLayout from '@/components/layouts/DashboardLayout';
 import SecurityKey from '@/components/dashboard/SecurityKey';
 
 export default function SecurityPage() {
@@ -20,7 +19,7 @@ export default function SecurityPage() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="container max-w-5xl px-4 py-8">
         <div className="mb-8">
           <h1 className="mb-2 text-2xl font-bold text-neutral-900">Seguridad</h1>
@@ -229,6 +228,6 @@ export default function SecurityPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 } 

@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, ArrowRightLeft, CreditCard, Users, Clock,
-  Bell, Settings, HelpCircle, LogOut, Menu, X, ChevronDown,
-  User, Shield, Zap, Search, Building2,
+  Settings, HelpCircle, LogOut, Menu, X, ChevronDown,
+  Shield, Zap, Building2, ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -24,7 +24,7 @@ interface NavItem {
 const mainNavItems: NavItem[] = [
   { title: 'Panel Principal', href: '/dashboard',    icon: LayoutDashboard },
   { title: 'Transferencias',  href: '/transfers',    icon: ArrowRightLeft },
-  { title: 'Transacciones',   href: '/transactions', icon: Clock, badge: 3 },
+  { title: 'Transacciones',   href: '/transactions', icon: Clock },
   { title: 'Pagar entidad',   href: '/pay-entity',   icon: Building2 },
   { title: 'Servicios',       href: '/services',     icon: CreditCard },
   { title: 'Contactos',       href: '/contacts',     icon: Users },
@@ -34,28 +34,49 @@ const bottomNavItems: NavItem[] = [
   { title: 'Configuración', href: '/settings',  icon: Settings },
   { title: 'Seguridad',     href: '/security',  icon: Shield },
   { title: 'Soporte',       href: '/support',   icon: HelpCircle },
-  { title: 'Admin',         href: '/admin',     icon: Shield },
 ];
+
+// Solo para usuarios con app_metadata.role = 'admin' (lo firma el servidor)
+const adminNavItem: NavItem = { title: 'Admin', href: '/admin', icon: ShieldCheck };
+
+// Activo en la sección y en sus subpáginas (/transactions/123)
+const isActivePath = (pathname: string, href: string) =>
+  pathname === href || pathname.startsWith(`${href}/`);
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('Usuario');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checked, setChecked] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
+  // Sin sesión, ninguna sección de la app se muestra
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setUserEmail(user.email || '');
-        setUserName(
-          user.user_metadata?.full_name ||
-          user.email?.split('@')[0] ||
-          'Usuario'
-        );
+      if (!user) {
+        router.replace('/login');
+        return;
       }
+      setUserEmail(user.email || '');
+      setUserName(
+        user.user_metadata?.full_name ||
+        user.email?.split('@')[0] ||
+        'Usuario'
+      );
+      setIsAdmin(user.app_metadata?.role === 'admin');
+      setChecked(true);
     });
-  }, []);
+  }, [router]);
+
+  // Cerrar el menú móvil al cambiar de sección
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [pathname]);
+
+  const accountNavItems = isAdmin ? [...bottomNavItems, adminNavItem] : bottomNavItems;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -63,6 +84,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const userInitial = userName.charAt(0).toUpperCase();
+
+  if (!checked) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-violet-50/50">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-violet-50/50">
@@ -111,7 +140,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </motion.div>
             <div>
               <p className="text-white font-bold text-base leading-none">OpenPay</p>
-              <p className="text-indigo-400 text-[10px] leading-none mt-0.5">Finanzas seguras</p>
+              <p className="text-indigo-400 text-[10px] leading-none mt-0.5">Cuentas claras</p>
             </div>
           </Link>
           <button
@@ -126,7 +155,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Main nav */}
         <nav className="flex-1 overflow-auto px-3 py-5 space-y-0.5">
           {mainNavItems.map((navItem, i) => {
-            const isActive = pathname === navItem.href;
+            const isActive = isActivePath(pathname, navItem.href);
             return (
               <motion.div
                 key={navItem.href}
@@ -162,8 +191,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </p>
           </div>
 
-          {bottomNavItems.map((navItem, i) => {
-            const isActive = pathname === navItem.href;
+          {accountNavItems.map((navItem, i) => {
+            const isActive = isActivePath(pathname, navItem.href);
             return (
               <motion.div
                 key={navItem.href}
@@ -233,29 +262,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Search */}
-          <div className="hidden md:flex flex-1 max-w-xs items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 focus-within:ring-2 focus-within:ring-violet-200"
-            style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.12)' }}
-          >
-            <Search className="h-4 w-4 text-violet-400 shrink-0" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="flex-1 bg-transparent text-sm text-slate-600 placeholder-violet-300 outline-none border-none shadow-none p-0 focus:ring-0"
-            />
-          </div>
-
           <div className="ml-auto flex items-center gap-2">
-            {/* Bell */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative p-2 rounded-xl text-slate-500 hover:text-violet-600 hover:bg-violet-50 transition-colors"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-violet-600 ring-2 ring-white" />
-            </motion.button>
-
             {/* Profile dropdown */}
             <div className="relative">
               <motion.button

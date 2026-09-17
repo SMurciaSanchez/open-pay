@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api, { Account } from '@/lib/api';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import TransferForm from '@/components/dashboard/TransferForm';
 
 export default function SendMoneyPage() {
@@ -94,7 +93,7 @@ export default function SendMoneyPage() {
   // Si no hay cuentas disponibles
   if (accounts.length === 0) {
     return (
-      <DashboardLayout user={user}>
+      <>
         <div className="rounded-xl bg-white p-8 text-center shadow-md">
           <div className="mb-4 mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-8 w-8 text-primary-600">
@@ -112,18 +111,18 @@ export default function SendMoneyPage() {
             Volver al inicio
           </button>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout user={user}>
+    <>
       <div>
         <TransferForm 
           accounts={accounts} 
           onTransferComplete={handleTransferComplete} 
         />
       </div>
-    </DashboardLayout>
+    </>
   );
 } 

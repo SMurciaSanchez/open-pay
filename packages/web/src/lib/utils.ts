@@ -18,11 +18,11 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Format a currency value
  * @param amount The amount to format
- * @param currency The currency code (default: MXN)
+ * @param currency The currency code (default: COP)
  * @returns Formatted currency string
  */
-export function formatCurrency(amount: number, currency = "MXN"): string {
-  return new Intl.NumberFormat("es-MX", {
+export function formatCurrency(amount: number, currency = "COP"): string {
+  return new Intl.NumberFormat("es-CO", {
     style: "currency",
     currency,
     minimumFractionDigits: 2,

@@ -40,22 +40,10 @@ export default function SettingsPage() {
       href: '/settings/notifications'
     },
     {
-      title: 'Métodos de pago',
-      description: 'Gestiona tus tarjetas y cuentas bancarias',
-      icon: <CreditCard className="h-6 w-6" />,
-      href: '/settings/payment-methods'
-    },
-    {
-      title: 'Idioma y región',
-      description: 'Cambia el idioma y la configuración regional',
-      icon: <Globe className="h-6 w-6" />,
-      href: '/settings/locale'
-    },
-    {
       title: 'Ayuda y soporte',
       description: 'Preguntas frecuentes y contacto con soporte',
       icon: <HelpCircle className="h-6 w-6" />,
-      href: '/help'
+      href: '/support'
     },
   ];
 
