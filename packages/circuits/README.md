@@ -17,14 +17,24 @@ declara. Pero eso demostraría *"estos pagos están en el lote y son correctos"*
 que deja abierta la puerta grande: **esconder los pagos incómodos** y no
 declararlos.
 
-Por eso el circuito **recalcula la raíz del lote desde las 64 hojas** y la
+Por eso el circuito **recalcula la raíz del lote desde todas las hojas** y la
 compara con la que está anclada. Si alguien marca un pago real como casilla
 vacía, la raíz que sale no es la anclada y la prueba no se puede construir. Es lo
 que convierte "algunos pagos" en "todos los pagos".
 
-Ese es el motivo de que el árbol tenga 64 hojas y no 1024: la cuenta crece con
-el tamaño del árbol. La prueba de esa decisión está en
-`test/circuit.test.ts`, en el bloque *"no se puede esconder un pago"*.
+Ese es el motivo de que el árbol sea pequeño: la cuenta crece con el tamaño del
+árbol, así que la garantía se paga en restricciones. Hoy son **16 hojas**
+(`DEFAULT_TREE_HEIGHT = 4` en `contracts/src/commitment.ts`), tras bajar de 1024
+a 64 y de 64 a 16. El segundo recorte fue por una medición concreta: con 64
+hojas el circuito da 147.100 restricciones, el dominio se redondea a 2^18 y el
+`groth16 setup` de snarkjs corrió 15,4 horas sin llegar a escribir el `.zkey`.
+Con 16 quedan ~36.800 restricciones y el dominio cae a 2^16.
+
+Subir la altura otra vez es un cambio de una línea, pero **invalida toda raíz ya
+anclada**: el tamaño del árbol es parte del formato del compromiso.
+
+La prueba de esta decisión está en `test/circuit.test.ts`, en el bloque *"no se
+puede esconder un pago"*.
 
 ## Cómo se usa
 

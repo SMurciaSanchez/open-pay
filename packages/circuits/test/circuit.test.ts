@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import {
+  DEFAULT_TREE_HEIGHT,
   VENDOR_TREE_HEIGHT,
   buildMerkleTree,
   buildVendorSet,
@@ -9,6 +10,9 @@ import { buildWitness, type CircuitInput } from '../src/witness';
 import { PROVEEDORES, calcularTestigo, esperarRechazo, pago, uuid } from './helpers';
 
 const PRESUPUESTO = 100_000_000n;
+
+/// Hojas por lote. Se deriva de la altura para que bajarla no rompa el test.
+const HOJAS = 2 ** DEFAULT_TREE_HEIGHT;
 
 function testigoVálido(): CircuitInput {
   const pagos = [pago(0), pago(1), pago(2)];
@@ -39,8 +43,8 @@ describe('circuito: pagos autorizados y total dentro del presupuesto', () => {
       await calcularTestigo(input);
     });
 
-    it('acepta el lote lleno, con las 64 hojas ocupadas', async () => {
-      const pagos = Array.from({ length: 64 }, (_, i) => pago(i));
+    it(`acepta el lote lleno, con las ${HOJAS} hojas ocupadas`, async () => {
+      const pagos = Array.from({ length: HOJAS }, (_, i) => pago(i));
       const total = pagos.reduce((a, p) => a + p.amountMinorUnits, 0n);
       const input = buildWitness({
         payments: pagos,
@@ -190,7 +194,7 @@ describe('circuito: pagos autorizados y total dentro del presupuesto', () => {
         vendorIds: PROVEEDORES,
         budgetLimit: PRESUPUESTO,
       });
-      const esperada = buildMerkleTree(pagos.map(paymentCommitment), 6).root;
+      const esperada = buildMerkleTree(pagos.map(paymentCommitment), DEFAULT_TREE_HEIGHT).root;
       expect(batchRoot).to.equal(esperada);
       expect(input.batchRoot).to.equal(esperada.toString());
     });

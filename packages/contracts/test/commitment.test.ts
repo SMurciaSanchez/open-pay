@@ -109,13 +109,14 @@ describe('compromisos con Poseidon', () => {
       expect(chico.root).to.not.equal(grande.root);
     });
 
-    it('la altura por defecto da 64 hojas', () => {
-      // 64 y no más: el circuito de la Fase 3 recalcula la raíz desde todas las
+    it(`la altura por defecto da ${2 ** DEFAULT_TREE_HEIGHT} hojas`, () => {
+      // No más: el circuito de la Fase 3 recalcula la raíz desde todas las
       // hojas para poder afirmar que ningún pago quedó afuera, y esa cuenta
-      // crece con el tamaño del árbol.
+      // crece con el tamaño del árbol. Se deriva de la constante para que
+      // volver a bajar la altura no rompa el test.
       const árbol = buildMerkleTree([1n]);
       expect(árbol.height).to.equal(DEFAULT_TREE_HEIGHT);
-      expect(árbol.layers[0].length).to.equal(64);
+      expect(árbol.layers[0].length).to.equal(2 ** DEFAULT_TREE_HEIGHT);
     });
 
     it('rechaza un lote más grande que el árbol', () => {

@@ -27,19 +27,29 @@ export const FIELD_SIZE =
 export const ZERO_LEAF = 0n;
 
 /**
- * Altura por defecto: 64 hojas por lote.
+ * Altura por defecto: 16 hojas por lote.
  *
- * Por qué 64 y no 1024: el circuito de la Fase 3 recalcula la raíz desde TODAS
- * las hojas, que es lo que le permite afirmar que ningún pago quedó afuera del
- * lote. Con 1024 hojas esa cuenta se vuelve lenta; con 64 la prueba sale en
- * segundos. Lo que se cede es que la raíz delata que el lote tenía a lo sumo 64
- * pagos en vez de a lo sumo 1024 — fuga menor, porque la vista pública
+ * El circuito de la Fase 3 recalcula la raíz desde TODAS las hojas, que es lo
+ * que le permite afirmar que ningún pago quedó afuera del lote. Esa garantía se
+ * paga en restricciones, y el costo crece con el número de hojas: el coste de
+ * la ceremonia, no el de verificar.
+ *
+ * Se bajó de 1024 a 64 (2026-09-17) y de 64 a 16 (2026-09-18). El motivo del
+ * segundo recorte fue medido, no teórico: con 64 hojas el circuito da 147.100
+ * restricciones, el dominio se redondea a 2^18 y el `groth16 setup` de snarkjs
+ * corrió 15,4 horas en la máquina de desarrollo sin llegar a escribir el .zkey.
+ * Con 16 hojas quedan ~36.800 restricciones y el dominio cae a 2^16.
+ *
+ * Lo que se cede: la raíz delata que el lote tenía a lo sumo 16 pagos, y un
+ * fondo con más de 16 pagos en el período necesita varios lotes, lo que deja
+ * ver que hubo más de 16. Fuga acotada: la vista pública
  * PublicReconciliationStatus ya publica el porcentaje conciliado cuando hay 10
  * o más pagos en el mes.
  *
- * Cambiar esta altura invalida toda raíz ya anclada.
+ * Cambiar esta altura invalida toda raíz ya anclada. Hoy no hay ninguna anclada
+ * — por eso el recorte todavía es gratis.
  */
-export const DEFAULT_TREE_HEIGHT = 6;
+export const DEFAULT_TREE_HEIGHT = 4;
 
 /** Altura del árbol de proveedores autorizados: hasta 64 por fondo. */
 export const VENDOR_TREE_HEIGHT = 6;

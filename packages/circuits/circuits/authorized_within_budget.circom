@@ -23,7 +23,9 @@ include "merkle.circom";
 /// conciliación bancaria, y el banco sigue siendo la fuente (supuesto S5 de
 /// docs/MODELO_AMENAZA.md). Aquí se prueba consistencia de lo registrado.
 ///
-/// batchHeight   — altura del árbol del lote (6 → 64 pagos)
+/// batchHeight   — altura del árbol del lote (4 → 16 pagos). Ver el comentario
+///                 de DEFAULT_TREE_HEIGHT en contracts/src/commitment.ts: se
+///                 bajó de 6 a 4 porque el setup con 64 hojas no terminaba.
 /// vendorHeight  — altura del árbol de proveedores (6 → 64 proveedores)
 /// amountBits    — cota de cada monto; 64 bits sobran para pesos en centavos
 template AuthorizedAndWithinBudget(batchHeight, vendorHeight, amountBits) {
@@ -125,4 +127,4 @@ template AuthorizedAndWithinBudget(batchHeight, vendorHeight, amountBits) {
 }
 
 component main {public [batchRoot, vendorSetRoot, budgetLimit]} =
-    AuthorizedAndWithinBudget(6, 6, 64);
+    AuthorizedAndWithinBudget(4, 6, 64);

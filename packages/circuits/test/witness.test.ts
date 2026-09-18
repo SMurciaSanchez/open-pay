@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import {
+  DEFAULT_TREE_HEIGHT,
   buildVendorSet,
   merkleProof,
   vendorLeaf,
@@ -10,18 +11,21 @@ import { PROVEEDORES, pago, uuid } from './helpers';
 
 const PRESUPUESTO = 100_000_000n;
 
+/// Hojas por lote. Se deriva de la altura para que bajarla no rompa el test.
+const HOJAS = 2 ** DEFAULT_TREE_HEIGHT;
+
 describe('constructor del testigo', () => {
   describe('forma de las entradas', () => {
-    it('rellena hasta las 64 hojas del árbol', () => {
+    it(`rellena hasta las ${HOJAS} hojas del árbol`, () => {
       const { input } = buildWitness({
         payments: [pago(0), pago(1)],
         vendorIds: PROVEEDORES,
         budgetLimit: PRESUPUESTO,
       });
 
-      expect(input.amount).to.have.length(64);
-      expect(input.isReal).to.have.length(64);
-      expect(input.vendorPathElements).to.have.length(64);
+      expect(input.amount).to.have.length(HOJAS);
+      expect(input.isReal).to.have.length(HOJAS);
+      expect(input.vendorPathElements).to.have.length(HOJAS);
       expect(input.vendorPathElements[0]).to.have.length(6);
     });
 
@@ -121,10 +125,10 @@ describe('constructor del testigo', () => {
     });
 
     it('más pagos de los que caben en el árbol', () => {
-      const pagos = Array.from({ length: 65 }, (_, i) => pago(i));
+      const pagos = Array.from({ length: HOJAS + 1 }, (_, i) => pago(i));
       expect(() =>
         buildWitness({ payments: pagos, vendorIds: PROVEEDORES, budgetLimit: 10n ** 12n }),
-      ).to.throw('admite 64');
+      ).to.throw(`admite ${HOJAS}`);
     });
 
     it('más proveedores de los que caben en el conjunto', () => {
