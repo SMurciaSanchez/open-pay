@@ -221,3 +221,26 @@ SELECT expect_error($$SELECT count(*) FROM "VendorSetSnapshot"$$,
 SELECT expect_error($$SELECT count(*) FROM "BatchProof"$$,
                     'permission denied', 'P43 el público lee las pruebas solo por la vista');
 RESET ROLE;
+
+-- ════════════════ Conciliar fija la fecha del pago ════════════════
+
+-- El tesorero declaró junio; el banco dice que el dinero salió en julio.
+INSERT INTO "Payment" (id, "fundId", "budgetId", "vendorId", amount, concept, "paidOn",
+                       status, "createdBy", "approvedBy", "decidedAt")
+VALUES ('pf-1', 'fund-1', 'bud-1', 'ven-1', 700000, 'Fecha declarada mal', '2026-06-30',
+        'APPROVED', 'p-tes', 'p-apr', '2026-07-01');
+INSERT INTO "BankStatement" (id, "bankAccountId", "organizationId", "periodStart", "periodEnd",
+                             "openingBalance", "closingBalance", "fileSha256", "declaredCount", "importedBy")
+VALUES ('st-jul', 'ba-1', 'org-1', '2026-07-01', '2026-07-31', 1000000, 300000,
+        decode(repeat('e7', 32), 'hex'), 1, 'p-tes');
+INSERT INTO "BankMovement" (id, "statementId", "periodStart", "periodEnd", "postedOn",
+                            direction, amount, "bankReference")
+VALUES ('mv-jul', 'st-jul', '2026-07-01', '2026-07-31', '2026-07-15', 'DEBIT', 700000, 'REF-JUL');
+
+SET ROLE authenticated;
+SELECT login('00000000-0000-0000-0000-000000000003');  -- p-tes
+SELECT seal_bank_statement('st-jul');
+SELECT reconcile_payment('pf-1', 'mv-jul');
+SELECT ok((SELECT "paidOn" = '2026-07-15' AND status = 'RECONCILED' FROM "Payment" WHERE id = 'pf-1'),
+          'P44 al conciliar, la fecha del pago pasa a ser la del banco');
+RESET ROLE;

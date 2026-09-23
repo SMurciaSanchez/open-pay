@@ -539,4 +539,79 @@ JOIN "Organization" o       ON o.id = f."organizationId";
 
 GRANT SELECT ON "PublicBatchProof" TO anon, authenticated;
 
+-- ── 8. Conciliar fija la fecha del pago ─────────────────────
+
+-- Hasta ahora "paidOn" lo escribía el tesorero y la conciliación no lo
+-- comparaba con el banco. Como el lote se arma por mes según "paidOn", eso
+-- dejaba mover un pago de mes (y de lote) con solo cambiar una fecha. Misma
+-- función que en 20260917120000_bank_reconciliation.sql, con un cambio: al
+-- conciliar, la fecha del pago pasa a ser la del movimiento bancario.
+CREATE OR REPLACE FUNCTION reconcile_payment(p_payment_id TEXT, p_movement_id TEXT)
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  l_me       TEXT := current_profile_id();
+  l_payment  "Payment"%ROWTYPE;
+  l_mov      "BankMovement"%ROWTYPE;
+  l_stmt     "BankStatement"%ROWTYPE;
+  l_pay_org  TEXT;
+  l_id       TEXT;
+BEGIN
+  SELECT * INTO l_payment FROM "Payment" WHERE id = p_payment_id FOR UPDATE;
+  IF NOT FOUND OR NOT has_fund_role(l_payment."fundId", ARRAY['TREASURER']) THEN
+    RAISE EXCEPTION 'No autorizado';
+  END IF;
+
+  SELECT * INTO l_mov FROM "BankMovement" WHERE id = p_movement_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Movimiento no encontrado';
+  END IF;
+
+  SELECT * INTO l_stmt FROM "BankStatement" WHERE id = l_mov."statementId";
+
+  -- El movimiento tiene que ser de un banco de la misma organización del fondo
+  SELECT f."organizationId" INTO l_pay_org FROM "Fund" f WHERE f.id = l_payment."fundId";
+  IF l_stmt."organizationId" <> l_pay_org THEN
+    RAISE EXCEPTION 'El movimiento es de otra organización';
+  END IF;
+
+  IF l_stmt.status <> 'SEALED' THEN
+    RAISE EXCEPTION 'El extracto todavía no está sellado';
+  END IF;
+  IF l_payment.status <> 'APPROVED' THEN
+    RAISE EXCEPTION 'Solo se concilia un pago aprobado (este está en %)', l_payment.status;
+  END IF;
+  IF l_mov.direction <> 'DEBIT' THEN
+    RAISE EXCEPTION 'Un pago se justifica con una salida de dinero, no con una entrada';
+  END IF;
+  IF l_mov.amount <> l_payment.amount THEN
+    RAISE EXCEPTION 'El movimiento es por % y el pago por %', l_mov.amount, l_payment.amount;
+  END IF;
+  -- La plata no puede haber salido antes de que alguien autorizara el pago:
+  -- ese es exactamente el caso "pago sin autorización" que OpenPay busca cerrar.
+  IF l_mov."postedOn" < l_payment."decidedAt"::date THEN
+    RAISE EXCEPTION 'El dinero salió el % y el pago se aprobó el %',
+      l_mov."postedOn", l_payment."decidedAt"::date;
+  END IF;
+
+  INSERT INTO "PaymentReconciliation" ("paymentId", "movementId", "reconciledBy")
+  VALUES (p_payment_id, p_movement_id, l_me)
+  RETURNING id INTO l_id;
+
+  -- La fecha del pago pasa a ser la del banco: es la que decide a qué mes
+  -- (y a qué lote) pertenece, y no puede quedar a criterio de quien lo registró.
+  UPDATE "Payment"
+  SET status = 'RECONCILED', "paidOn" = l_mov."postedOn", "updatedAt" = NOW()
+  WHERE id = p_payment_id;
+
+  RETURN l_id;
+EXCEPTION
+  WHEN unique_violation THEN
+    RAISE EXCEPTION 'Ese pago o ese movimiento ya está conciliado';
+END;
+$$;
+
 COMMIT;

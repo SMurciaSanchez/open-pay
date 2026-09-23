@@ -52,13 +52,16 @@ Cada etapa termina con pruebas y un commit.
 - [x] `VendorSetSnapshot`: qué lista de proveedores se ancló, en qué orden y en qué transacción (el circuito necesita el orden).
 - [x] `BatchProof`: la prueba generada de cada lote, y la vista pública `PublicBatchProof` para `/verificar`.
 - [x] Pruebas SQL en `packages/web/supabase/tests/60_org_panel.sql`.
+- [x] Conciliar fija `paidOn` = fecha del movimiento bancario (antes la escribía el tesorero y decidía el mes del lote).
 - [x] Además: `record_vendor_set` / `anchor_vendor_set`, `record_budget_batch` (exige TODOS los pagos conciliados del rubro en el mes, mes cerrado, lista anclada) y `discard_unanchored_batch`.
 - [ ] **Aplicarla en Supabase** (SQL Editor) — la hace el usuario.
 
 ### Etapa 2 — Organización y fondo
-- [ ] `/organizacion`: crear la organización, ver miembros, invitar por correo.
-- [ ] `/fondos` y `/fondos/[id]`: fondo, rubros, contratos, proveedores autorizados.
-- [ ] Menú lateral: sección de organización; sacar las pantallas de la billetera vieja.
+- [x] `/organizacion`: crear la organización, ver miembros, invitar por correo.
+- [x] `/fondos/[id]`: fondo, rubros, contratos, proveedores autorizados (los fondos se listan en `/organizacion`).
+- [x] Menú lateral: Organización y Verificar.
+- [ ] Decidir si se sacan del menú las pantallas de la billetera vieja (Enviar dinero, Transacciones).
+- [ ] Probar en Chrome con las cuentas de la demo (necesita la migración aplicada).
 
 ### Etapa 3 — Pagos
 - [ ] Tesorero registra pagos (borrador); aprobador aprueba o rechaza.
