@@ -19,7 +19,7 @@ done
 echo "Migraciones aplicadas dos veces sin error"
 run "$DIR/10_helpers.sql"
 FAIL=0
-for t in "$DIR"/2*.sql "$DIR"/3*.sql "$DIR"/4*.sql "$DIR"/5*.sql; do
+for t in "$DIR"/2*.sql "$DIR"/3*.sql "$DIR"/4*.sql "$DIR"/5*.sql "$DIR"/6*.sql; do
   echo "== $(basename "$t")"
   OUT=$(run "$t" 2>&1) || FAIL=1
   echo "$OUT" | sed -n "s/.*NOTICE:  //p; /FALLA\|ERROR/p"
