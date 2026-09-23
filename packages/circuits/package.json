@@ -6,6 +6,7 @@
   "scripts": {
     "build": "sh scripts/build.sh",
     "test": "mocha",
+    "aceptacion": "mocha test/acceptance/*.test.ts",
     "demo": "ts-node -r ./scripts/fastfile-fix.cjs src/demo.ts",
     "vkey-hash": "ts-node -r ./scripts/fastfile-fix.cjs src/vkey-hash.ts",
     "copy-vkey": "node scripts/copy-vkey.js"

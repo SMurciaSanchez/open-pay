@@ -278,7 +278,7 @@ No empezamos como billetera. La organización sigue pagando desde su banco; Open
 | **3. Mandatos** | Fondo, contrato (enlace a SECOP II), presupuesto, proveedores autorizados, reglas y actas de entrega. **Corazón del producto.** | Transparencia para quien administra dinero ajeno | ✅ |
 | **4. Datos privados** | Postgres con RLS y cifrado por campo con llaves por fondo; registro de accesos inmutable. | Revelación mínima | ✅ (RLS + log) |
 | **5. Compromisos** | Hash con sal por registro → árbol de Merkle por lote → `CommitmentRegistry` en Base. | Nada personal en la cadena | ✅ |
-| **6. Pruebas ZK** | Librería de reglas en una zkVM (SP1 o RISC Zero), worker que genera pruebas, contrato verificador en Base. | Probar antes que mostrar | ✅ (una regla) |
+| **6. Pruebas ZK** | Circuito Circom + Groth16 por regla; la prueba la genera la organización y se verifica en el navegador con la clave cuya huella está anclada en Base. (Diseño original: zkVM SP1 / RISC Zero y verificador on-chain.) | Probar antes que mostrar | ✅ (una regla) |
 | **7. Divulgación selectiva** | Llaves con propósito y vencimiento para auditores y autoridades; cada acceso queda anclado. | Acceso con propósito | Visión |
 | **8. Fuentes externas** | CUFE de la DIAN, SECOP II, RUB, confirmaciones bancarias, cada una validada por separado. | Independencia de las fuentes | Visión |
 | **9. Interfaces** | App de la organización, portal de participantes, portal del auditor y **portal público de verificación**. | Agregados en público | ✅ (org + verificador público) |
@@ -286,7 +286,7 @@ No empezamos como billetera. La organización sigue pagando desde su banco; Open
 ### Decisiones técnicas
 - **Sal = derecho al olvido.** Cada hash on-chain usa una sal guardada solo en Postgres. Borrar la sal hace el hash imposible de vincular (*crypto-shredding*): permite cumplir la supresión de la Ley 1581 aunque la blockchain sea inmutable.
 - **Lotes a intervalos fijos** (p. ej. cada 24 h), no por evento, para no filtrar patrones por metadatos.
-- **zkVM**: SP1 y RISC Zero se consideran listos para producción. Verificar una prueba Groth16 cuesta ~300k de gas (barato en Base). Generar pruebas con red externa (Succinct Prover Network o Bonsai) antes que GPUs propias.
+- **Circom + Groth16 en vez de zkVM (decisión 17/09/2026)**: la primera regla es una suma y dos árboles de Merkle, que caben en un circuito de 147.100 restricciones; así la prueba se verifica gratis en el navegador y no hace falta una red de probadores. La zkVM queda para reglas que no quepan cómodas en un circuito. Lo que se decía de ella: SP1 y RISC Zero se consideran listos para producción. Verificar una prueba Groth16 cuesta ~300k de gas (barato en Base). Generar pruebas con red externa (Succinct Prover Network o Bonsai) antes que GPUs propias.
 - **Noir** (pruebas en el navegador): exploración futura.
 - **Cadena**: Base (Sepolia para desarrollo). On-chain solo van raíces de Merkle y pruebas; nunca montos individuales, descripciones ni IDs.
 - Verificar la documentación vigente de cada herramienta antes de empezar.
@@ -351,21 +351,21 @@ Es original y conecta criptografía + privacidad + contratación pública + gobi
 
 ### Fase 0 — Esta semana: apagar incendios
 - [x] Incidente registrado en [`SEGURIDAD_INCIDENTES.md`](./SEGURIDAD_INCIDENTES.md) (INC-001).
-- [ ] **Rotar la contraseña de Postgres** del proyecto Supabase `bmfiotbutuslsaxeumik` (estuvo en `test-p1.mjs`/`test-p2.mjs` y sigue en el historial de un repo **público**) y revisar logs.
-- [ ] Pasar el repo a privado (no borra la filtración: rotar la contraseña es lo que protege).
+- [x] ~~Rotar la contraseña de Postgres~~ del proyecto Supabase `bmfiotbutuslsaxeumik`. Resuelto de otra forma: proyecto dado de baja y reemplazado por uno nuevo (INC-001 cerrado, 16/09/2026).
+- [x] El repo viejo pasó a privado (`open-pay-mvp`); el público `open-pay` empezó con historial limpio.
 - [x] Guardar el tear-down sin commit (`stash@{0}`), crear la rama `pivot/trazabilidad` y restaurar `packages/contracts`.
 - [x] Aplicar los arreglos del zip: scripts leen `DB_URL` del entorno, `.gitignore` en UTF-8, `.env.example`.
-- [x] Quitar la segunda contraseña filtrada (proyecto `garzwhnenhtmpfvfntmk`) de `packages/web/VERCEL_DEPLOYMENT.md`. **También hay que rotarla.**
+- [x] Quitar la segunda contraseña filtrada (proyecto `garzwhnenhtmpfvfntmk`) de `packages/web/VERCEL_DEPLOYMENT.md`. Proyecto dado de baja (INC-002 cerrado).
 - [x] Corregir `20260916120000_security_fixes.sql` (validada en Postgres 16 local: bloquea el robo, fuerza saldo 0, idempotente).
-- [ ] **Aplicarla** en el SQL Editor de Supabase. Cambios hechos:
+- [x] **Aplicarla** en el SQL Editor de Supabase (proyecto nuevo, 16/09/2026). Cambios hechos:
   - `DROP FUNCTION` de la versión vieja de `transfer_funds` (firma con emails); si no, queda una sobrecarga sin validar `auth.uid()`.
   - Renombrar variables `v_*` a `l_*` (bug del SQL Editor, error 42P01).
   - `SET search_path = public` en las funciones `SECURITY DEFINER`.
   - Índice único en `Account("profileId", type)`.
 - [ ] Probar: transferencia normal funciona; RPC con el `p_sender_id` de otro usuario devuelve "No autorizado".
-- [ ] Confirmar qué proyecto de Supabase usa Vercel (`garzwhnenhtmpfvfntmk` o `bmfiotbutuslsaxeumik`).
+- [x] ~~Confirmar qué proyecto de Supabase usa Vercel~~: ninguno de los dos; Vercel usa el proyecto nuevo (23/09/2026).
 - [x] Decidir la visión con Nicolás (16/09/2026).
-- [ ] Actualizar el README (dice "Sebastián Díaz"; autores: Sebastián Murcia Sánchez y Nicolás Castillo) con el nuevo lema.
+- [x] Autores del README corregidos (Sebastián Murcia Sánchez y Nicolás Castillo), 23/09/2026. Falta el nuevo lema.
 
 ### Fase 1 — Validación con usuarios (⏸️ POSPUESTA, decisión 16/09/2026)
 > Se salta por ahora para avanzar con el MVP universitario (fases 2 y 3). **Es obligatoria antes de la Fase 4 (piloto real)**:
@@ -379,14 +379,14 @@ Es original y conecta criptografía + privacidad + contratación pública + gobi
 ### Fase 2 — Cimientos
 - [x] `docs/POLITICA_DATOS.md`: clasificación de datos (capa 0) con la regla de oro.
 - [x] `docs/MODELO_AMENAZA.md`: definición de X, Y, adversario y datos públicos para las pruebas de aceptación.
-- [ ] Modelo de mandatos: `Fund`, `Contract`, `Budget`, `AuthorizedVendor`, `FundRule` con RLS + registro de accesos.
-- [ ] Importación CSV / registro de pagos y conciliación.
-- [ ] `CommitmentRegistry` con lotes, reemplazando el contrato que publica montos.
+- [x] Modelo de mandatos: `Fund`, `Contract`, `Budget`, `AuthorizedVendor`, `FundRule` con RLS + registro de accesos.
+- [x] Registro de pagos y conciliación bancaria (esquema + pruebas SQL). La pantalla de importación CSV sigue pendiente.
+- [x] `CommitmentRegistry` con lotes, reemplazando el contrato que publica montos (desplegado en Base Sepolia y verificado en Basescan).
 
 ### Fase 3 — Primera prueba de punta a punta (entregable universitario)
-- [ ] Regla ZK: "pagos del contrato autorizados y total ≤ presupuesto", generada en la zkVM y verificada en Base Sepolia.
-- [ ] Portal público de verificación (sin cuenta).
-- [ ] ✅ Pasar la prueba de transparencia y la prueba de privacidad.
+- [x] Regla ZK: "pagos del contrato autorizados y total ≤ presupuesto" — circuito Circom + Groth16 (no zkVM, ver §9); raíces y huella de la clave ancladas en Base Sepolia.
+- [x] Portal público de verificación (sin cuenta): https://open-pay-one.vercel.app/verificar
+- [x] ✅ Pasar la prueba de transparencia y la prueba de privacidad (23/09/2026; resultado en `MODELO_AMENAZA.md` §7). Falta la revisión manual de PP por otra persona del equipo.
 - [ ] Primera auditoría de seguridad, aunque sea con un tercero conocido.
 
 ### Fase 4 — Piloto real

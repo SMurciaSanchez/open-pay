@@ -159,6 +159,6 @@ transfer_funds(sender_id, receiver_id, amount, description, idempotency_key)
 
 ## Equipo
 
-Proyecto desarrollado por **Sebastián Murcia** y **Sebastián Díaz**  
+Proyecto desarrollado por **Sebastián Murcia Sánchez** y **Nicolás Castillo**  
 Ingeniería de Sistemas — Gerencia de Proyectos TICs  
 © 2025 OpenPay · Todos los derechos reservados

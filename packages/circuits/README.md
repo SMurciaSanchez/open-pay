@@ -46,7 +46,8 @@ puede esconder un pago"*.
 npm install
 sh scripts/setup-tools.sh   # baja circom y comprueba su hash
 npm run build               # compila el circuito y corre la ceremonia
-npm test                    # 42 pruebas
+npm test                    # 42 pruebas unitarias
+npm run aceptacion          # + pruebas de aceptación PT y PP (95 en total, lee Base Sepolia)
 npm run demo                # genera build/demo-proof.json para el portal
 npm run copy-vkey           # copia la clave de verificación al portal
 npm run vkey-hash           # imprime la huella para anclarla en la cadena
@@ -71,6 +72,26 @@ El cálculo de los compromisos vive en `packages/contracts/src/commitment.ts` y
 **se importa, no se copia**: el circuito y el constructor de lotes tienen que
 usar el mismo Poseidon, con los mismos campos y en el mismo orden. Si se
 separaran, las pruebas dejarían de verificar sin que nada avisara.
+
+## Pruebas de aceptación
+
+`test/acceptance/` tiene las dos pruebas que exige `docs/MODELO_AMENAZA.md` §7,
+escritas desde el lado de un tercero que no confía en OpenPay: solo usan la
+prueba publicada, la clave que sirve el portal y la cadena leída por un nodo
+público.
+
+- `transparency.test.ts` (PT): la prueba verifica sin código de OpenPay, lo
+  publicado está anclado, y un tramposo con todos los datos no logra probar un
+  proveedor no autorizado, un total sobre el tope, un pago omitido ni uno
+  modificado. El portal da el mismo veredicto.
+- `privacy.test.ts` (PP): juego de indistinguibilidad sobre monto, proveedor,
+  fecha y número de pagos; fuerza bruta de hojas; búsqueda de datos privados en
+  todo lo publicado. Cada ataque tiene un control que muestra que el ataque
+  funciona cuando las sales son débiles.
+
+Un tercero no necesita la ceremonia: `sh scripts/build.sh --solo-compilar`
+alcanza, porque compilar es determinista y las pruebas negativas solo calculan
+testigos. `OPENPAY_SIN_RED=1` salta las lecturas de red.
 
 ## Lo que este circuito NO demuestra
 

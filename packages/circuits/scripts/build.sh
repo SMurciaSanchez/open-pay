@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 # Compila el circuito y genera las claves de prueba y verificación.
 #
+#   sh scripts/build.sh                  compila y corre la ceremonia
+#   sh scripts/build.sh --solo-compilar  solo compila (lo que necesitan las
+#                                        pruebas de aceptación; no toca claves)
+#
 # ⚠️  LA CEREMONIA QUE CORRE ESTE SCRIPT ES DE DESARROLLO, NO SIRVE PARA
 #     PRODUCCIÓN. Genera el Powers of Tau localmente y aporta una sola
 #     contribución, en esta misma máquina. Quien tenga la aleatoriedad usada
@@ -33,6 +37,14 @@ mkdir -p build ptau
 echo "── 1/5  Compilando el circuito"
 "$CIRCOM" "circuits/$CIRCUITO.circom" --r1cs --wasm --sym -o build -l node_modules
 $SNARKJS r1cs info "build/$CIRCUITO.r1cs"
+
+# Compilar es determinista: cualquiera obtiene el mismo wasm y las mismas
+# restricciones. La ceremonia no, y rehacerla cambiaría la clave de verificación
+# y dejaría de coincidir con la huella anclada.
+if [ "$1" = "--solo-compilar" ]; then
+  echo "Compilado. No se tocaron las claves (--solo-compilar)."
+  exit 0
+fi
 
 echo "── 2/5  Powers of Tau (fase 1, universal)"
 if [ ! -f "ptau/pot${POTENCIA}_final.ptau" ]; then
