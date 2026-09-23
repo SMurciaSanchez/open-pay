@@ -12,7 +12,7 @@
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { PaymentInput } from '../../contracts/src/commitment';
-import { prove, verify, verificationKeyHash } from './prove';
+import { cerrarProver, prove, verify, verificationKeyHash } from './prove';
 
 const SALIDA = path.resolve(__dirname, '..', 'build', 'demo-proof.json');
 
@@ -62,7 +62,10 @@ async function main() {
   console.log('  ningún monto, ningún proveedor, ninguna fecha, ni cuántos pagos hubo.');
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exitCode = 1;
-});
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+  })
+  // Sin esto el proceso no sale nunca: snarkjs deja su pool de workers abierto.
+  .finally(cerrarProver);

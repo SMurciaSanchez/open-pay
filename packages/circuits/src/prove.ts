@@ -80,6 +80,23 @@ export function loadVerificationKey(): unknown {
 }
 
 /**
+ * Cierra los hilos que snarkjs deja abiertos.
+ *
+ * `groth16.fullProve` levanta un pool de workers a través de ffjavascript y lo
+ * guarda en `globalThis.curve_bn128` para reutilizarlo. Nadie los cierra: al
+ * terminar de probar, el proceso se queda vivo con los workers ociosos y Node
+ * nunca sale. Parece un cuelgue —CPU en cero y el programa sin devolver el
+ * prompt— cuando en realidad el trabajo ya está hecho.
+ *
+ * Todo programa que pruebe o verifique tiene que llamar a esto antes de salir.
+ * En los tests lo cubre `"exit": true` en .mocharc.json.
+ */
+export async function cerrarProver(): Promise<void> {
+  const curva = (globalThis as { curve_bn128?: { terminate?: () => Promise<void> } }).curve_bn128;
+  if (curva?.terminate) await curva.terminate();
+}
+
+/**
  * Huella de la clave de verificación, para anclarla en CommitmentRegistry.
  *
  * Esto es lo que cierra el último agujero del portal: sin ella, quien entra a

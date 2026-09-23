@@ -27,29 +27,36 @@ export const FIELD_SIZE =
 export const ZERO_LEAF = 0n;
 
 /**
- * Altura por defecto: 16 hojas por lote.
+ * Altura por defecto: 64 hojas por lote.
  *
  * El circuito de la Fase 3 recalcula la raíz desde TODAS las hojas, que es lo
  * que le permite afirmar que ningún pago quedó afuera del lote. Esa garantía se
- * paga en restricciones, y el costo crece con el número de hojas: el coste de
- * la ceremonia, no el de verificar.
+ * paga en restricciones, y el costo crece con el número de hojas: es coste de
+ * la ceremonia, no de verificar.
  *
- * Se bajó de 1024 a 64 (2026-09-17) y de 64 a 16 (2026-09-18). El motivo del
- * segundo recorte fue medido, no teórico: con 64 hojas el circuito da 147.100
- * restricciones, el dominio se redondea a 2^18 y el `groth16 setup` de snarkjs
- * corrió 15,4 horas en la máquina de desarrollo sin llegar a escribir el .zkey.
- * Con 16 hojas quedan ~36.800 restricciones y el dominio cae a 2^16.
+ * Historia, que vale la pena conservar porque uno de los recortes fue un error:
+ * se bajó de 1024 a 64 (2026-09-17), de 64 a 16 (2026-09-18) y se volvió a 64
+ * (2026-09-23). El recorte a 16 se hizo porque el `groth16 setup` con 64 hojas
+ * corrió 15,4 horas sin escribir el .zkey, y se atribuyó al tamaño del
+ * circuito. La causa real era un livelock de `fastfile` (ver
+ * circuits/scripts/fastfile-fix.cjs): el proceso no era lento, no iba a
+ * terminar nunca. Con el arreglo, el setup de 64 hojas tarda ~2-3 minutos, así
+ * que el motivo del recorte desapareció.
  *
- * Lo que se cede: la raíz delata que el lote tenía a lo sumo 16 pagos, y un
- * fondo con más de 16 pagos en el período necesita varios lotes, lo que deja
- * ver que hubo más de 16. Fuga acotada: la vista pública
+ * Números a 64 hojas: 147.100 restricciones, dominio 2^18, .r1cs de 77 MB.
+ * (A 16 eran 36.696, 2^16 y 19 MB.)
+ *
+ * Lo que se cede: la raíz delata que el lote tenía a lo sumo 64 pagos, y un
+ * fondo con más de 64 pagos en el período necesita varios lotes, lo que deja
+ * ver que hubo más de 64. Fuga acotada: la vista pública
  * PublicReconciliationStatus ya publica el porcentaje conciliado cuando hay 10
  * o más pagos en el mes.
  *
  * Cambiar esta altura invalida toda raíz ya anclada. Hoy no hay ninguna anclada
- * — por eso el recorte todavía es gratis.
+ * — por eso este cambio todavía es gratis. Una vez que se ancle la primera,
+ * deja de serlo.
  */
-export const DEFAULT_TREE_HEIGHT = 4;
+export const DEFAULT_TREE_HEIGHT = 6;
 
 /** Altura del árbol de proveedores autorizados: hasta 64 por fondo. */
 export const VENDOR_TREE_HEIGHT = 6;
