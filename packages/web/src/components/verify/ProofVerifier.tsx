@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CheckCircle2, XCircle, Loader2, Upload, ShieldQuestion } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Upload,
+  ShieldQuestion,
+} from 'lucide-react';
 import {
   formatMinorUnits,
   parseBundle,
@@ -12,9 +19,7 @@ import {
   type PublicClaim,
   type VerifyOutcome,
 } from '@/lib/zk/verify';
-
-const REGISTRY = process.env.NEXT_PUBLIC_COMMITMENT_REGISTRY_ADDRESS;
-const EXPLORER = process.env.NEXT_PUBLIC_COMMITMENT_REGISTRY_EXPLORER;
+import { EXPLORER, REGISTRY, consultarAnclaje, type Anclaje } from '@/lib/zk/registry';
 
 type Estado =
   | { fase: 'inicio' }
@@ -181,9 +186,26 @@ function Resultado({
   );
 }
 
+/** null mientras consulta; sin registro configurado se queda en null. */
+function useAnclaje(valorHex: string): Anclaje | null {
+  const [anclaje, setAnclaje] = useState<Anclaje | null>(null);
+  useEffect(() => {
+    if (!REGISTRY) return;
+    let vigente = true;
+    setAnclaje(null);
+    consultarAnclaje(valorHex).then((a) => vigente && setAnclaje(a));
+    return () => {
+      vigente = false;
+    };
+  }, [valorHex]);
+  return anclaje;
+}
+
 function ResultadoVálido({ claim }: { claim: PublicClaim }) {
   const batch = toHexRoot(claim.batchRoot);
   const vendors = toHexRoot(claim.vendorSetRoot);
+  const anclajeBatch = useAnclaje(batch);
+  const anclajeVendors = useAnclaje(vendors);
 
   return (
     <div className="space-y-4">
@@ -209,24 +231,32 @@ function ResultadoVálido({ claim }: { claim: PublicClaim }) {
         </p>
 
         <dl className="mt-4 space-y-4 text-sm">
-          <Dato etiqueta="Raíz del lote de pagos" valor={batch} />
-          <Dato etiqueta="Raíz del conjunto de proveedores autorizados" valor={vendors} />
+          <Dato etiqueta="Raíz del lote de pagos" valor={batch} anclaje={anclajeBatch} />
+          <Dato
+            etiqueta="Raíz del conjunto de proveedores autorizados"
+            valor={vendors}
+            anclaje={anclajeVendors}
+          />
           <Dato etiqueta="Tope del rubro" valor={formatMinorUnits(claim.budgetLimit)} mono={false} />
         </dl>
 
         {REGISTRY && EXPLORER ? (
-          <p className="mt-5 text-sm">
-            Comprobá que ambas raíces estén ancladas llamando a{' '}
-            <code className="rounded bg-muted px-1">isKnownRoot</code> en el contrato:{' '}
-            <a
-              href={`${EXPLORER}/address/${REGISTRY}#readContract`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-primary underline"
-            >
-              ver CommitmentRegistry
-            </a>
-          </p>
+          <>
+            <ResumenDeAnclaje raíces={[anclajeBatch, anclajeVendors]} />
+            <p className="mt-3 text-sm text-muted-foreground">
+              Esta consulta la hace tu navegador directo a un nodo público de Base, pero la sigue
+              mostrando esta página. Si no querés creerle, llamá vos a{' '}
+              <code className="rounded bg-muted px-1">isKnownRoot</code> en el contrato:{' '}
+              <a
+                href={`${EXPLORER}/address/${REGISTRY}#readContract`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-primary underline"
+              >
+                ver CommitmentRegistry
+              </a>
+            </p>
+          </>
         ) : (
           <p className="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
             <strong>El registro todavía no está desplegado.</strong> Mientras no lo esté, esta
@@ -258,20 +288,96 @@ function Dato({
   etiqueta,
   valor,
   mono = true,
+  anclaje,
 }: {
   etiqueta: string;
   valor: string;
   mono?: boolean;
+  /** undefined: el dato no se ancla. null: consultando. */
+  anclaje?: Anclaje | null;
 }) {
   return (
     <div>
       <dt className="text-muted-foreground">{etiqueta}</dt>
       <dd className={`mt-1 break-all ${mono ? 'font-mono text-xs' : 'font-medium'}`}>{valor}</dd>
+      {anclaje !== undefined && REGISTRY && <EstadoDeAnclaje anclaje={anclaje} />}
     </div>
   );
 }
 
+function EstadoDeAnclaje({ anclaje }: { anclaje: Anclaje | null }) {
+  if (!anclaje) {
+    return (
+      <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Consultando la cadena...
+      </p>
+    );
+  }
+  if (anclaje.estado === 'anclada') {
+    return (
+      <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
+        <CheckCircle2 className="h-3 w-3" />
+        Anclada el {formatearFecha(anclaje.fecha)}
+      </p>
+    );
+  }
+  if (anclaje.estado === 'no-anclada') {
+    return (
+      <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-red-700">
+        <XCircle className="h-3 w-3" />
+        No está anclada en el registro
+      </p>
+    );
+  }
+  return (
+    <p className="mt-1 inline-flex items-center gap-1 text-xs text-amber-700">
+      <AlertTriangle className="h-3 w-3" />
+      No se pudo consultar la cadena: {anclaje.mensaje}
+    </p>
+  );
+}
+
+/**
+ * La prueba sola demuestra que las reglas se cumplen sobre ESAS raíces; el
+ * anclaje, que son las que la organización publicó.
+ */
+function ResumenDeAnclaje({ raíces }: { raíces: (Anclaje | null)[] }) {
+  if (raíces.some((r) => r === null)) return null;
+  const estados = raíces.map((r) => r!.estado);
+
+  if (estados.every((e) => e === 'anclada')) {
+    return (
+      <p className="mt-5 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">
+        <strong>Las dos raíces están ancladas.</strong> Son las que la organización publicó en la
+        cadena, así que la prueba habla de sus pagos reales y no de un lote armado para la ocasión.
+      </p>
+    );
+  }
+  if (estados.includes('no-anclada')) {
+    return (
+      <p className="mt-5 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+        <strong>Falta anclar al menos una raíz.</strong> La prueba es matemáticamente correcta,
+        pero no hay constancia de que la organización haya publicado ese lote o esa lista de
+        proveedores. Cualquiera puede armar un lote que cumpla las reglas: sin el anclaje, esta
+        prueba no dice nada sobre los pagos reales.
+      </p>
+    );
+  }
+  return (
+    <p className="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+      <strong>No se pudo consultar la cadena.</strong> La prueba es válida, pero falta confirmar
+      que las raíces estén ancladas. Podés hacerlo a mano con el enlace de abajo.
+    </p>
+  );
+}
+
+function formatearFecha(fecha: Date): string {
+  return fecha.toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' });
+}
+
 function HuellaDeLaClave({ huella }: { huella: string }) {
+  const anclaje = useAnclaje(huella);
   return (
     <div className="rounded-xl border bg-muted/30 p-6">
       <div className="flex items-start gap-3">
@@ -283,11 +389,18 @@ function HuellaDeLaClave({ huella }: { huella: string }) {
             que por sí sola no prueba nada. Su huella es:
           </p>
           <p className="mt-2 break-all font-mono text-xs">{huella}</p>
+          {REGISTRY && <EstadoDeAnclaje anclaje={anclaje} />}
           <p className="mt-2 text-muted-foreground">
             {REGISTRY && EXPLORER ? (
               <>
-                Comparala con la que está anclada en la cadena. Si coinciden, ya no estás confiando
-                en nosotros.
+                {anclaje?.estado === 'no-anclada' && (
+                  <strong className="text-red-800">
+                    Esta huella no está en el registro: la clave que te sirvió esta página no es la
+                    que publicó la organización. No confíes en el resultado.{' '}
+                  </strong>
+                )}
+                Podés compararla vos con la anclada en el contrato. Si coinciden, ya no estás
+                confiando en nosotros.
               </>
             ) : (
               <>
