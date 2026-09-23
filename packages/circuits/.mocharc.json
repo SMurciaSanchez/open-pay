@@ -1,1 +1,5 @@
-{ "require": ["ts-node/register"], "timeout": 900000, "spec": "test/**/*.test.ts" }
+{
+  "require": ["./scripts/fastfile-fix.cjs", "ts-node/register"],
+  "timeout": 900000,
+  "spec": "test/**/*.test.ts"
+}

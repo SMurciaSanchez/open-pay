@@ -6,8 +6,8 @@
   "scripts": {
     "build": "sh scripts/build.sh",
     "test": "mocha",
-    "demo": "ts-node src/demo.ts",
-    "vkey-hash": "ts-node src/vkey-hash.ts",
+    "demo": "ts-node -r ./scripts/fastfile-fix.cjs src/demo.ts",
+    "vkey-hash": "ts-node -r ./scripts/fastfile-fix.cjs src/vkey-hash.ts",
     "copy-vkey": "node scripts/copy-vkey.js"
   },
   "devDependencies": {

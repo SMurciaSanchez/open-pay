@@ -23,7 +23,10 @@ CIRCOM=./tools/circom.exe
 [ -x "$CIRCOM" ] || CIRCOM=circom
 
 export NODE_OPTIONS=--max-old-space-size=8192
-SNARKJS="npx snarkjs"
+# snarkjs se invoca PRECARGANDO scripts/fastfile-fix.cjs. Sin ese parche, leer una
+# seccion del .ptau entra en un livelock de fastfile y el setup no termina nunca
+# (15,4 h girando un nucleo sin escribir un byte). Ver el comentario del parche.
+SNARKJS="node -r ./scripts/fastfile-fix.cjs ./node_modules/snarkjs/build/cli.cjs"
 
 mkdir -p build ptau
 
