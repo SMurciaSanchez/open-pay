@@ -370,6 +370,8 @@ Es original y conecta criptografía + privacidad + contratación pública + gobi
 ### Fase 1 — Validación con usuarios (⏸️ POSPUESTA, decisión 16/09/2026)
 > Se salta por ahora para avanzar con el MVP universitario (fases 2 y 3). **Es obligatoria antes de la Fase 4 (piloto real)**:
 > sin ella no hay forma de saber si alguien pagaría ni qué le duele de verdad.
+>
+> Material listo (23/09/2026): [`VALIDACION_FASE1.md`](./VALIDACION_FASE1.md) — hipótesis con umbrales, segmentos, guion, plantilla de notas y preguntas legales.
 
 - [ ] Entrevistar a 15-20 personas: fundaciones y ONG, revisores fiscales, cooperación internacional, veedurías.
 - [ ] Cómo rinden cuentas hoy, cuánto les cuesta, qué les duele, quién pagaría.
