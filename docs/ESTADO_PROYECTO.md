@@ -1,65 +1,92 @@
-# Estado del proyecto: pausa del 23/09/2026
+# Estado del proyecto: 09/11/2026
 
-> Resumen para retomar OpenPay después de una pausa. Dice qué está hecho, qué
-> falta y qué hay que hacer primero.
+> Resumen para retomar OpenPay. Dice qué está hecho, qué falta y qué hay que
+> hacer primero. El detalle por etapa está en `PLAN_PANEL_ORGANIZACION.md`.
 
 ## Qué está hecho
 
 - **Fases 0, 2 y 3 cerradas.** La app está desplegada en https://open-pay-one.vercel.app
-  con login de Supabase. El contrato está verificado en Basescan (Base Sepolia), las
-  raíces de la demo están ancladas y `/verificar` sale todo en verde.
-- **Pruebas de aceptación** en `packages/circuits`: `npm run aceptacion` corre
-  95 pruebas (42 unitarias, 25 de transparencia y 28 de privacidad). Los resultados
-  están en `MODELO_AMENAZA.md` §7.
-- **Material de la Fase 1** en `VALIDACION_FASE1.md`: hipótesis H1 a H5, guion
-  de entrevistas, plantilla de notas y preguntas legales.
-- **Panel de la organización** (rama `panel/organizacion`), según
-  `PLAN_PANEL_ORGANIZACION.md`:
-  - Etapa 1, base de datos: la migración `20260923120000_org_panel.sql` y 44 pruebas SQL.
-  - Etapa 2, pantallas `/organizacion` y `/fondos/[id]`: rubros, proveedores y contratos.
+  (rama `main`). El contrato está verificado en Basescan (Base Sepolia) y `/verificar`
+  funciona con la prueba de demostración.
+- **Pruebas de aceptación** en `packages/circuits`: `npm run aceptacion` (transparencia
+  y privacidad). Resultados en `MODELO_AMENAZA.md` §7.
+- **Panel de la organización: las 6 etapas construidas** en la rama `panel/organizacion`
+  (sin unir a `main`). Una organización ya recorre desde la app:
+  **equipo → fondo → pagos → aprobación → extracto → conciliación → lista anclada**.
+  - Etapas 1-2: organización, equipo de 4 roles, fondo, rubros, proveedores, contratos.
+  - Etapa 3: el tesorero registra pagos; el aprobador aprueba o rechaza.
+  - Etapa 4: cuenta bancaria cifrada, extracto CSV sellado, conciliación.
+  - Etapa 5: anclar la lista de proveedores y cerrar el lote de un rubro (`/api/org/batch`).
+  - Etapa 6: `npm run prove-batch` en `packages/circuits` y `/verificar?lote=<id>`.
+- **Datos de demostración en la base real** (Supabase): "Fundación Demo OpenPay",
+  "Fondo Salud Rural 2026", rubro Medicamentos ($40.000.000), un proveedor, un contrato,
+  un pago de $5.000.000 conciliado el 09/11/2026 y la lista de proveedores anclada
+  (transacción `0x73a5185823169da6b2b5ab4ff31113bd757e751ec6aab571d0daba8e61f44b53`).
+- **Cuentas de la demo:** cuatro alias de Gmail (`+legal`, `+config`, `+tesoreria`,
+  `+aprueba`), uno por rol.
 
-## Lo primero al retomar (bloqueante)
+## Lo único del recorrido que falta probar con datos reales
 
-1. **Aplicar la migración** `packages/web/supabase/migrations/20260923120000_org_panel.sql`
-   en el SQL Editor de Supabase. Sin ella, `/organizacion` falla en producción.
-2. **Crear 4 cuentas** de la demo con alias de Gmail: `+legal` (representante
-   legal), `+config` (configurador), `+tesoreria` (tesorero) y `+aprueba` (aprobador).
-3. No unir `panel/organizacion` con `main` hasta aplicar la migración.
+Un lote solo se cierra cuando su mes terminó. El de noviembre de 2026 se puede
+cerrar **desde el 01/12/2026**:
 
-## Plan para cerrar el MVP
+1. Entrar como tesorero → fondo → pestaña **Lotes** → **Cerrar y anclar lote**.
+2. En `packages/circuits`: `npm run prove-batch -- <id del lote>`.
+3. Abrir `/verificar?lote=<id>`: tiene que salir todo en verde.
 
-Meta: que una organización recorra todo el flujo desde la app, así:
-**pago → aprobación → extracto → conciliación → lote anclado → prueba ZK → `/verificar`**.
-Hoy la prueba publicada sale de datos de demostración (`src/demo-data.ts`).
+Ya se simuló con el pago real (`npm run prove-batch -- --simular <id del rubro> 2026-11-01`):
+la prueba verifica y la raíz de proveedores coincide con la anclada.
+
+## Para correr la app en local
+
+`cd packages/web && npm run dev`. Necesita `packages/web/.env.local` (no se sube a git) con,
+además de las variables públicas: `BANK_DATA_KEY`, `SUPABASE_SERVICE_ROLE_KEY` y
+`PUBLISHER_PRIVATE_KEY`. Ver `packages/web/.env.example`.
+
+> ⚠️ `BANK_DATA_KEY` cifra los números de cuenta y las glosas ya guardadas. Si se
+> pierde, no se pueden leer. Hay que copiarla tal cual a Vercel.
+
+Pruebas: `npx jest` en `packages/web`, `npm test` en `packages/circuits`,
+`npx hardhat test` en `packages/contracts`, `sh packages/web/supabase/tests/run.sh` (Docker).
+
+## Qué sigue
 
 | Paso | Qué | Quién |
 |---|---|---|
-| 0 | Aplicar la migración y crear las 4 cuentas | Usuario |
-| 1 | Probar la Etapa 2 en Chrome. Sacar del menú las pantallas de la billetera vieja (Enviar dinero, Transacciones) | Claude |
-| 2 | Etapa 3, pagos: el tesorero registra borradores y el aprobador aprueba o rechaza. Pruebas SQL de permisos | Claude |
-| 3 | Etapa 4: cuenta bancaria cifrada, importar un extracto CSV (SHA-256, sellado) y conciliar. CSV de ejemplo para la demo | Claude |
-| 4 | Etapa 5: ruta de API que arma el lote y ancla en Base Sepolia, más una pantalla de lotes. Variables en Vercel: `SUPABASE_SERVICE_ROLE_KEY`, `PUBLISHER_PRIVATE_KEY`, `BASE_SEPOLIA_RPC_URL` y `BANK_DATA_KEY` | Claude + usuario |
-| 5 | Etapa 6: script `prove-batch.ts` (prueba en el PC del operador) y `/verificar?lote=<id>`. Recorrido completo con las 4 cuentas | Claude |
-| 6 | Unir con `main`, desplegar, poner el recorrido de la demo en el README y dejar documentados los límites | Ambos |
+| 1 | `next build` de la web con las rutas nuevas | Claude |
+| 2 | Poner en Vercel `SUPABASE_SERVICE_ROLE_KEY`, `PUBLISHER_PRIVATE_KEY` y `BANK_DATA_KEY` | Usuario |
+| 3 | Unir `panel/organizacion` con `main` y desplegar | Ambos |
+| 4 | 01/12/2026 o después: cerrar el lote de noviembre, probarlo y verificarlo | Ambos |
+| 5 | Pendientes menores: crear el perfil al registrarse (hoy se crea al primer inicio de sesión y por eso no se puede invitar a quien nunca entró); rehacer el Panel Principal, que todavía muestra la billetera vieja; pantalla para leer lo cifrado | Claude |
+| 6 | README con el recorrido de la demo y los límites | Ambos |
 
-**Ojo con las fechas:** un lote solo se puede cerrar cuando su mes ya terminó y
-tiene un movimiento bancario posterior a la aprobación. Antes de eso, se prueba en
-local con fechas simuladas.
+## Después del MVP
+
+La prueba de hoy es en parte autocalificación: la organización fija sus propias
+reglas y sube su propio extracto. Para que deje de serlo (detalle en
+`PLAN_PANEL_ORGANIZACION.md`):
+
+- **Etapa 7:** las reglas las aprueba quien pone la plata (un financiador externo).
+- **Etapa 8:** datos de entrada independientes (factura electrónica contra la DIAN,
+  extracto con origen comprobable).
+- **Cinco conversaciones** con fundaciones o donantes antes de construir esas etapas:
+  deciden si valen la pena. Guion en `VALIDACION_FASE1.md`.
 
 ## Límites conocidos (hay que decirlos en la demo)
 
-- La prueba de cada lote cubre un rubro y un mes. Que la suma de **todos** los
-  meses no pase del presupuesto lo hace cumplir la base (`decide_payment`), pero
-  todavía no se prueba (ver `MODELO_AMENAZA.md` §3).
-- La prueba ZK se genera en el PC del operador: la clave de prueba pesa cientos
-  de MB y no cabe en Vercel.
+- La prueba de cada lote cubre un rubro y un mes. Que la suma de **todos** los meses
+  no pase del presupuesto lo hace cumplir la base (`decide_payment`), pero todavía no
+  se prueba (ver `MODELO_AMENAZA.md` §3).
+- El extracto lo sube la propia organización: queda sellado y con la huella del
+  archivo, pero OpenPay no lo recibe del banco (supuesto S5).
+- La prueba ZK se genera en el PC del operador: la clave de prueba no cabe en Vercel.
+- La ceremonia de claves es de desarrollo (`CEREMONIA.md`); red de pruebas.
 - Falta la auditoría de seguridad externa y la revisión manual de las pruebas de
   privacidad por otra persona.
 
 ## Fase 1 (en paralelo, trabajo humano)
 
-Pedir cita en el consultorio jurídico (llevar §7 de `VALIDACION_FASE1.md`), armar
-una lista de unos 25 contactos (fuera del repo), conseguir quién revise las
-pruebas de privacidad, probar la transferencia de la Fase 0 y hacer de 10 a 12
-entrevistas. La Fase 4 (piloto) solo arranca si H5 da 2 o 3 organizaciones con
-un siguiente paso concreto.
+Pedir cita en el consultorio jurídico (llevar §7 de `VALIDACION_FASE1.md`), armar una
+lista de contactos (fuera del repo), conseguir quién revise las pruebas de privacidad
+y hacer las entrevistas. La Fase 4 (piloto) solo arranca si H5 da 2 o 3
+organizaciones con un siguiente paso concreto.
