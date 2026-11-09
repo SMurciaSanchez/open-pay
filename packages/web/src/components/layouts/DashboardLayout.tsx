@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, ArrowRightLeft, Clock,
+  LayoutDashboard,
   Settings, HelpCircle, LogOut, Menu, X, ChevronDown,
   Shield, Zap, ShieldCheck, Building2, BadgeCheck,
 } from 'lucide-react';
@@ -25,8 +25,6 @@ const mainNavItems: NavItem[] = [
   { title: 'Panel Principal', href: '/dashboard',    icon: LayoutDashboard },
   { title: 'Organización',    href: '/organizacion', icon: Building2 },
   { title: 'Verificar',       href: '/verificar',    icon: BadgeCheck },
-  { title: 'Enviar dinero',   href: '/send-money',   icon: ArrowRightLeft },
-  { title: 'Transacciones',   href: '/transactions', icon: Clock },
 ];
 
 const bottomNavItems: NavItem[] = [

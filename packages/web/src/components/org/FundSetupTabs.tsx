@@ -25,9 +25,9 @@ import {
 } from '@/lib/api/org';
 import { ErrorNote, Loading, RoleNote } from './ui';
 
-const selectClass = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm';
+export const selectClass = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm';
 
-function useLista<T>(cargar: () => Promise<T[]>) {
+export function useLista<T>(cargar: () => Promise<T[]>) {
   const [items, setItems] = useState<T[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const recargar = useCallback(async () => {
@@ -44,7 +44,7 @@ function useLista<T>(cargar: () => Promise<T[]>) {
 }
 
 /** Envuelve un envío de formulario: error visible y botón ocupado. */
-function useEnvio(setError: (e: string | null) => void) {
+export function useEnvio(setError: (e: string | null) => void) {
   const [ocupado, setOcupado] = useState(false);
   const enviar = async (f: () => Promise<void>) => {
     setError(null);

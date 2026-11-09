@@ -246,6 +246,72 @@ export async function revokeVendor(vendorId: string): Promise<void> {
   );
 }
 
+// ── Pagos ──────────────────────────────────────────────────────
+
+export type PaymentStatus = 'DRAFT' | 'APPROVED' | 'REJECTED' | 'RECONCILED';
+
+export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
+  DRAFT: 'Por aprobar',
+  APPROVED: 'Aprobado',
+  REJECTED: 'Rechazado',
+  RECONCILED: 'Conciliado',
+};
+
+export interface Payment {
+  id: string;
+  fundId: string;
+  budgetId: string;
+  contractId: string | null;
+  vendorId: string;
+  amount: number;
+  concept: string;
+  paidOn: string | null;
+  status: PaymentStatus;
+  createdBy: string;
+  approvedBy: string | null;
+  decidedAt: string | null;
+  createdAt: string;
+}
+
+// Columnas a mano: la sal del pago no la puede leer ningún rol de cliente, así
+// que un select('*') lo rechaza la base.
+const PAYMENT_COLS =
+  'id, fundId, budgetId, contractId, vendorId, amount, concept, paidOn, status, createdBy, approvedBy, decidedAt, createdAt';
+
+export async function listPayments(fundId: string): Promise<Payment[]> {
+  return unwrap(
+    supabase
+      .from('Payment')
+      .select(PAYMENT_COLS)
+      .eq('fundId', fundId)
+      .order('createdAt', { ascending: false }),
+  ) as Promise<Payment[]>;
+}
+
+export interface NewPayment {
+  fundId: string;
+  budgetId: string;
+  contractId: string | null;
+  vendorId: string;
+  amount: number;
+  concept: string;
+}
+
+/**
+ * El tesorero registra el pago como borrador. La fecha de pago no se pide: la
+ * pone el banco al conciliar. Sin `.select()` después del insert, porque
+ * devolver la fila exigiría permiso de lectura sobre la sal.
+ */
+export async function createPayment(p: NewPayment): Promise<void> {
+  const yo = await myProfileId();
+  await unwrap(supabase.from('Payment').insert({ ...p, createdBy: yo }));
+}
+
+/** El aprobador decide. La base comprueba el rol, el presupuesto y el proveedor. */
+export async function decidePayment(paymentId: string, approve: boolean): Promise<void> {
+  await unwrap(supabase.rpc('decide_payment', { p_payment_id: paymentId, p_approve: approve }));
+}
+
 /** Pesos con separador de miles, sin decimales. */
 export function pesos(n: number | string): string {
   return Number(n).toLocaleString('es-CO', {

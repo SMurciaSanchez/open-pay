@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { ArrowLeft, Wallet } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BudgetsTab, ContractsTab, VendorsTab } from '@/components/org/FundSetupTabs';
+import { PaymentsTab } from '@/components/org/PaymentsTab';
 import { ErrorNote, Loading, PageHeader, RoleBadge } from '@/components/org/ui';
 import { getFund, pesos, type Fund, type MyOrganization } from '@/lib/api/org';
 
@@ -18,7 +19,10 @@ export default function FondoPage() {
     getFund(id).then(setFondo).catch((e) => setError((e as Error).message));
   }, [id]);
 
-  const esConfig = fondo?.organization.role === 'CONFIGURATOR';
+  const rol = fondo?.organization.role;
+  const esConfig = rol === 'CONFIGURATOR';
+  // Tesorero y aprobador llegan a lo suyo: los pagos
+  const pestañaInicial = rol === 'TREASURER' || rol === 'APPROVER' ? 'pagos' : 'rubros';
 
   return (
     <div className="px-5 py-6 lg:px-8 lg:py-8 max-w-5xl mx-auto space-y-6">
@@ -40,11 +44,12 @@ export default function FondoPage() {
           </PageHeader>
           <p className="text-slate-600">{fondo.purpose}</p>
 
-          <Tabs defaultValue="rubros">
+          <Tabs defaultValue={pestañaInicial}>
             <TabsList className="flex-wrap h-auto">
               <TabsTrigger value="rubros">Rubros</TabsTrigger>
               <TabsTrigger value="proveedores">Proveedores</TabsTrigger>
               <TabsTrigger value="contratos">Contratos</TabsTrigger>
+              <TabsTrigger value="pagos">Pagos</TabsTrigger>
             </TabsList>
             <TabsContent value="rubros" className="pt-4">
               <BudgetsTab fundId={fondo.id} canEdit={esConfig} />
@@ -54,6 +59,9 @@ export default function FondoPage() {
             </TabsContent>
             <TabsContent value="contratos" className="pt-4">
               <ContractsTab fundId={fondo.id} canEdit={esConfig} />
+            </TabsContent>
+            <TabsContent value="pagos" className="pt-4">
+              <PaymentsTab fundId={fondo.id} role={fondo.organization.role} />
             </TabsContent>
           </Tabs>
         </>

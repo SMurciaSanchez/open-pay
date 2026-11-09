@@ -54,17 +54,20 @@ Cada etapa termina con pruebas y un commit.
 - [x] Pruebas SQL en `packages/web/supabase/tests/60_org_panel.sql`.
 - [x] Conciliar fija `paidOn` = fecha del movimiento bancario (antes la escribía el tesorero y decidía el mes del lote).
 - [x] Además: `record_vendor_set` / `anchor_vendor_set`, `record_budget_batch` (exige TODOS los pagos conciliados del rubro en el mes, mes cerrado, lista anclada) y `discard_unanchored_batch`.
-- [ ] **Aplicarla en Supabase** (SQL Editor) — la hace el usuario.
+- [x] **Aplicarla en Supabase** (SQL Editor) — aplicada el 09/11/2026.
 
 ### Etapa 2 — Organización y fondo
 - [x] `/organizacion`: crear la organización, ver miembros, invitar por correo.
 - [x] `/fondos/[id]`: fondo, rubros, contratos, proveedores autorizados (los fondos se listan en `/organizacion`).
 - [x] Menú lateral: Organización y Verificar.
-- [ ] Decidir si se sacan del menú las pantallas de la billetera vieja (Enviar dinero, Transacciones).
-- [ ] Probar en Chrome con las cuentas de la demo (necesita la migración aplicada).
+- [x] Sacadas del menú las pantallas de la billetera vieja (Enviar dinero, Transacciones), 09/11/2026. Las rutas siguen existiendo y el Panel Principal todavía muestra la billetera: falta rehacerlo como inicio de la organización.
+- [x] Probar en Chrome con las cuentas de la demo — hecho el 09/11/2026: organización, equipo de 4 roles, fondo, rubro, proveedor y contrato.
+- [ ] Defecto encontrado en la prueba: el perfil se crea en el primer inicio de sesión, no al registrarse. Invitar a alguien que se registró pero nunca entró da "No hay una cuenta de OpenPay con ese correo". Arreglo: crear el perfil al registrarse (disparador en la base) o, como mínimo, corregir el texto de la pantalla.
+- [ ] Menor: `ensureProfile` a veces se ejecuta dos veces a la vez y la segunda falla con `Profile_userId_key` (no rompe nada, ensucia la consola).
 
 ### Etapa 3 — Pagos
-- [ ] Tesorero registra pagos (borrador); aprobador aprueba o rechaza.
+- [x] Pestaña "Pagos" en `/fondos/[id]`: el tesorero registra (borrador), el aprobador aprueba o rechaza, y cada rubro muestra cuánto lleva aprobado. No hizo falta migración: usa `Payment` y `decide_payment`, que ya tenían pruebas SQL.
+- [x] Probado en Chrome el 09/11/2026: el tesorero registró dos pagos y no ve botones de decidir; el aprobador aprobó uno de $5.000.000, la base rechazó aprobar otro de $38.000.000 ("El pago excede el presupuesto del rubro", rubro de $40.000.000) y luego lo rechazó a mano.
 
 ### Etapa 4 — Extractos y conciliación
 - [ ] Cuenta bancaria de la organización (el número se cifra en el servidor).
@@ -81,3 +84,23 @@ Cada etapa termina con pruebas y un commit.
 - [ ] `/verificar?lote=<id>`: carga la prueba publicada y verifica sola.
 - [ ] Prueba de punta a punta en Chrome con las 4 cuentas.
 - [ ] Actualizar `MODELO_AMENAZA.md` y las pruebas de aceptación si cambia lo que se publica.
+
+## Después del MVP: que la prueba deje de ser autocalificación (09/11/2026)
+
+Hoy la organización fija sus propias reglas (proveedores, presupuesto) y sube su
+propio extracto. La prueba atrapa al tesorero que se sale de las reglas, no a una
+cúpula que las escribe a su medida. Estas dos etapas atacan eso. Son diseño por
+confirmar: se detallan cuando se cierre la Etapa 6.
+
+### Etapa 7 — Las reglas las fija quien pone la plata
+- [ ] Rol nuevo de financiador (donante), externo a la organización, ligado a un fondo.
+- [ ] El presupuesto por rubro y la lista de proveedores no valen hasta que el financiador los aprueba; cada cambio posterior necesita su aprobación y queda anclado como lista nueva.
+- [ ] `/verificar` dice quién aprobó las reglas que se prueban (la organización o un financiador).
+
+### Etapa 8 — Datos de entrada independientes
+- [ ] Pago respaldado por factura electrónica: guardar el CUFE y comprobarlo contra la DIAN (confirmar antes qué consulta pública existe y qué permite).
+- [ ] Extracto con origen comprobable: explorar extracto firmado digitalmente por el banco o confirmación bancaria; si no existe, decirlo como límite.
+- [ ] Cierra el supuesto S5 de `MODELO_AMENAZA.md` solo en la medida en que estas fuentes sean de verdad independientes.
+
+### En paralelo — Cinco conversaciones (trabajo humano)
+- [ ] Cinco conversaciones con fundaciones o donantes, con el guion de `VALIDACION_FASE1.md`. Deciden si las Etapas 7 y 8 valen la pena y en qué orden.
