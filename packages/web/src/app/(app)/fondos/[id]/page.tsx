@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { ArrowLeft, Wallet } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BudgetsTab, ContractsTab, VendorsTab } from '@/components/org/FundSetupTabs';
+import { BatchesTab } from '@/components/org/BatchesTab';
 import { PaymentsTab } from '@/components/org/PaymentsTab';
 import { ReconciliationTab } from '@/components/org/ReconciliationTab';
 import { ErrorNote, Loading, PageHeader, RoleBadge } from '@/components/org/ui';
@@ -52,6 +53,7 @@ export default function FondoPage() {
               <TabsTrigger value="contratos">Contratos</TabsTrigger>
               <TabsTrigger value="pagos">Pagos</TabsTrigger>
               <TabsTrigger value="banco">Banco y conciliación</TabsTrigger>
+              <TabsTrigger value="lotes">Lotes</TabsTrigger>
             </TabsList>
             <TabsContent value="rubros" className="pt-4">
               <BudgetsTab fundId={fondo.id} canEdit={esConfig} />
@@ -67,6 +69,9 @@ export default function FondoPage() {
             </TabsContent>
             <TabsContent value="banco" className="pt-4">
               <ReconciliationTab fundId={fondo.id} orgId={fondo.organizationId} role={fondo.organization.role} />
+            </TabsContent>
+            <TabsContent value="lotes" className="pt-4">
+              <BatchesTab fundId={fondo.id} role={fondo.organization.role} />
             </TabsContent>
           </Tabs>
         </>

@@ -78,9 +78,13 @@ Cada etapa termina con pruebas y un commit.
 - [ ] Pendiente: el conteo de movimientos declarado se toma del propio archivo, así que al sellar la comprobación que de verdad aporta es la de los saldos.
 
 ### Etapa 5 — Cerrar lote y anclar (servidor)
-- [ ] Ruta de API: comprueba el rol, arma la lista de proveedores y el lote, ancla las dos raíces en Base Sepolia y guarda todo.
-- [ ] Pantalla de lotes por fondo, con estado y enlace al explorador.
-- [ ] Variables nuevas en Vercel: `SUPABASE_SERVICE_ROLE_KEY`, `PUBLISHER_PRIVATE_KEY`, `BASE_SEPOLIA_RPC_URL`, `BANK_DATA_KEY`.
+- [x] Ruta `/api/org/batch` (09/11/2026): comprueba el rol con el token del usuario, registra y ancla la lista de proveedores, arma el lote (único uso de la llave de servicio: leer las sales), lo registra con `record_budget_batch` y ancla la raíz. Si un intento anterior dejó un lote a medias, lo retoma o lo descarta.
+- [x] Pestaña "Lotes" en `/fondos/[id]`: estado de la lista de proveedores, meses por cerrar y lotes con enlace al explorador.
+- [x] `src/lib/zk/commitment.ts` en la web es una **copia** de `packages/contracts/src/commitment.ts` (el despliegue de la web no puede importar del otro paquete). Las dos se prueban contra `packages/contracts/test/vectors/commitment.json`.
+- [ ] Probar el anclaje real de la lista de proveedores (transacción en Base Sepolia).
+- [ ] Probar el cierre de un lote real: el de noviembre de 2026 solo se puede desde el 01/12/2026.
+- [ ] Variables nuevas en Vercel: `SUPABASE_SERVICE_ROLE_KEY`, `PUBLISHER_PRIVATE_KEY`, `BANK_DATA_KEY` (y opcional `BASE_SEPOLIA_RPC_URL`). Ya están en el `.env.local` de desarrollo.
+- [ ] Límites conocidos: si un proveedor se revoca después de pagarle en el mes, el lote de ese mes no cierra (exige la lista vigente); dos cierres simultáneos pueden chocar en la cadena; la recuperación de una transacción ya enviada solo mira ~22 horas atrás.
 
 ### Etapa 6 — Prueba ZK y verificación
 - [ ] Script `packages/circuits/src/prove-batch.ts`: lee el lote, genera la prueba, la verifica y la sube.
