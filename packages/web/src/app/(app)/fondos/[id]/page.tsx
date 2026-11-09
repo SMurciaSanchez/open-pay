@@ -7,6 +7,7 @@ import { ArrowLeft, Wallet } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BudgetsTab, ContractsTab, VendorsTab } from '@/components/org/FundSetupTabs';
 import { PaymentsTab } from '@/components/org/PaymentsTab';
+import { ReconciliationTab } from '@/components/org/ReconciliationTab';
 import { ErrorNote, Loading, PageHeader, RoleBadge } from '@/components/org/ui';
 import { getFund, pesos, type Fund, type MyOrganization } from '@/lib/api/org';
 
@@ -50,6 +51,7 @@ export default function FondoPage() {
               <TabsTrigger value="proveedores">Proveedores</TabsTrigger>
               <TabsTrigger value="contratos">Contratos</TabsTrigger>
               <TabsTrigger value="pagos">Pagos</TabsTrigger>
+              <TabsTrigger value="banco">Banco y conciliación</TabsTrigger>
             </TabsList>
             <TabsContent value="rubros" className="pt-4">
               <BudgetsTab fundId={fondo.id} canEdit={esConfig} />
@@ -62,6 +64,9 @@ export default function FondoPage() {
             </TabsContent>
             <TabsContent value="pagos" className="pt-4">
               <PaymentsTab fundId={fondo.id} role={fondo.organization.role} />
+            </TabsContent>
+            <TabsContent value="banco" className="pt-4">
+              <ReconciliationTab fundId={fondo.id} orgId={fondo.organizationId} role={fondo.organization.role} />
             </TabsContent>
           </Tabs>
         </>

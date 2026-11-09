@@ -70,9 +70,12 @@ Cada etapa termina con pruebas y un commit.
 - [x] Probado en Chrome el 09/11/2026: el tesorero registró dos pagos y no ve botones de decidir; el aprobador aprobó uno de $5.000.000, la base rechazó aprobar otro de $38.000.000 ("El pago excede el presupuesto del rubro", rubro de $40.000.000) y luego lo rechazó a mano.
 
 ### Etapa 4 — Extractos y conciliación
-- [ ] Cuenta bancaria de la organización (el número se cifra en el servidor).
-- [ ] Importar extracto CSV: hash SHA-256 del archivo, movimientos, sellar.
-- [ ] Conciliar: emparejar cada pago aprobado con un movimiento.
+- [x] Cuenta bancaria de la organización: el número y la glosa de cada movimiento se cifran en el servidor (`/api/org/bank/encrypt`, AES-256-GCM con `BANK_DATA_KEY`; solo cifra para el tesorero de esa organización).
+- [x] Importar extracto CSV (formato propio, `src/lib/bank/csv.ts`, 18 pruebas con `npx jest`): hash SHA-256 del archivo, movimientos, aviso de si cuadra con los saldos, sellar o descartar.
+- [x] Conciliar: para cada pago aprobado se ofrecen solo los movimientos que la base aceptaría; deshacer pide motivo.
+- [x] Probado en Chrome el 09/11/2026 con `docs/demo/extracto-demo-2026-11.csv`: cuenta registrada, extracto importado y sellado, pago de $5.000.000 conciliado con el movimiento TRF-0002. Sin probar en pantalla: deshacer una conciliación y descartar un borrador.
+- [ ] Pendiente: no hay pantalla para leer lo cifrado (número completo, glosas). Hace falta una ruta de descifrado para el tesorero y, más adelante, para el auditor con llave.
+- [ ] Pendiente: el conteo de movimientos declarado se toma del propio archivo, así que al sellar la comprobación que de verdad aporta es la de los saldos.
 
 ### Etapa 5 — Cerrar lote y anclar (servidor)
 - [ ] Ruta de API: comprueba el rol, arma la lista de proveedores y el lote, ancla las dos raíces en Base Sepolia y guarda todo.

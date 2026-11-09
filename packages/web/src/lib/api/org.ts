@@ -104,10 +104,11 @@ export function mensajeDeError(e: unknown): string {
     return 'Ya hay un proveedor con ese NIT en este fondo.';
   }
   if (/Budget_fundId_category/i.test(m)) return 'Ya hay un rubro con ese nombre.';
+  if (/BankStatement_bankAccountId_fileSha256/i.test(m)) return 'Ese mismo archivo ya se importó para esta cuenta.';
   return m;
 }
 
-async function unwrap<T>(p: PromiseLike<{ data: T | null; error: unknown }>): Promise<T> {
+export async function unwrap<T>(p: PromiseLike<{ data: T | null; error: unknown }>): Promise<T> {
   const { data, error } = await p;
   if (error) throw new Error(mensajeDeError(error));
   return data as T;
