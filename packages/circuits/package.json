@@ -9,7 +9,8 @@
     "aceptacion": "mocha test/acceptance/*.test.ts",
     "demo": "ts-node -r ./scripts/fastfile-fix.cjs src/demo.ts",
     "vkey-hash": "ts-node -r ./scripts/fastfile-fix.cjs src/vkey-hash.ts",
-    "copy-vkey": "node scripts/copy-vkey.js"
+    "copy-vkey": "node scripts/copy-vkey.js",
+    "prove-batch": "ts-node -r ./scripts/fastfile-fix.cjs src/prove-batch.ts"
   },
   "devDependencies": {
     "@types/chai": "^4.3.20",

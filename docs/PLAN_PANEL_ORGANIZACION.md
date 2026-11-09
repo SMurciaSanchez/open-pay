@@ -81,15 +81,17 @@ Cada etapa termina con pruebas y un commit.
 - [x] Ruta `/api/org/batch` (09/11/2026): comprueba el rol con el token del usuario, registra y ancla la lista de proveedores, arma el lote (único uso de la llave de servicio: leer las sales), lo registra con `record_budget_batch` y ancla la raíz. Si un intento anterior dejó un lote a medias, lo retoma o lo descarta.
 - [x] Pestaña "Lotes" en `/fondos/[id]`: estado de la lista de proveedores, meses por cerrar y lotes con enlace al explorador.
 - [x] `src/lib/zk/commitment.ts` en la web es una **copia** de `packages/contracts/src/commitment.ts` (el despliegue de la web no puede importar del otro paquete). Las dos se prueban contra `packages/contracts/test/vectors/commitment.json`.
-- [ ] Probar el anclaje real de la lista de proveedores (transacción en Base Sepolia).
+- [x] Anclaje real de la lista de proveedores, 09/11/2026: huella `0x2d2c8416…41a40e90`, transacción `0x73a5185823169da6b2b5ab4ff31113bd757e751ec6aab571d0daba8e61f44b53` (bloque 56716691 de Base Sepolia). Confirmado contra un nodo público.
 - [ ] Probar el cierre de un lote real: el de noviembre de 2026 solo se puede desde el 01/12/2026.
 - [ ] Variables nuevas en Vercel: `SUPABASE_SERVICE_ROLE_KEY`, `PUBLISHER_PRIVATE_KEY`, `BANK_DATA_KEY` (y opcional `BASE_SEPOLIA_RPC_URL`). Ya están en el `.env.local` de desarrollo.
 - [ ] Límites conocidos: si un proveedor se revoca después de pagarle en el mes, el lote de ese mes no cierra (exige la lista vigente); dos cierres simultáneos pueden chocar en la cadena; la recuperación de una transacción ya enviada solo mira ~22 horas atrás.
 
 ### Etapa 6 — Prueba ZK y verificación
-- [ ] Script `packages/circuits/src/prove-batch.ts`: lee el lote, genera la prueba, la verifica y la sube.
-- [ ] `/verificar?lote=<id>`: carga la prueba publicada y verifica sola.
-- [ ] Prueba de punta a punta en Chrome con las 4 cuentas.
+- [x] Script `packages/circuits/src/prove-batch.ts` (`npm run prove-batch -- <id del lote>`): lee el lote anclado, comprueba que las raíces recalculadas sean las ancladas, genera la prueba, la verifica y la sube a `BatchProof`.
+- [x] Modo `--simular <id del rubro> <AAAA-MM-01>`: arma el lote como lo armaría el servidor y lo prueba sin escribir nada. Corrido el 09/11/2026 con el pago real de noviembre: la prueba verifica (6,4 s) y la raíz de proveedores sale igual a la que ancló la web.
+- [x] `/verificar?lote=<id>`: carga la prueba publicada (`PublicBatchProof`), comprueba que lo publicado coincida con lo que afirma la prueba y verifica sola. Probado solo el caso "lote sin prueba"; el caso feliz necesita un lote real.
+- [ ] **Desde el 01/12/2026:** cerrar el lote de noviembre (pestaña Lotes, tesorero), correr `npm run prove-batch -- <id>` y abrir `/verificar?lote=<id>`. Es el único tramo del recorrido que falta probar con datos reales.
+- [ ] `next build` de la web con las rutas nuevas (no se corrió: el servidor de desarrollo estaba abierto).
 - [ ] Actualizar `MODELO_AMENAZA.md` y las pruebas de aceptación si cambia lo que se publica.
 
 ## Después del MVP: que la prueba deje de ser autocalificación (09/11/2026)

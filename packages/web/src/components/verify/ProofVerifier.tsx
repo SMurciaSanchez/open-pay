@@ -20,6 +20,39 @@ import {
   type VerifyOutcome,
 } from '@/lib/zk/verify';
 import { EXPLORER, REGISTRY, consultarAnclaje, type Anclaje } from '@/lib/zk/registry';
+import { supabase } from '@/lib/supabase';
+
+/** Fila de la vista pública PublicBatchProof: lo que la organización publicó de un lote. */
+interface LotePublicado {
+  batchId: string;
+  fundName: string;
+  organizationName: string;
+  budgetCategory: string;
+  periodStart: string;
+  batchRoot: string;
+  vendorSetRoot: string;
+  budgetLimitMinor: string;
+  proof: unknown;
+  publicSignals: string[];
+}
+
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const nombreMes = (inicio: string) => `${MESES[Number(inicio.slice(5, 7)) - 1]} de ${inicio.slice(0, 4)}`;
+
+/**
+ * Lo que la vista dice del lote tiene que ser lo mismo que afirma la prueba.
+ * Si no, la página estaría mostrando un rubro o un tope que la prueba no cubre.
+ */
+function loteCoincide(l: LotePublicado): boolean {
+  const s = l.publicSignals;
+  return (
+    Array.isArray(s) &&
+    s.length === 3 &&
+    toHexRoot(s[0]) === l.batchRoot.toLowerCase() &&
+    toHexRoot(s[1]) === l.vendorSetRoot.toLowerCase() &&
+    s[2] === l.budgetLimitMinor
+  );
+}
 
 type Estado =
   | { fase: 'inicio' }
@@ -33,6 +66,29 @@ export function ProofVerifier() {
   const [vkey, setVkey] = useState<unknown>(null);
   const [huella, setHuella] = useState<string | null>(null);
   const [vkeyError, setVkeyError] = useState<string | null>(null);
+  const [lote, setLote] = useState<LotePublicado | null>(null);
+  const [loteError, setLoteError] = useState<string | null>(null);
+  const [autoVerificado, setAutoVerificado] = useState(false);
+
+  // /verificar?lote=<id>: carga la prueba que la organización publicó de ese lote.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('lote');
+    if (!id) return;
+    supabase
+      .from('PublicBatchProof')
+      .select('batchId, fundName, organizationName, budgetCategory, periodStart, batchRoot, vendorSetRoot, budgetLimitMinor, proof, publicSignals')
+      .eq('batchId', id)
+      .maybeSingle<LotePublicado>()
+      .then(({ data, error }) => {
+        if (error) return setLoteError(`No se pudo consultar el lote: ${error.message}`);
+        if (!data) return setLoteError('No hay una prueba publicada para ese lote. Puede que el enlace esté mal o que la organización todavía no la haya generado.');
+        if (!loteCoincide(data)) {
+          return setLoteError('Lo publicado sobre este lote no coincide con lo que afirma su prueba. No se verifica: avísale a la organización.');
+        }
+        setLote(data);
+        setTexto(JSON.stringify({ proof: data.proof, publicSignals: data.publicSignals }, null, 2));
+      });
+  }, []);
 
   useEffect(() => {
     fetch('/zk/verification_key.json')
@@ -63,6 +119,15 @@ export function ProofVerifier() {
     setEstado({ fase: 'listo', resultado });
   };
 
+  // Un lote cargado por enlace se verifica solo en cuanto está la clave.
+  useEffect(() => {
+    if (lote && vkey && texto && !autoVerificado) {
+      setAutoVerificado(true);
+      void verificar();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lote, vkey, texto, autoVerificado]);
+
   const cargarArchivo = async (file: File) => {
     setTexto(await file.text());
     setEstado({ fase: 'inicio' });
@@ -83,6 +148,24 @@ export function ProofVerifier() {
             <code className="rounded bg-amber-100 px-1">npm run build</code> en{' '}
             <code className="rounded bg-amber-100 px-1">packages/circuits</code> y se copia a{' '}
             <code className="rounded bg-amber-100 px-1">public/zk/</code>.
+          </p>
+        </div>
+      )}
+
+      {loteError && <Resultado ok={false} titulo="No se pudo cargar el lote" detalle={loteError} />}
+
+      {lote && (
+        <div className="rounded-xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-muted-foreground">Prueba publicada por</p>
+          <h2 className="mt-1 text-lg font-semibold">
+            {lote.organizationName} · {lote.fundName}
+          </h2>
+          <p className="mt-1 text-sm">
+            Rubro <strong>{lote.budgetCategory}</strong>, pagos de <strong>{nombreMes(lote.periodStart)}</strong>.
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            El nombre, el rubro y el mes los declara la organización. Lo que se comprueba abajo, en
+            tu navegador, es la prueba: que los pagos de ese lote cumplen las dos reglas.
           </p>
         </div>
       )}
