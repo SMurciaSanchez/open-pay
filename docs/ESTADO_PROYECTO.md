@@ -1,4 +1,4 @@
-# Estado del proyecto: 09/11/2026
+# Estado del proyecto: 10/11/2026
 
 > Resumen para retomar OpenPay. Dice qué está hecho, qué falta y qué hay que
 > hacer primero. El detalle por etapa está en `PLAN_PANEL_ORGANIZACION.md`.
@@ -10,8 +10,8 @@
   funciona con la prueba de demostración.
 - **Pruebas de aceptación** en `packages/circuits`: `npm run aceptacion` (transparencia
   y privacidad). Resultados en `MODELO_AMENAZA.md` §7.
-- **Panel de la organización: las 6 etapas construidas** en la rama `panel/organizacion`
-  (sin unir a `main`). Una organización ya recorre desde la app:
+- **Panel de la organización: las 6 etapas construidas** y unidas a `main`. Una
+  organización ya recorre desde la app:
   **equipo → fondo → pagos → aprobación → extracto → conciliación → lista anclada**.
   - Etapas 1-2: organización, equipo de 4 roles, fondo, rubros, proveedores, contratos.
   - Etapa 3: el tesorero registra pagos; el aprobador aprueba o rechaza.
@@ -24,6 +24,19 @@
   (transacción `0x73a5185823169da6b2b5ab4ff31113bd757e751ec6aab571d0daba8e61f44b53`).
 - **Cuentas de la demo:** cuatro alias de Gmail (`+legal`, `+config`, `+tesoreria`,
   `+aprueba`), uno por rol.
+- **Revisión de seguridad del panel (10/11/2026)** y sus correcciones, antes de unir a `main`
+  (migración `20261110120000_panel_hardening.sql`, ya aplicada en Supabase):
+  - Registrar y anclar listas y lotes solo lo hace el servidor; ningún cliente puede
+    ejecutar esas funciones de la base.
+  - Un mes con lote queda cerrado: no se concilia ni se revoca una conciliación dentro
+    de él, y no se cierra con pagos aprobados de ese mes sin conciliar.
+  - Solo anclan las organizaciones habilitadas por el operador (`anchoringEnabled`) y un
+    fondo registra como máximo 3 listas de proveedores nuevas cada 24 horas.
+  - Datos bancarios con llave por organización (formato `bank-v2`); lo anterior se sigue leyendo.
+  - El portal comprueba en la cadena que las raíces son de ese fondo y de ese tipo, y dice
+    que la prueba cubre un mes.
+  - La web publica con una billetera propia (`0x673f868bFaFd72F6E003Ed0b69f0e8E78E021704`),
+    distinta de la dueña del contrato (`packages/contracts/scripts/new-publisher.ts`).
 
 ## Lo único del recorrido que falta probar con datos reales
 
@@ -44,7 +57,11 @@ además de las variables públicas: `BANK_DATA_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 `PUBLISHER_PRIVATE_KEY`. Ver `packages/web/.env.example`.
 
 > ⚠️ `BANK_DATA_KEY` cifra los números de cuenta y las glosas ya guardadas. Si se
-> pierde, no se pueden leer. Hay que copiarla tal cual a Vercel.
+> pierde, no se pueden leer. `PUBLISHER_PRIVATE_KEY` es la llave de la billetera que
+> publica y solo existe en ese archivo y en Vercel. Hay que tener copia de las dos.
+>
+> Habilitar a una organización nueva para anclar (SQL Editor de Supabase):
+> `UPDATE "Organization" SET "anchoringEnabled" = TRUE WHERE id = '...';`
 
 Pruebas: `npx jest` en `packages/web`, `npm test` en `packages/circuits`,
 `npx hardhat test` en `packages/contracts`, `sh packages/web/supabase/tests/run.sh` (Docker).
@@ -53,12 +70,9 @@ Pruebas: `npx jest` en `packages/web`, `npm test` en `packages/circuits`,
 
 | Paso | Qué | Quién |
 |---|---|---|
-| 1 | `next build` de la web con las rutas nuevas | Claude |
-| 2 | Poner en Vercel `SUPABASE_SERVICE_ROLE_KEY`, `PUBLISHER_PRIVATE_KEY` y `BANK_DATA_KEY` | Usuario |
-| 3 | Unir `panel/organizacion` con `main` y desplegar | Ambos |
-| 4 | 01/12/2026 o después: cerrar el lote de noviembre, probarlo y verificarlo | Ambos |
-| 5 | Pendientes menores: crear el perfil al registrarse (hoy se crea al primer inicio de sesión y por eso no se puede invitar a quien nunca entró); rehacer el Panel Principal, que todavía muestra la billetera vieja; pantalla para leer lo cifrado | Claude |
-| 6 | README con el recorrido de la demo y los límites | Ambos |
+| 1 | 01/12/2026 o después: cerrar el lote de noviembre, probarlo y verificarlo. Será el primer anclaje real con la billetera nueva | Ambos |
+| 2 | Pendientes menores: crear el perfil al registrarse (hoy se crea al primer inicio de sesión y por eso no se puede invitar a quien nunca entró); rehacer el Panel Principal, que todavía muestra la billetera vieja; pantalla para leer lo cifrado (la función de descifrado ya existe en `lib/server/bankCrypto.ts`) | Claude |
+| 3 | Dos cierres de lote a la vez usan la misma billetera sin coordinarse: uno falla y hay que reintentar. Aceptado para la demo | — |
 
 ## Después del MVP
 

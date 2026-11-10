@@ -8,7 +8,7 @@ A foundation or NGO using OpenPay can prove to anyone that, in a given period, *
 > Transparency is for power; privacy is for people.
 
 **Live verifier:** https://open-pay-one.vercel.app/verificar (public, no account needed)
-**Status:** working MVP on Base Sepolia testnet. Not audited, not for production use — see [Limitations](#limitations).
+**Status:** working MVP on Base Sepolia testnet, with the full flow driven from the app. Not audited, not for production use — see [Limitations](#limitations).
 
 ---
 
@@ -26,6 +26,15 @@ payment ──► approval ──► bank statement ──► reconciliation ─
 5. **The proof.** A Circom circuit proves that all payments in the batch went to vendors in the anchored set and that their sum is within the budget. Only three values are public: the batch root, the vendor-set root and the budget limit.
 6. **Verification.** Anyone opens `/verificar`, the proof is verified locally with snarkjs, and the page queries a public Base node directly to confirm both roots are anchored. Nobody has to trust OpenPay's servers.
 
+### Who can do what
+
+An organization has four roles, one per person: a **legal representative** (manages the team), a **configurator** (fund, budget lines, vendors, contracts), an **approver** (approves or rejects payments) and a **treasurer** (drafts payments, imports bank statements, reconciles, closes batches). Whoever registers a payment cannot approve it.
+
+Two things are deliberately kept away from every client, the treasurer included:
+
+- **Registering and anchoring** vendor lists and batches is done by the server only. The database functions behind it are not executable by any logged-in user, so nobody can mark a month as "anchored" with a made-up root or transaction.
+- **A month with a batch is closed.** A payment cannot be reconciled into it, or pulled out of it, afterwards — otherwise it would sit in that month and outside its proof.
+
 ### The design decision that matters
 
 The cheap circuit would verify a Merkle path for each payment the prover *chooses to declare*. That proves "these payments are fine" and leaves the real door open: hiding the inconvenient ones.
@@ -40,7 +49,7 @@ This circuit instead **recomputes the batch root from all 64 leaves** and compar
 |---|---|
 | [`packages/circuits`](packages/circuits) | The ZK rule: `authorized_within_budget.circom`, Poseidon Merkle trees, witness builder, prover, trusted-setup scripts, acceptance tests |
 | [`packages/contracts`](packages/contracts) | `CommitmentRegistry.sol` (Solidity 0.8.24, Hardhat) and the off-chain commitment format (`src/commitment.ts`) shared with the circuit |
-| [`packages/web`](packages/web) | Next.js 15 app: the public verifier, the organization UI, and the Supabase schema (`supabase/migrations`) with its SQL test suite |
+| [`packages/web`](packages/web) | Next.js 15 app: the public verifier, the organization panel (team, funds, payments, bank reconciliation, batches), the two server routes that encrypt bank data and anchor roots, and the Supabase schema (`supabase/migrations`) with its SQL test suite |
 | [`packages/mobile`](packages/mobile) | Expo app from an earlier version of the project. Frozen, not part of the current product |
 | [`docs`](docs) | Vision, threat model, data policy, ceremony notes and security incidents, in English. File names and a few internal working notes (project status, plans, interview guide) are in Spanish |
 
@@ -61,7 +70,8 @@ The adversary is the organization itself, plus a curious public. Every phase shi
 |---|---|---|
 | Circuit unit tests (42) | `packages/circuits/test` | `npm test` |
 | Acceptance: transparency + privacy (95 total with the unit tests; reads Base Sepolia) | `packages/circuits/test/acceptance` | `npm run aceptacion` |
-| Contract and commitment-format tests | `packages/contracts/test` | `npx hardhat test` |
+| Contract and commitment-format tests (shared test vectors keep the web copy of the format in sync) | `packages/contracts/test` | `npx hardhat test` |
+| Web unit tests: commitment format, bank-statement CSV parser, bank-data encryption, public error messages, registry event decoding | `packages/web/src` | `npx jest` |
 | Database: roles, RLS, reconciliation, batches (every migration applied twice in a throwaway Postgres) | `packages/web/supabase/tests` | `sh packages/web/supabase/tests/run.sh` (needs Docker) |
 
 ---
@@ -101,13 +111,17 @@ Stated plainly, because the project is about not asking for trust:
 - **Testnet only.** Everything is anchored on Base Sepolia.
 - **Single-party trusted setup.** The Groth16 ceremony was run by one participant, who could forge proofs. A multi-party ceremony is required before any real use ([`docs/CEREMONIA.md`](docs/CEREMONIA.md)).
 - **It verifies what was recorded.** The proof covers the payments the organization registered and reconciled against the statement it uploaded. Binding inputs to an external source (signed bank data, electronic invoices) is future work.
-- **Per-month proofs.** Each proof covers one budget line and one month. The cumulative cap across months is enforced by the database but not yet proven.
+- **Per-month proofs.** Each proof covers one budget line and one month. The cumulative cap across months is enforced by the database but not yet proven; the verifier page says so.
+- **Unreconciled payments are outside the proof.** A batch commits every *reconciled* payment of the month, and a month cannot be closed while approved payments dated in it are still unreconciled. But a payment that is never recorded, or approved and never reconciled, is not covered by any proof.
+- **The organization grades itself.** Today the organization defines its own rules and uploads its own bank statement.
+- **Anchoring is by invitation.** Publishing costs gas paid by a shared OpenPay wallet, so only organizations enabled by the operator can anchor, with a daily limit per fund.
 - **Proving is done off-server.** The proving key is hundreds of MB, so proofs are generated on the operator's machine, not on Vercel.
-- **No external security audit.** Past incidents and their fixes are documented in [`docs/SEGURIDAD_INCIDENTES.md`](docs/SEGURIDAD_INCIDENTES.md).
+- **No external security audit.** An internal differential security review of the organization panel was done on 2026-11-10 and its findings were fixed before merging (commits prefixed `fix(panel)`), but that is not a substitute. Past incidents are documented in [`docs/SEGURIDAD_INCIDENTES.md`](docs/SEGURIDAD_INCIDENTES.md).
 
 ## Roadmap
 
-- **In progress** (branch [`panel/organizacion`](../../tree/panel/organizacion)): the full flow driven from the app by a real organization — payments, approvals, encrypted bank data, reconciliation, closing and anchoring a month's batch, and `/verificar?lote=<id>` for a published proof.
+- **Done:** the full flow driven from the app by an organization — team and roles, payments and approvals, encrypted bank data, statement import and reconciliation, anchoring the vendor list, closing and anchoring a month's batch, and `/verificar?lote=<id>` for a published proof.
+- **In progress:** the first real monthly batch. A batch can only be closed once its month has ended, so the demo fund's November 2026 batch is closed, proven and published in December.
 - **Next:** an external funder who approves the rules, so the organization does not grade itself; inputs with verifiable origin; multi-party ceremony.
 - **Research:** selective disclosure with expiring keys for auditors; conflict-of-interest rules in ZK.
 
