@@ -1,6 +1,6 @@
 # OpenPay — Fase 1: validación con usuarios
 
-> Autores: Sebastián Murcia Sánchez · Nicolás Castillo
+> Autor: Sebastián Murcia Sánchez
 > Versión: 0.1 — 23/09/2026
 > Relacionado: [`VISION_OPENPAY.md`](./VISION_OPENPAY.md) §12 (Fase 1) y §13 (criterio de éxito) · [`POLITICA_DATOS.md`](./POLITICA_DATOS.md)
 >

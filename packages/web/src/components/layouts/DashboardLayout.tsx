@@ -36,7 +36,7 @@ const bottomNavItems: NavItem[] = [
 // Solo para usuarios con app_metadata.role = 'admin' (lo firma el servidor)
 const adminNavItem: NavItem = { title: 'Admin', href: '/admin', icon: ShieldCheck };
 
-// Activo en la sección y en sus subpáginas (/transactions/123)
+// Activo en la sección y en sus subpáginas (/fondos/123)
 const isActivePath = (pathname: string, href: string) =>
   pathname === href || pathname.startsWith(`${href}/`);
 

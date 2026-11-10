@@ -1,6 +1,6 @@
 # OpenPay — Plan técnico y de producto
 
-> Fundadores: Sebastián Murcia Sánchez · Nicolás Castillo
+> Fundador: Sebastián Murcia Sánchez
 > Última actualización: 16/09/2026
 > Estado: documento vigente. **Reemplaza la visión "efectivo digital" (Arbitrum, DAI, Bitso, Railgun) de mayo de 2026, que queda descartada.**
 
