@@ -62,6 +62,9 @@ RESET ROLE;
 
 -- ════════════════ Lista de proveedores anclada ════════════════
 
+-- El operador habilita a la organización para anclar (20261110120000, M3).
+UPDATE "Organization" SET "anchoringEnabled" = TRUE WHERE id = 'org-1';
+
 -- Un rubro limpio y pagos de julio, conciliados, para armar lotes.
 INSERT INTO "Budget" (id, "fundId", category, amount) VALUES ('bud-p', 'fund-1', 'Papelería', 50000000);
 INSERT INTO "Payment" (id, "fundId", "budgetId", "vendorId", amount, concept, "paidOn",

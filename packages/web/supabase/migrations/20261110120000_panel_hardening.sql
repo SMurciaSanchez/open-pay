@@ -17,6 +17,14 @@
 --     - no se arma el lote de un mes mientras queden pagos aprobados de ese
 --       mes sin conciliar.
 --
+-- M3. Anclar gasta gas de la billetera compartida de OpenPay, y registrarse y
+--     crear una organización es libre. Para que nadie la vacíe:
+--     - solo anclan las organizaciones que el operador habilitó
+--       ("anchoringEnabled"; las que ya existían al aplicar esto quedan
+--       habilitadas). Se habilita desde el SQL Editor:
+--         UPDATE "Organization" SET "anchoringEnabled" = TRUE WHERE id = '...';
+--     - un fondo registra como máximo 3 listas de proveedores nuevas cada 24 h.
+--
 -- Se puede aplicar más de una vez.
 -- ============================================================
 
@@ -41,6 +49,41 @@ AS $$
       AND m."revokedAt" IS NULL
   )
 $$;
+
+-- ── 1b. Quién puede gastar gas de OpenPay ─────────────────────
+
+-- Ningún cliente tiene UPDATE sobre "Organization": solo el operador la cambia.
+DO $col$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_schema = 'public' AND table_name = 'Organization'
+                   AND column_name = 'anchoringEnabled') THEN
+    ALTER TABLE "Organization" ADD COLUMN "anchoringEnabled" BOOLEAN NOT NULL DEFAULT FALSE;
+    -- Las que ya existían venían anclando: siguen pudiendo.
+    UPDATE "Organization" SET "anchoringEnabled" = TRUE;
+  END IF;
+END
+$col$;
+
+CREATE OR REPLACE FUNCTION assert_anchoring_enabled(p_fund_id TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM "Fund" f
+    JOIN "Organization" o ON o.id = f."organizationId"
+    WHERE f.id = p_fund_id AND o."anchoringEnabled"
+  ) THEN
+    RAISE EXCEPTION 'Esta organización todavía no está habilitada para anclar en la cadena';
+  END IF;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION assert_anchoring_enabled(TEXT) FROM PUBLIC, anon, authenticated;
 
 -- ── 2. Fuera las versiones que podía llamar un cliente ────────
 
@@ -77,6 +120,9 @@ BEGIN
   IF NOT profile_has_fund_role(p_actor, p_fund_id, ARRAY['TREASURER']) THEN
     RAISE EXCEPTION 'No autorizado';
   END IF;
+  PERFORM assert_anchoring_enabled(p_fund_id);
+  -- Candado del fondo: dos registros a la vez no se saltan el cupo.
+  PERFORM 1 FROM "Fund" WHERE id = p_fund_id FOR UPDATE;
 
   SELECT coalesce(array_agg(id ORDER BY id), '{}') INTO l_vigentes
   FROM "AuthorizedVendor"
@@ -93,6 +139,12 @@ BEGIN
   SELECT id INTO l_id FROM "VendorSetSnapshot" WHERE root = p_root AND "fundId" = p_fund_id;
   IF l_id IS NOT NULL THEN
     RETURN l_id;
+  END IF;
+
+  -- Cada lista nueva termina en una transacción que paga OpenPay.
+  IF (SELECT count(*) FROM "VendorSetSnapshot"
+      WHERE "fundId" = p_fund_id AND "builtAt" > NOW() - INTERVAL '24 hours') >= 3 THEN
+    RAISE EXCEPTION 'Este fondo ya registró 3 listas de proveedores en las últimas 24 horas: se puede anclar otra mañana';
   END IF;
 
   INSERT INTO "VendorSetSnapshot" ("fundId", subject, root, "treeHeight", "vendorIds", "builtBy")
@@ -174,6 +226,7 @@ BEGIN
   IF l_fund IS NULL OR NOT profile_has_fund_role(p_actor, l_fund, ARRAY['TREASURER']) THEN
     RAISE EXCEPTION 'No autorizado';
   END IF;
+  PERFORM assert_anchoring_enabled(l_fund);
 
   IF p_period_start <> date_trunc('month', p_period_start)::date THEN
     RAISE EXCEPTION 'El período tiene que empezar el primer día del mes';

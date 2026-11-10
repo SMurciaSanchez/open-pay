@@ -302,6 +302,10 @@ function ResultadoVálido({ claim }: { claim: PublicClaim }) {
               <strong>todos los pagos del lote fueron a proveedores del conjunto autorizado</strong>{' '}
               y que <strong>entre todos no superan {formatMinorUnits(claim.budgetLimit)}</strong>.
             </p>
+            <p className="mt-2 text-sm text-emerald-800">
+              Un lote son los pagos de un rubro en un solo mes. La prueba habla de ese mes, no de
+              todo lo que el rubro ha gastado.
+            </p>
           </div>
         </div>
       </div>
@@ -352,6 +356,12 @@ function ResultadoVálido({ claim }: { claim: PublicClaim }) {
       <div className="rounded-xl border bg-white p-6 shadow-sm">
         <h4 className="font-semibold">Lo que esto NO demuestra</h4>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          <li>
+            Que el rubro no se haya pasado sumando todos los meses. Cada prueba compara los pagos
+            de un mes con el tope completo del rubro: dos meses pueden pasar cada uno por separado
+            y juntos superarlo. Ese acumulado lo controla la organización en su sistema y todavía
+            no se prueba.
+          </li>
           <li>
             Que el dinero se haya movido. Eso lo dice el extracto bancario conciliado, y el banco
             sigue siendo la fuente.
