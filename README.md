@@ -1,164 +1,120 @@
-# OpenPay — Plataforma Financiera Digital
+# OpenPay
 
-> Fintech MVP con web moderna, app móvil y backend serverless en Supabase.  
-> Proyecto académico — Ingeniería de Sistemas, 5° semestre.
+**Verifiable spending for organizations that manage other people's money — without publishing a single payment.**
 
-**Demo en vivo:** [web-kohl-sigma-30.vercel.app](https://web-kohl-sigma-30.vercel.app)
+A foundation or NGO using OpenPay can prove to anyone that, in a given period, *every* payment from a budget line went to an authorized vendor and the total stayed within budget. The verifier sees no amounts, no vendors, no dates and not even how many payments there were. The proof is a zero-knowledge proof checked in the browser against roots anchored on Base.
 
----
+> Private like cash. Verifiable like a ledger.
+> Transparency is for power; privacy is for people.
 
-## Stack tecnológico
-
-| Capa | Tecnología |
-|---|---|
-| **Frontend Web** | Next.js 15 · TypeScript · Tailwind CSS · Framer Motion |
-| **App Móvil** | React Native · Expo SDK 51 |
-| **Backend / Auth** | Supabase (PostgreSQL + Auth + Storage + RLS) |
-| **UI Components** | Radix UI · shadcn/ui · Lucide React |
-| **Deploy Web** | Vercel |
-| **Animaciones** | Framer Motion · tailwindcss-animate |
-| **Formularios** | react-hook-form · Zod |
-| **Gráficos** | Recharts |
+**Live verifier:** https://open-pay-one.vercel.app/verificar (public, no account needed)
+**Status:** working MVP on Base Sepolia testnet. Not audited, not for production use — see [Limitations](#limitations).
 
 ---
 
-## Estructura del monorepo
+## How it works
 
 ```
-open-pay-mvp/
-├── packages/
-│   ├── web/          # Frontend Next.js 15 — PRINCIPAL
-│   └── mobile/       # App React Native + Expo
-├── app/              # Documentación y planes anteriores
-├── README.md
-└── improvement-plan.md
+payment ──► approval ──► bank statement ──► reconciliation ──► batch ──► anchor ──► ZK proof ──► public verifier
+            (roles)      (SHA-256, sealed)   (payment ↔ debit)  (Merkle)  (Base)    (Groth16)    (browser)
 ```
 
----
+1. **Mandates in Postgres.** An organization defines a fund, its budget lines, its authorized vendors and its contracts. Payments are drafted by the treasurer and approved by a different person. Row-level security and `SECURITY DEFINER` functions enforce who can do what; the budget cap is enforced on approval.
+2. **Bank reconciliation.** A bank statement is imported, hashed and sealed (it must balance). A payment only counts once it is matched to a real debit of the same amount posted on or after the approval date.
+3. **Commitments.** Each reconciled payment becomes `Poseidon(paymentId, amount, vendorId, date, salt)`. The salt never leaves the server, so the commitment reveals nothing. A month's commitments form a fixed-height Merkle tree padded with zeros, so the root does not leak the batch size.
+4. **Anchoring.** The batch root and the root of the authorized-vendor set are published to `CommitmentRegistry` on Base. The contract only accepts `bytes32` values and is append-only: no personal or financial data can reach the chain, even by mistake.
+5. **The proof.** A Circom circuit proves that all payments in the batch went to vendors in the anchored set and that their sum is within the budget. Only three values are public: the batch root, the vendor-set root and the budget limit.
+6. **Verification.** Anyone opens `/verificar`, the proof is verified locally with snarkjs, and the page queries a public Base node directly to confirm both roots are anchored. Nobody has to trust OpenPay's servers.
 
-## Estado actual del proyecto
+### The design decision that matters
 
-### Web (`packages/web`) — ~90% completo ✅
+The cheap circuit would verify a Merkle path for each payment the prover *chooses to declare*. That proves "these payments are fine" and leaves the real door open: hiding the inconvenient ones.
 
-Desplegado en Vercel. Autenticación real con Supabase.
-
-| Módulo | Estado |
-|---|---|
-| Login / Registro | ✅ Funcional con Supabase Auth |
-| Dashboard (balance real) | ✅ Conectado a Supabase |
-| Enviar dinero | ✅ RPC `transfer_funds` |
-| Historial de transacciones | ✅ Datos reales |
-| Pagos de servicios | ✅ Implementado |
-| Transferencias | ✅ Implementado |
-| Configuración de perfil | ✅ Implementado |
-| Seguridad (2FA, biometría, sesiones) | ✅ Implementado |
-| Soporte (chatbot + tickets) | ✅ Implementado |
-| Verificación de identidad (KYC) | ✅ Implementado |
-| Panel de administrador | ✅ Implementado |
-| Design System `/design` | ✅ Página interactiva |
-
-### Mobile (`packages/mobile`) — ~50% completo 🔄
-
-App funcional con navegación completa. Datos conectados a Supabase real.
-
-| Módulo | Estado |
-|---|---|
-| Login / Registro / Forgot Password | ✅ Funcional con Supabase Auth |
-| Dashboard (balance real) | ✅ Conectado a Supabase |
-| Historial de transacciones | ✅ Datos reales |
-| Enviar dinero | ✅ RPC `transfer_funds` |
-| Servicios | 🔄 UI lista, sin integración real |
-| Perfil | 🔄 UI lista, sin integración real |
-| Biometría | ✅ expo-local-authentication |
-| Notificaciones push | ❌ Pendiente |
+This circuit instead **recomputes the batch root from all 64 leaves** and compares it with the anchored one. Mark a real payment as an empty slot and the root no longer matches, so the proof cannot be built. That turns "some payments" into "all payments", and it is why the tree is small: the guarantee is paid for in constraints (147,100, Groth16 over BN254). The test for it is `packages/circuits/test/circuit.test.ts`, block *"no se puede esconder un pago"*.
 
 ---
 
-## Inicio rápido
+## Repository layout
 
-### Web
+| Package | What it is |
+|---|---|
+| [`packages/circuits`](packages/circuits) | The ZK rule: `authorized_within_budget.circom`, Poseidon Merkle trees, witness builder, prover, trusted-setup scripts, acceptance tests |
+| [`packages/contracts`](packages/contracts) | `CommitmentRegistry.sol` (Solidity 0.8.24, Hardhat) and the off-chain commitment format (`src/commitment.ts`) shared with the circuit |
+| [`packages/web`](packages/web) | Next.js 15 app: the public verifier, the organization UI, and the Supabase schema (`supabase/migrations`) with its SQL test suite |
+| [`packages/mobile`](packages/mobile) | Expo app from an earlier version of the project. Frozen, not part of the current product |
+| [`docs`](docs) | Vision, threat model, data policy, ceremony notes, security incidents (in Spanish) |
 
-```bash
+**Stack:** Circom 2.1.9 · snarkjs (Groth16) · Poseidon · Solidity · Hardhat · Base (OP Stack L2) · ethers v6 · Next.js 15 · TypeScript · Supabase (Postgres, RLS, Auth) · Vercel.
+
+**Deployed contract (Base Sepolia):** [`0xCde0Eed0E0c4876f1e9A57F49f5b8E4Af06b350B`](https://sepolia.basescan.org/address/0xCde0Eed0E0c4876f1e9A57F49f5b8E4Af06b350B#code), source verified on Basescan.
+
+---
+
+## Threat model and tests
+
+The adversary is the organization itself, plus a curious public. Every phase ships with two kinds of acceptance tests, defined in [`docs/MODELO_AMENAZA.md`](docs/MODELO_AMENAZA.md):
+
+- **Transparency:** a third party can verify claim X without trusting OpenPay.
+- **Privacy:** with everything that is public, an observer cannot deduce Y.
+
+| Suite | Where | How to run |
+|---|---|---|
+| Circuit unit tests (42) | `packages/circuits/test` | `npm test` |
+| Acceptance: transparency + privacy (95 total with the unit tests; reads Base Sepolia) | `packages/circuits/test/acceptance` | `npm run aceptacion` |
+| Contract and commitment-format tests | `packages/contracts/test` | `npx hardhat test` |
+| Database: roles, RLS, reconciliation, batches (every migration applied twice in a throwaway Postgres) | `packages/web/supabase/tests` | `sh packages/web/supabase/tests/run.sh` (needs Docker) |
+
+---
+
+## Try it
+
+**Verify a proof (no setup):** open the [live verifier](https://open-pay-one.vercel.app/verificar), paste `packages/circuits/test/acceptance/fixtures/demo-proof.json` and verify. Change one digit and it must say the proof is invalid.
+
+**Build the circuit and generate a proof locally:**
+
+```sh
+cd packages/circuits
+npm install
+sh scripts/setup-tools.sh   # downloads circom and checks its hash
+npm run build               # compiles the circuit and runs the (development) ceremony
+npm test
+npm run demo                # writes build/demo-proof.json
+```
+
+**Run the web app:**
+
+```sh
 cd packages/web
 npm install
-# Crea packages/web/.env.local con las variables de Supabase
-npm run dev
-# → http://localhost:3000
+cp .env.example .env.local  # fill in your Supabase URL and anon key
+npm run dev                 # http://localhost:3000
 ```
 
-Variables de entorno requeridas en `.env.local`:
-```
-NEXT_PUBLIC_SUPABASE_URL=https://bmfiotbutuslsaxeumik.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
-```
-
-### Mobile
-
-```bash
-cd packages/mobile
-npm install
-# Asegúrate de tener packages/mobile/.env con las variables de Supabase
-npx expo start
-# Escanea el QR con Expo Go en tu celular
-```
-
-Variables de entorno en `packages/mobile/.env`:
-```
-EXPO_PUBLIC_SUPABASE_URL=https://bmfiotbutuslsaxeumik.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
-```
+**Run the contract tests:** `cd packages/contracts && npm install && npx hardhat test`
 
 ---
 
-## Arquitectura del backend
+## Limitations
 
-El backend es **Supabase** (PostgreSQL + Auth + Storage + RLS).
+Stated plainly, because the project is about not asking for trust:
 
-```
-Cliente (Next.js / React Native)
-         │
-         ▼
-   Supabase Client SDK
-         │
-    ┌────┴─────────────────────────────────────┐
-    │           Supabase Platform               │
-    │  ┌─────────┐  ┌────────┐  ┌───────────┐  │
-    │  │  Auth   │  │  DB    │  │  Storage  │  │
-    │  │  (JWT)  │  │  (PG)  │  │  (KYC)    │  │
-    │  └─────────┘  └────────┘  └───────────┘  │
-    │                 │                         │
-    │          ┌──────┴──────┐                  │
-    │          │ PostgreSQL  │                  │
-    │          │ Functions   │                  │
-    │          │ + RLS       │                  │
-    │          └─────────────┘                  │
-    └───────────────────────────────────────────┘
-```
+- **Testnet only.** Everything is anchored on Base Sepolia.
+- **Single-party trusted setup.** The Groth16 ceremony was run by one participant, who could forge proofs. A multi-party ceremony is required before any real use ([`docs/CEREMONIA.md`](docs/CEREMONIA.md)).
+- **It verifies what was recorded.** The proof covers the payments the organization registered and reconciled against the statement it uploaded. Binding inputs to an external source (signed bank data, electronic invoices) is future work.
+- **Per-month proofs.** Each proof covers one budget line and one month. The cumulative cap across months is enforced by the database but not yet proven.
+- **Proving is done off-server.** The proving key is hundreds of MB, so proofs are generated on the operator's machine, not on Vercel.
+- **No external security audit.** Past incidents and their fixes are documented in [`docs/SEGURIDAD_INCIDENTES.md`](docs/SEGURIDAD_INCIDENTES.md).
 
-**Función principal:**
-```sql
-transfer_funds(sender_id, receiver_id, amount, description, idempotency_key)
--- Valida saldo, aplica RLS, previene deadlocks, es idempotente
-```
+## Roadmap
+
+- **In progress** (branch [`panel/organizacion`](../../tree/panel/organizacion)): the full flow driven from the app by a real organization — payments, approvals, encrypted bank data, reconciliation, closing and anchoring a month's batch, and `/verificar?lote=<id>` for a published proof.
+- **Next:** an external funder who approves the rules, so the organization does not grade itself; inputs with verifiable origin; multi-party ceremony.
+- **Research:** selective disclosure with expiring keys for auditors; conflict-of-interest rules in ZK.
+
+More context: [`docs/VISION_OPENPAY.md`](docs/VISION_OPENPAY.md) · [`docs/POLITICA_DATOS.md`](docs/POLITICA_DATOS.md) · [`packages/circuits/README.md`](packages/circuits/README.md)
 
 ---
 
-## Documentación
+## Authors
 
-| Documento | Ubicación | Descripción |
-|---|---|---|
-| **Frontend** | `packages/web/FRONTEND.md` | Guía completa del frontend web |
-| **Design System** | `packages/web/DESIGN_SYSTEM.md` | Colores, tipografía, animaciones, componentes |
-| **Design visual** | `/design` (en la app) | Página interactiva del design system |
-| **Supabase config** | `packages/web/SUPABASE_CONFIG.md` | Configuración de la base de datos |
-| **Scripts SQL** | `packages/web/SCRIPTS_SQL_OPENPAY.md` | Scripts de creación de tablas y funciones |
-| **Deploy Vercel** | `packages/web/VERCEL_DEPLOYMENT.md` | Instrucciones de deployment |
-| **Mobile impl.** | `packages/mobile/IMPLEMENTACION.md` | Plan de implementación de la app móvil |
-
----
-
-## Equipo
-
-Proyecto desarrollado por **Sebastián Murcia Sánchez** y **Nicolás Castillo**  
-Ingeniería de Sistemas — Gerencia de Proyectos TICs  
-© 2025 OpenPay · Todos los derechos reservados
+Built by **Sebastián Murcia Sánchez** and **Nicolás Castillo**.
