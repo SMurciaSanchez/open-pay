@@ -8,8 +8,8 @@ export interface EnsuredProfile {
 }
 
 // Idempotente: garantiza que existe (Profile + Account) para el user autenticado.
-// Supabase Auth solo crea filas en auth.users — el modelo de dominio (Profile, Account)
-// vive en public.* y no se autogenera. Esto se llama desde useAuth tras cada login.
+// El perfil lo crea la base al confirmar el correo (20261110180000_profile_on_signup.sql);
+// esto queda como respaldo y para la cuenta. Se llama desde useAuth tras cada login.
 export async function ensureProfile(user: User): Promise<EnsuredProfile> {
   const { data: existing } = await supabase
     .from('Profile')
@@ -33,8 +33,15 @@ export async function ensureProfile(user: User): Promise<EnsuredProfile> {
       .select('id')
       .single();
 
-    if (error || !created) throw new Error(error?.message || 'No se pudo crear el perfil');
-    profileId = created.id;
+    if (created) {
+      profileId = created.id;
+    } else {
+      // Otra pestaña, o la base al confirmar el correo, lo creó entre la consulta y
+      // la inserción (llave duplicada): se usa ese.
+      const { data: yaEsta } = await supabase.from('Profile').select('id').eq('userId', user.id).maybeSingle();
+      if (!yaEsta?.id) throw new Error(error?.message || 'No se pudo crear el perfil');
+      profileId = yaEsta.id;
+    }
   }
 
   const { data: account } = await supabase

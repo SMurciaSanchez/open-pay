@@ -68,6 +68,30 @@ async function cifrar(
   return cuerpo;
 }
 
+async function descifrar<T>(cuerpo: Record<string, unknown>): Promise<T> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('No hay sesión');
+  const r = await fetch('/api/org/bank/decrypt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify(cuerpo),
+  });
+  const respuesta = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(respuesta.error ?? 'No se pudo leer el dato bancario.');
+  return respuesta as T;
+}
+
+/** Número completo de una cuenta. Solo tesorería; se descifra en el servidor. */
+export async function revealAccountNumber(orgId: string, accountId: string): Promise<string> {
+  return (await descifrar<{ number: string }>({ organizationId: orgId, accountId })).number;
+}
+
+/** Glosas de los movimientos de unos extractos, por id de movimiento. Solo tesorería. */
+export async function revealDescriptions(orgId: string, statementIds: string[]): Promise<Record<string, string>> {
+  if (statementIds.length === 0) return {};
+  return (await descifrar<{ descriptions: Record<string, string> }>({ organizationId: orgId, statementIds })).descriptions;
+}
+
 // ── Cuentas ────────────────────────────────────────────────────
 
 /** Solo el tesorero las ve: a los demás roles la base les devuelve lista vacía. */

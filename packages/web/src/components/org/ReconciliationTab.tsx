@@ -23,6 +23,8 @@ import {
   listReconciliations,
   listStatements,
   reconcilePayment,
+  revealAccountNumber,
+  revealDescriptions,
   sealStatement,
   unreconcilePayment,
   usedMovementIds,
@@ -107,7 +109,7 @@ export function ReconciliationTab({ fundId, orgId, role }: { fundId: string; org
 
       {esTesorero && <Cuentas datos={datos} orgId={orgId} ocupado={ocupado} accion={accion} />}
       <Extractos datos={datos} orgId={orgId} esTesorero={esTesorero} ocupado={ocupado} accion={accion} setError={setError} />
-      <Conciliar datos={datos} esTesorero={esTesorero} ocupado={ocupado} accion={accion} />
+      <Conciliar datos={datos} orgId={orgId} esTesorero={esTesorero} ocupado={ocupado} accion={accion} />
 
       {!esTesorero && <RoleNote>El extracto lo importa y la conciliación la hace el tesorero.</RoleNote>}
       <ErrorNote>{error}</ErrorNote>
@@ -120,6 +122,8 @@ type Accion = (f: () => Promise<void>) => Promise<void>;
 // ── Cuentas ────────────────────────────────────────────────────
 
 function Cuentas({ datos, orgId, ocupado, accion }: { datos: Datos; orgId: string; ocupado: boolean; accion: Accion }) {
+  // Lo descifrado vive solo en esta pantalla, mientras esté abierta.
+  const [numeros, setNumeros] = useState<Record<string, string>>({});
   const [bankName, setBankName] = useState('');
   const [alias, setAlias] = useState('');
   const [number, setNumber] = useState('');
@@ -135,7 +139,26 @@ function Cuentas({ datos, orgId, ocupado, accion }: { datos: Datos; orgId: strin
           {datos.cuentas.map((c) => (
             <li key={c.id} className="px-4 py-3">
               <p className="font-medium text-slate-900">{c.alias}</p>
-              <p className="text-sm text-slate-500">{c.bankName} · termina en {c.last4}</p>
+              <p className="text-sm text-slate-500">
+                {c.bankName} · {numeros[c.id] ? <span className="font-mono text-slate-800">{numeros[c.id]}</span> : <>termina en {c.last4}</>}
+                <button
+                  type="button"
+                  className="ml-2 text-xs text-indigo-700 underline disabled:opacity-50"
+                  disabled={ocupado}
+                  onClick={() => {
+                    if (numeros[c.id]) {
+                      setNumeros((n) => Object.fromEntries(Object.entries(n).filter(([id]) => id !== c.id)));
+                    } else {
+                      void accion(async () => {
+                        const numero = await revealAccountNumber(orgId, c.id);
+                        setNumeros((n) => ({ ...n, [c.id]: numero }));
+                      });
+                    }
+                  }}
+                >
+                  {numeros[c.id] ? 'ocultar' : 'ver número completo'}
+                </button>
+              </p>
             </li>
           ))}
         </ul>
@@ -338,7 +361,21 @@ function Extractos({
 
 // ── Conciliar ──────────────────────────────────────────────────
 
-function Conciliar({ datos, esTesorero, ocupado, accion }: { datos: Datos; esTesorero: boolean; ocupado: boolean; accion: Accion }) {
+function Conciliar({
+  datos,
+  orgId,
+  esTesorero,
+  ocupado,
+  accion,
+}: {
+  datos: Datos;
+  orgId: string;
+  esTesorero: boolean;
+  ocupado: boolean;
+  accion: Accion;
+}) {
+  // La glosa de cada movimiento se guarda cifrada; se trae solo cuando el tesorero la pide.
+  const [glosas, setGlosas] = useState<Record<string, string> | null>(null);
   const [deshaciendo, setDeshaciendo] = useState<string | null>(null);
   const [motivo, setMotivo] = useState('');
 
@@ -362,6 +399,23 @@ function Conciliar({ datos, esTesorero, ocupado, accion }: { datos: Datos; esTes
   return (
     <section className="space-y-3">
       <Titulo>Conciliación</Titulo>
+
+      {esTesorero && sellados.size > 0 && (
+        <p className="text-sm text-slate-600">
+          La glosa de cada movimiento se guarda cifrada.{' '}
+          <button
+            type="button"
+            className="text-indigo-700 underline disabled:opacity-50"
+            disabled={ocupado}
+            onClick={() => {
+              if (glosas) setGlosas(null);
+              else void accion(async () => setGlosas(await revealDescriptions(orgId, Array.from(sellados))));
+            }}
+          >
+            {glosas ? 'Ocultar las glosas' : 'Ver las glosas de los movimientos'}
+          </button>
+        </p>
+      )}
 
       {porConciliar.length === 0 && conciliados.length === 0 && (
         <p className="text-sm text-slate-500">No hay pagos aprobados todavía.</p>
@@ -393,6 +447,7 @@ function Conciliar({ datos, esTesorero, ocupado, accion }: { datos: Datos; esTes
                       <li key={m.id} className="flex flex-wrap items-center justify-between gap-2 rounded bg-slate-50 px-3 py-2 text-sm">
                         <span className="text-slate-700">
                           Salida del {m.postedOn} · ref. {m.bankReference} · {pesos(m.amount)}
+                          {glosas?.[m.id] && <span className="block text-xs text-slate-500">{glosas[m.id]}</span>}
                         </span>
                         {esTesorero && (
                           <Button size="sm" disabled={ocupado} onClick={() => accion(() => reconcilePayment(p.id, m.id))}>
@@ -422,6 +477,7 @@ function Conciliar({ datos, esTesorero, ocupado, accion }: { datos: Datos; esTes
                     <p className="text-sm text-slate-500">
                       {proveedor(p.vendorId)} · pagado el {p.paidOn}
                       {m && ` · ref. ${m.bankReference}`}
+                      {m && glosas?.[m.id] && <span className="block text-xs">{glosas[m.id]}</span>}
                     </p>
                   </div>
                   <div className="ml-auto flex shrink-0 items-center gap-2">

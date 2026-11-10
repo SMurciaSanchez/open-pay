@@ -11,3 +11,10 @@ CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS
 $$ SELECT nullif(current_setting('request.jwt.claim.role', true), '') $$;
 -- Supabase concede todo por defecto en public
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;
+-- Lo mínimo de auth.users que usan las migraciones (perfil al registrarse)
+CREATE TABLE auth.users (
+  id                  uuid PRIMARY KEY,
+  email               text,
+  email_confirmed_at  timestamptz,
+  raw_user_meta_data  jsonb
+);
