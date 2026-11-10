@@ -1,187 +1,189 @@
-# OpenPay — Política de datos (Capa 0)
+# OpenPay — Data policy (Layer 0)
 
-> Autores: Sebastián Murcia Sánchez · Nicolás Castillo
-> Versión: 0.1 — 16/09/2026
-> Relacionado: [`VISION_OPENPAY.md`](./VISION_OPENPAY.md) · [`MODELO_AMENAZA.md`](./MODELO_AMENAZA.md)
+> Author: Sebastián Murcia Sánchez
+> Version: 0.1 — 2026-09-16
+> Related: [`VISION_OPENPAY.md`](./VISION_OPENPAY.md) · [`MODELO_AMENAZA.md`](./MODELO_AMENAZA.md)
 >
-> **Esta política manda sobre el código.** Toda tabla, columna, endpoint, evento on-chain o pantalla nueva
-> debe tener un nivel asignado aquí antes de implementarse. Si un dato no está en el inventario, se trata como **N3 — Privado**.
+> **This policy rules over the code.** Every new table, column, endpoint, on-chain event or screen
+> must have a level assigned here before it is implemented. If a piece of data is not in the inventory, it is treated as **N3 — Private**.
+>
+> Legal references are Colombian: Law 1581 (personal data protection), Law 1712 (transparency and access to public information), SARLAFT (anti-money-laundering regime), SECOP II (public procurement platform), NIT (tax ID).
 
 ---
 
-## 1. La regla de oro
+## 1. The golden rule
 
-Cada dato debe responder cinco preguntas:
+Every piece of data must answer five questions:
 
-| Pregunta | Qué define |
+| Question | What it defines |
 |---|---|
-| **¿Quién lo ve?** | Rol o actor autorizado |
-| **¿Qué exactamente ve?** | Valor completo, agregado, prueba o nada |
-| **¿Para qué?** | Finalidad legítima (Ley 1581: principio de finalidad) |
-| **¿Cuándo?** | Momento o evento que habilita el acceso |
-| **¿Por cuánto tiempo?** | Retención y vencimiento del acceso |
+| **Who sees it?** | Authorized role or actor |
+| **What exactly do they see?** | Full value, aggregate, proof or nothing |
+| **What for?** | Legitimate purpose (Law 1581: purpose principle) |
+| **When?** | Moment or event that enables access |
+| **For how long?** | Retention and expiry of the access |
 
-> "Registremos lo necesario y revelemos lo mínimo necesario."
+> "Record what is necessary and reveal the minimum necessary."
 
 ---
 
-## 2. Niveles de clasificación
+## 2. Classification levels
 
-| Nivel | Nombre | Quién accede | Forma de acceso | Ejemplo |
+| Level | Name | Who has access | Form of access | Example |
 |---|---|---|---|---|
-| **N0** | **Público** | Cualquiera, sin cuenta | Valor completo | Nombre de un fondo, raíz de Merkle, prueba ZK |
-| **N1** | **Agregado público** | Cualquiera, sin cuenta | Solo agregados que cumplan las reglas de la sección 4 | "92% del fondo ejecutado en salud" |
-| **N2** | **Auditor** | Auditor, revisor fiscal, autoridad, donante con derecho | Llave con propósito y vencimiento; cada acceso queda registrado | Pagos individuales de un contrato |
-| **N3** | **Privado** | El titular del dato y la organización que lo administra (roles específicos) | RLS + cifrado por campo | Datos de contacto de un proveedor, dinero propio de una persona |
-| **N4** | **Restringido** | Mínimo de personas con necesidad estricta; **nunca** público ni en agregados pequeños | RLS + cifrado + aprobación doble + registro | Beneficiarios vulnerables, datos de salud, datos de víctimas |
+| **N0** | **Public** | Anyone, without an account | Full value | Name of a fund, Merkle root, ZK proof |
+| **N1** | **Public aggregate** | Anyone, without an account | Only aggregates that follow the rules of section 4 | "92% of the fund executed in health" |
+| **N2** | **Auditor** | Auditor, statutory auditor, authority, donor with a right to it | Key with a purpose and an expiry; every access is logged | Individual payments of a contract |
+| **N3** | **Private** | The data subject and the organization that manages it (specific roles) | RLS + per-field encryption | A vendor's contact details, a person's own money |
+| **N4** | **Restricted** | The minimum number of people with a strict need; **never** public nor in small aggregates | RLS + encryption + dual approval + logging | Vulnerable beneficiaries, health data, victims' data |
 
-### Reglas fijas (no configurables por ninguna organización)
+### Fixed rules (not configurable by any organization)
 
-1. **N4 nunca sube de nivel.** Ningún administrador puede publicar un dato N4, ni siquiera agregado si el grupo es pequeño.
-2. **Nada N2, N3 ni N4 va a la cadena.** On-chain solo se permite lo de la sección 5.
-3. **Dinero propio de personas = N3 por defecto.** Solo el titular decide revelarlo.
-4. **Dinero ajeno = verificable.** Las afirmaciones sobre su administración deben poder probarse (N0 vía prueba ZK) y su detalle debe estar disponible para auditoría (N2).
-5. **Seguridad antes que transparencia.** Si publicar algo pone en riesgo a una persona, baja de nivel, aunque otra regla diga lo contrario. Esta excepción queda registrada con su justificación.
+1. **N4 never moves up a level.** No administrator can publish N4 data, not even aggregated if the group is small.
+2. **Nothing N2, N3 or N4 goes on-chain.** On-chain, only what section 5 lists is allowed.
+3. **People's own money = N3 by default.** Only the owner decides to reveal it.
+4. **Other people's money = verifiable.** Claims about how it is managed must be provable (N0 through a ZK proof) and its detail must be available for audit (N2).
+5. **Safety before transparency.** If publishing something puts a person at risk, it moves down a level, even if another rule says otherwise. That exception is recorded with its justification.
 
 ---
 
-## 3. Inventario de datos
+## 3. Data inventory
 
-### 3.1 Datos que existen hoy en el código
+### 3.1 Data that exists in the code today
 
-| Dato | Tabla / origen | Nivel | Quién ve | Para qué | Retención | Notas |
+| Data | Table / origin | Level | Who sees it | What for | Retention | Notes |
 |---|---|---|---|---|---|---|
-| Email, nombre completo | `Profile` / Supabase Auth | N3 | Titular; admin de la plataforma | Identificación y contacto | Mientras la cuenta exista + plazo legal | |
-| Teléfono | `Profile.phone` | N3 | Titular; admin | Contacto, 2FA | Igual | |
-| Número de documento | Formulario KYC (`IdentityVerification.tsx`) | N3 (→ cifrado por campo) | Titular; verificación KYC | Identificación legal | Plazo SARLAFT | Verificar dónde se guarda; si se persiste, **cifrar** |
-| Documentos KYC (imágenes) | Storage | N4 | Solo verificador KYC | Cumplimiento | Plazo SARLAFT, luego borrar | Nunca exponer en la app web |
-| Secreto 2FA (TOTP) | Auth | N4 (secreto técnico) | Nadie (solo el sistema) | Autenticación | Mientras esté activo | Nunca se devuelve al cliente después del alta |
-| Saldo | `Account.balance` | N3 | Titular | Operación | — | Pasa a espejo conciliado con el banco |
-| Transacción P2P (monto, contraparte, descripción) | `Transaction` | N3 | Las dos partes | Operación | Plazo contable | Dinero propio → privado |
-| Pago a entidad | `Transaction` + `EntityReceiver` | N3 | Pagador | Operación | Plazo contable | Funcionalidad congelada |
-| Directorio de entidades | `EntityReceiver` | N0 | Cualquiera | Mostrar destinatarios | Indefinida | Datos institucionales |
-| Registro de auditoría | `AuditLog` | N2 | Auditor de seguridad; admin | Vigilar a los que vigilan | Mínimo 5 años | Solo inserción (append-only) |
-| IP del usuario | `AuditLog.ipAddress` | N3 | Seguridad | Detección de fraude | 12 meses | Minimizar |
-| Hash por transacción on-chain | `TransactionRegistry` (Base) | **❌ Incumple** | — | — | Permanente | Los eventos publican **monto y timestamp exacto** (y `metadata` = descripción en pagos a entidad); el hash no tiene sal → reemplazar por `CommitmentRegistry` |
+| Email, full name | `Profile` / Supabase Auth | N3 | Data subject; platform admin | Identification and contact | While the account exists + legal period | |
+| Phone | `Profile.phone` | N3 | Data subject; admin | Contact, 2FA | Same | |
+| ID document number | KYC form (`IdentityVerification.tsx`) | N3 (→ per-field encryption) | Data subject; KYC verification | Legal identification | SARLAFT period | Check where it is stored; if it is persisted, **encrypt it** |
+| KYC documents (images) | Storage | N4 | KYC verifier only | Compliance | SARLAFT period, then delete | Never expose in the web app |
+| 2FA secret (TOTP) | Auth | N4 (technical secret) | Nobody (only the system) | Authentication | While active | Never returned to the client after enrollment |
+| Balance | `Account.balance` | N3 | Data subject | Operation | — | Becomes a mirror reconciled with the bank |
+| P2P transaction (amount, counterparty, description) | `Transaction` | N3 | Both parties | Operation | Accounting period | Own money → private |
+| Payment to an entity | `Transaction` + `EntityReceiver` | N3 | Payer | Operation | Accounting period | Frozen feature |
+| Entity directory | `EntityReceiver` | N0 | Anyone | Show recipients | Indefinite | Institutional data |
+| Audit log | `AuditLog` | N2 | Security auditor; admin | Watching the watchers | At least 5 years | Append-only |
+| User IP | `AuditLog.ipAddress` | N3 | Security | Fraud detection | 12 months | Minimize |
+| Per-transaction hash on-chain | `TransactionRegistry` (Base) | **❌ Non-compliant** | — | — | Permanent | Its events publish the **amount and exact timestamp** (and `metadata` = description for entity payments); the hash has no salt → replace with `CommitmentRegistry` |
 
-### 3.2 Datos del modelo de mandatos (Fase 2)
+### 3.2 Data of the mandate model (Phase 2)
 
-| Dato | Tabla | Nivel | Quién ve | Para qué | Retención |
+| Data | Table | Level | Who sees it | What for | Retention |
 |---|---|---|---|---|---|
-| Nombre, NIT y tipo de la organización | `Organization` | N0 | Cualquiera | Saber quién responde | Indefinida |
-| Miembros y su rol (un rol por persona por organización) | `OrgMember` | N3 | Miembros de la organización | Separación de funciones | Mientras sea miembro + plazo legal |
-| Nombre y propósito del fondo | `Fund` | N0 | Cualquiera | Rendición de cuentas | Indefinida |
-| Organización administradora | `Fund` | N0 | Cualquiera | Saber quién responde | Indefinida |
-| Monto total del fondo | `Fund` | N0 (N2 si la organización es privada y así lo pacta con sus donantes) | Cualquiera / donantes | Rendición de cuentas | Indefinida |
-| Presupuesto por rubro | `Budget` | N1 | Cualquiera | Comparar ejecución vs. plan | Indefinida |
-| Objeto y valor del contrato | `Contract` | N0 si es contrato público (ya es público en SECOP II); N2 si es privado | Según el caso | Verificar pagos | Plazo contable |
-| Enlace SECOP II | `Contract` | N0 | Cualquiera | Fuente externa | Indefinida |
-| Nombre / NIT del proveedor autorizado | `AuthorizedVendor` | N2 (N0 si ya es público en SECOP) | Auditor | Verificar destino de pagos | Plazo contable |
-| Datos bancarios del proveedor | `VendorBankAccount` (tabla aparte) | N3 (cifrado por la aplicación) | Tesorería de la organización | Pagar | Mientras sea proveedor |
-| Reglas del fondo (parámetros) | `FundRule` | N0 | Cualquiera | Saber qué se está probando | Indefinida |
-| Pago individual (monto, fecha, proveedor, concepto) | `Payment` | N2 | Auditor con llave vigente | Auditoría | Plazo contable |
-| Sal de cada pago | `Payment.salt` | N4 (secreto técnico) | Nadie (solo el sistema y el generador de pruebas) | Compromisos | Hasta la supresión (ver 6) |
-| Extracto bancario importado | `BankStatement` | N3 | Tesorería | Conciliación | Plazo contable |
-| Beneficiario final de un programa | `Beneficiary` | **N4** | Operador del programa | Entregar la ayuda | Mínimo necesario |
-| Ejecución agregada del fondo | vista | N1 | Cualquiera | Rendición de cuentas | Indefinida |
-| Llave de auditoría (quién, qué fondo, propósito, vence) | `AccessGrant` | N2 | Auditor, admin, y **el público ve que existe** (sin detalle) | Vigilar a los que vigilan | Mínimo 5 años |
-| Registro de acceso a datos N2-N4 | `AccessLog` | N2 | Auditor de accesos | Vigilar a los que vigilan | Mínimo 5 años |
+| Name, tax ID and type of the organization | `Organization` | N0 | Anyone | Knowing who is accountable | Indefinite |
+| Members and their role (one role per person per organization) | `OrgMember` | N3 | Members of the organization | Separation of duties | While a member + legal period |
+| Name and purpose of the fund | `Fund` | N0 | Anyone | Accountability | Indefinite |
+| Managing organization | `Fund` | N0 | Anyone | Knowing who is accountable | Indefinite |
+| Total amount of the fund | `Fund` | N0 (N2 if the organization is private and has agreed so with its donors) | Anyone / donors | Accountability | Indefinite |
+| Budget per line | `Budget` | N1 | Anyone | Compare execution against plan | Indefinite |
+| Object and value of the contract | `Contract` | N0 if it is a public contract (already public in SECOP II); N2 if private | Depends on the case | Verify payments | Accounting period |
+| SECOP II link | `Contract` | N0 | Anyone | External source | Indefinite |
+| Name / tax ID of the authorized vendor | `AuthorizedVendor` | N2 (N0 if already public in SECOP) | Auditor | Verify where payments go | Accounting period |
+| Vendor bank details | `VendorBankAccount` (separate table) | N3 (encrypted by the application) | The organization's treasury | Paying | While a vendor |
+| Fund rules (parameters) | `FundRule` | N0 | Anyone | Knowing what is being proven | Indefinite |
+| Individual payment (amount, date, vendor, concept) | `Payment` | N2 | Auditor with a valid key | Audit | Accounting period |
+| Salt of each payment | `Payment.salt` | N4 (technical secret) | Nobody (only the system and the proof generator) | Commitments | Until erasure (see 6) |
+| Imported bank statement | `BankStatement` | N3 | Treasury | Reconciliation | Accounting period |
+| Final beneficiary of a program | `Beneficiary` | **N4** | Program operator | Delivering the aid | Minimum necessary |
+| Aggregate execution of the fund | view | N1 | Anyone | Accountability | Indefinite |
+| Audit key (who, which fund, purpose, expiry) | `AccessGrant` | N2 | Auditor, admin, and **the public sees that it exists** (without detail) | Watching the watchers | At least 5 years |
+| Log of access to N2-N4 data | `AccessLog` | N2 | Access auditor | Watching the watchers | At least 5 years |
 
 ---
 
-## 4. Reglas para agregados públicos (N1)
+## 4. Rules for public aggregates (N1)
 
-Un agregado solo se publica si:
+An aggregate is published only if:
 
-1. **Tamaño mínimo del grupo (k ≥ 10).** Si una celda agrupa menos de 10 registros o personas, se suprime o se fusiona con otra ("Otros").
-2. **Sin celdas dominantes.** Si un solo registro representa más del 80% de una celda, se suprime (revelaría el monto de ese pago).
-3. **Sin diferencias explotables.** No se publican dos agregados cuya resta aísle a un individuo (p. ej. "total del fondo" y "total sin el proveedor X").
-4. **Redondeo.** Montos a millones o a porcentajes enteros, según el tamaño del fondo.
-5. **Publicación periódica, no en tiempo real.** Los agregados se actualizan por periodo (mensual por defecto) para que no se puedan deducir pagos individuales comparando antes y después.
-6. **Datos N4 solo con k ≥ 50** y previa revisión manual.
+1. **Minimum group size (k ≥ 10).** If a cell groups fewer than 10 records or people, it is suppressed or merged with another ("Other").
+2. **No dominant cells.** If a single record represents more than 80% of a cell, it is suppressed (it would reveal the amount of that payment).
+3. **No exploitable differences.** Two aggregates whose subtraction isolates an individual are not published (e.g. "fund total" and "total without vendor X").
+4. **Rounding.** Amounts to millions or to whole percentages, depending on the size of the fund.
+5. **Periodic publication, not real time.** Aggregates are updated per period (monthly by default) so that individual payments cannot be deduced by comparing before and after.
+6. **N4 data only with k ≥ 50** and after manual review.
 
 ---
 
-## 5. Qué puede ir a la cadena (lista cerrada)
+## 5. What can go on-chain (closed list)
 
-| Permitido on-chain | Prohibido on-chain |
+| Allowed on-chain | Forbidden on-chain |
 |---|---|
-| Raíz de Merkle de un lote | Montos individuales |
-| Identificador opaco del lote y del fondo (hash con sal del ID) | Nombres, NIT, cédulas, emails |
-| Timestamp del lote (redondeado al periodo) | Descripciones o conceptos |
-| Prueba ZK y sus entradas públicas definidas en `MODELO_AMENAZA.md` | IDs de base de datos en claro |
-| Hash de un `AccessGrant` y de cada evento de acceso | Hash sin sal de cualquier dato con pocos valores posibles |
-| Parámetros públicos de una regla (N0) | Timestamps exactos de pagos individuales |
+| Merkle root of a batch | Individual amounts |
+| Opaque identifier of the batch and the fund (salted hash of the ID) | Names, tax IDs, national ID numbers, emails |
+| Batch timestamp (rounded to the period) | Descriptions or concepts |
+| ZK proof and its public inputs as defined in `MODELO_AMENAZA.md` | Database IDs in the clear |
+| Hash of an `AccessGrant` and of each access event | Unsalted hash of any data with few possible values |
+| Public parameters of a rule (N0) | Exact timestamps of individual payments |
 
-**Reglas de construcción:**
-- Cada hoja del árbol: `H(sal_32_bytes ‖ registro_canónico)`. La sal es aleatoria por registro.
-- Lotes a **intervalo fijo** (24 h por defecto), no por evento.
-- Lotes **rellenados a tamaño fijo** (potencia de 2) con hojas aleatorias, para no revelar cuántos pagos hubo.
+**Construction rules:**
+- Each leaf of the tree: `H(32_byte_salt ‖ canonical_record)`. The salt is random per record.
+- Batches at a **fixed interval** (24 h by default), not per event.
+- Batches **padded to a fixed size** (a power of 2) with random leaves, so as not to reveal how many payments there were.
 
 ---
 
-## 6. Derechos del titular (Ley 1581) y blockchain
+## 6. Data subject rights (Law 1581) and blockchain
 
-| Derecho | Cómo se cumple |
+| Right | How it is honored |
 |---|---|
-| **Conocer y acceder** | Pantalla "Mis datos" con todo lo N3 del titular y quién accedió (desde `AccessLog`) |
-| **Actualizar y rectificar** | Edición en la app; los compromisos ya anclados no cambian, se ancla un registro de corrección |
-| **Suprimir** | *Crypto-shredding*: se borra el dato y **su sal** de Postgres. El hash on-chain queda, pero es imposible de vincular con nadie |
-| **Revocar la autorización** | Igual que suprimir, salvo lo que la ley obligue a conservar (contabilidad, SARLAFT) |
-| **Ser informado del uso** | Aviso de privacidad con la finalidad de cada dato (esta tabla) |
+| **Know and access** | "My data" screen with everything N3 about the data subject and who accessed it (from `AccessLog`) |
+| **Update and rectify** | Editing in the app; commitments already anchored do not change, a correction record is anchored |
+| **Erase** | *Crypto-shredding*: the data **and its salt** are deleted from Postgres. The on-chain hash remains, but can no longer be linked to anyone |
+| **Withdraw consent** | Same as erasure, except for what the law requires to be kept (accounting, SARLAFT) |
+| **Be informed of the use** | Privacy notice with the purpose of each piece of data (this table) |
 
-Datos sensibles (salud, víctimas, menores, art. 5 y 7 Ley 1581) → **N4 siempre**, con autorización explícita.
-
----
-
-## 7. Relación con la Ley 1712 (transparencia)
-
-Para entidades públicas y privadas que administran recursos públicos:
-
-- La información del contrato, el valor y la ejecución es pública por defecto → N0/N1.
-- Las excepciones de la ley (información clasificada por derechos de las personas o reservada por seguridad) se implementan bajando el nivel (N2-N4) con una **justificación registrada**.
-- OpenPay no decide qué es reservado: la organización lo marca y la decisión queda registrada y visible para el auditor.
+Sensitive data (health, victims, minors, articles 5 and 7 of Law 1581) → **always N4**, with explicit consent.
 
 ---
 
-## 8. Acceso con propósito (N2)
+## 7. Relation to Law 1712 (transparency)
 
-Toda llave de auditoría (`AccessGrant`) debe tener:
+For public entities, and private ones that manage public resources:
 
-| Campo | Ejemplo |
+- Contract information, value and execution are public by default → N0/N1.
+- The exceptions in the law (information classified because of people's rights, or reserved for security) are implemented by lowering the level (N2-N4) with a **recorded justification**.
+- OpenPay does not decide what is reserved: the organization marks it, and the decision is recorded and visible to the auditor.
+
+---
+
+## 8. Access with a purpose (N2)
+
+Every audit key (`AccessGrant`) must have:
+
+| Field | Example |
 |---|---|
-| Quién | Revisor fiscal X (identidad verificada) |
-| Qué | Pagos del fondo F, contrato C |
-| Para qué | Auditoría anual 2026 |
-| Desde / hasta | 01/10/2026 – 31/10/2026 |
-| Quién la aprobó | Representante legal (no puede ser el mismo que la usa) |
+| Who | Statutory auditor X (verified identity) |
+| What | Payments of fund F, contract C |
+| What for | 2026 annual audit |
+| From / to | 2026-10-01 – 2026-10-31 |
+| Who approved it | Legal representative (cannot be the same person who uses it) |
 
-- Al vencer, la llave deja de funcionar automáticamente.
-- Cada consulta genera un registro en `AccessLog` y, por lotes, su hash va a la cadena.
-- Cualquier ciudadano puede ver **que existe** una auditoría en curso sobre el fondo F, sin ver quién ni qué consultó.
+- When it expires, the key stops working automatically.
+- Every query creates a record in `AccessLog` and, in batches, its hash goes on-chain.
+- Any citizen can see **that there is** an audit in progress on fund F, without seeing who or what was queried.
 
 ---
 
-## 9. Separación de funciones (roles)
+## 9. Separation of duties (roles)
 
-| Rol | Puede | No puede |
+| Role | Can | Cannot |
 |---|---|---|
-| Configurador | Crear fondos, contratos, reglas | Aprobar pagos |
-| Aprobador | Aprobar pagos | Cambiar reglas ni proveedores autorizados |
-| Tesorero | Importar extractos, conciliar | Aprobar sus propios pagos |
-| Auditor | Leer N2 con llave vigente | Modificar nada |
-| Admin de plataforma (OpenPay) | Operar la infraestructura | Leer N2-N4 sin llave; todo acceso de emergencia queda registrado |
+| Configurator | Create funds, contracts, rules | Approve payments |
+| Approver | Approve payments | Change rules or authorized vendors |
+| Treasurer | Import statements, reconcile | Approve their own payments |
+| Auditor | Read N2 with a valid key | Modify anything |
+| Platform admin (OpenPay) | Operate the infrastructure | Read N2-N4 without a key; every emergency access is logged |
 
 ---
 
-## 10. Pendientes para cumplir esta política en el código
+## 10. Pending items to meet this policy in the code
 
-- [ ] Verificar dónde se guarda el número de documento del KYC; cifrarlo por campo junto con los datos bancarios.
-- [ ] Reemplazar `TransactionRegistry` (publica montos y descripción) por `CommitmentRegistry`.
-- [x] Crear `AccessGrant` y `AccessLog` (migración `20260916180000_mandates.sql`).
-- [ ] Enlazar `AccessLog` con el `AuditLog` existente y anclar sus hashes por lotes.
-- [x] Vista de agregados con supresión k ≥ 10, sin celdas dominantes, meses cerrados (`PublicBudgetExecution`).
-- [ ] Cifrado por campo de `VendorBankAccount` (llaves por fondo, Capa 4).
-- [ ] Pantalla "Mis datos".
-- [ ] Aviso de privacidad basado en la sección 3.
-- [ ] Revisión por asesoría legal (Ley 1581, Ley 1712, SARLAFT) antes del piloto.
+- [ ] Check where the KYC ID document number is stored; encrypt it per field together with bank details.
+- [ ] Replace `TransactionRegistry` (it publishes amounts and description) with `CommitmentRegistry`.
+- [x] Create `AccessGrant` and `AccessLog` (migration `20260916180000_mandates.sql`).
+- [ ] Link `AccessLog` with the existing `AuditLog` and anchor their hashes in batches.
+- [x] Aggregates view with k ≥ 10 suppression, no dominant cells, closed months (`PublicBudgetExecution`).
+- [ ] Per-field encryption of `VendorBankAccount` (keys per fund, Layer 4).
+- [ ] "My data" screen.
+- [ ] Privacy notice based on section 3.
+- [ ] Review by legal counsel (Law 1581, Law 1712, SARLAFT) before the pilot.

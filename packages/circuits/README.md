@@ -1,125 +1,126 @@
-# La regla ZK de OpenPay
+# The OpenPay ZK rule
 
-Un circuito que demuestra, **sin revelar ningún pago**, que una organización que
-administra dinero ajeno cumplió dos reglas en un período:
+A circuit that proves, **without revealing any payment**, that an organization
+managing other people's money followed two rules during a period:
 
-1. **Todos** los pagos del lote fueron a proveedores de su lista autorizada.
-2. La suma de esos pagos no superó el presupuesto del rubro.
+1. **Every** payment in the batch went to a vendor on its authorized list.
+2. The sum of those payments did not exceed the budget line.
 
-Quien verifica no ve montos, ni proveedores, ni fechas, ni identificadores, ni
-siquiera cuántos pagos hubo. Solo ve tres números: la raíz del lote, la raíz del
-conjunto de proveedores y el tope del rubro.
+The verifier sees no amounts, no vendors, no dates, no identifiers, not even how
+many payments there were. It sees three numbers only: the batch root, the root
+of the vendor set and the budget limit.
 
-## Por qué el circuito recorre el lote entero
+## Why the circuit walks the whole batch
 
-Lo barato sería verificar el camino de Merkle de cada pago que el probador
-declara. Pero eso demostraría *"estos pagos están en el lote y son correctos"*,
-que deja abierta la puerta grande: **esconder los pagos incómodos** y no
-declararlos.
+The cheap option would be to verify the Merkle path of each payment the prover
+declares. But that would prove *"these payments are in the batch and are
+correct"*, which leaves the big door open: **hiding the inconvenient payments**
+by not declaring them.
 
-Por eso el circuito **recalcula la raíz del lote desde todas las hojas** y la
-compara con la que está anclada. Si alguien marca un pago real como casilla
-vacía, la raíz que sale no es la anclada y la prueba no se puede construir. Es lo
-que convierte "algunos pagos" en "todos los pagos".
+So the circuit **recomputes the batch root from all the leaves** and compares it
+with the anchored one. If someone marks a real payment as an empty slot, the
+resulting root is not the anchored one and the proof cannot be built. That is
+what turns "some payments" into "all payments".
 
-Ese es el motivo de que el árbol sea pequeño: la cuenta crece con el tamaño del
-árbol, así que la garantía se paga en restricciones. Hoy son **64 hojas**
-(`DEFAULT_TREE_HEIGHT = 6` en `contracts/src/commitment.ts`): 147.100
-restricciones y dominio 2^18.
+This is why the tree is small: the computation grows with the size of the tree,
+so the guarantee is paid for in constraints. Today it is **64 leaves**
+(`DEFAULT_TREE_HEIGHT = 6` in `contracts/src/commitment.ts`): 147,100
+constraints and a 2^18 domain.
 
-Hubo un rodeo que conviene no repetir. El árbol se bajó a 16 hojas el 18-09
-porque el `groth16 setup` con 64 corrió 15,4 horas sin escribir el `.zkey`, y se
-dio por hecho que el circuito era demasiado grande. No lo era: la causa fue un
-livelock de `fastfile` (ver `scripts/fastfile-fix.cjs`), y el proceso no iba a
-terminar nunca, con 64 hojas o con 16. Arreglado eso, el setup de 64 hojas tarda
-unos 2-3 minutos y se volvió a la altura original.
+There was a detour worth not repeating. The tree was lowered to 16 leaves on
+2026-09-18 because `groth16 setup` with 64 ran for 15.4 hours without writing
+the `.zkey`, and the circuit was assumed to be too large. It was not: the cause
+was a livelock in `fastfile` (see `scripts/fastfile-fix.cjs`), and the process
+was never going to finish, with 64 leaves or with 16. With that fixed, the
+64-leaf setup takes 2-3 minutes and the original height was restored.
 
-Subir la altura otra vez es un cambio de una línea, pero **invalida toda raíz ya
-anclada**: el tamaño del árbol es parte del formato del compromiso.
+Raising the height again is a one-line change, but it **invalidates every root
+already anchored**: the tree size is part of the commitment format.
 
-La prueba de esta decisión está en `test/circuit.test.ts`, en el bloque *"no se
-puede esconder un pago"*.
+The test for this decision is in `test/circuit.test.ts`, in the block *"no se
+puede esconder un pago"* ("a payment cannot be hidden").
 
-## Cómo se usa
+## Usage
 
 ```sh
 npm install
-sh scripts/setup-tools.sh   # baja circom y comprueba su hash
-npm run build               # compila el circuito y corre la ceremonia
-npm test                    # 42 pruebas unitarias
-npm run aceptacion          # + pruebas de aceptación PT y PP (95 en total, lee Base Sepolia)
-npm run demo                # genera build/demo-proof.json para el portal
-npm run copy-vkey           # copia la clave de verificación al portal
-npm run vkey-hash           # imprime la huella para anclarla en la cadena
+sh scripts/setup-tools.sh   # downloads circom and checks its hash
+npm run build               # compiles the circuit and runs the ceremony
+npm test                    # 42 unit tests
+npm run aceptacion          # + PT and PP acceptance tests (95 in total, reads Base Sepolia)
+npm run demo                # writes build/demo-proof.json for the portal
+npm run copy-vkey           # copies the verification key to the portal
+npm run vkey-hash           # prints the key fingerprint, to anchor it on-chain
 ```
 
-Para probar el portal: `npm run demo`, después `cd ../web && npm run dev`, y
-pegar `build/demo-proof.json` en `/verificar`. Cambiándole un dígito a la prueba,
-la página tiene que decir que no es válida.
+To try the portal: `npm run demo`, then `cd ../web && npm run dev`, and paste
+`build/demo-proof.json` into `/verificar`. Change one digit of the proof and the
+page must say it is not valid.
 
-## Qué hay acá
+## What is in here
 
-| Archivo | Qué hace |
+| File | What it does |
 |---|---|
-| `circuits/authorized_within_budget.circom` | La regla. Es el archivo que hay que leer para saber qué se está probando |
-| `circuits/merkle.circom` | Árboles de Merkle con Poseidon, dentro del circuito |
-| `src/witness.ts` | Arma las entradas del circuito desde los datos de un fondo |
-| `src/prove.ts` | Genera y verifica pruebas; calcula la huella de la clave |
-| `src/demo.ts` | Una prueba de ejemplo con datos inventados |
-| `scripts/build.sh` | Compilación y ceremonia |
+| `circuits/authorized_within_budget.circom` | The rule. This is the file to read to know what is being proven |
+| `circuits/merkle.circom` | Poseidon Merkle trees, inside the circuit |
+| `src/witness.ts` | Builds the circuit inputs from a fund's data |
+| `src/prove.ts` | Generates and verifies proofs; computes the key fingerprint |
+| `src/demo.ts` | An example proof with made-up data |
+| `scripts/build.sh` | Compilation and ceremony |
 
-El cálculo de los compromisos vive en `packages/contracts/src/commitment.ts` y
-**se importa, no se copia**: el circuito y el constructor de lotes tienen que
-usar el mismo Poseidon, con los mismos campos y en el mismo orden. Si se
-separaran, las pruebas dejarían de verificar sin que nada avisara.
+The commitment computation lives in `packages/contracts/src/commitment.ts` and
+is **imported, not copied**: the circuit and the batch builder must use the same
+Poseidon, with the same fields in the same order. If they drifted apart, proofs
+would stop verifying without anything warning about it.
 
-## Pruebas de aceptación
+## Acceptance tests
 
-`test/acceptance/` tiene las dos pruebas que exige `docs/MODELO_AMENAZA.md` §7,
-escritas desde el lado de un tercero que no confía en OpenPay: solo usan la
-prueba publicada, la clave que sirve el portal y la cadena leída por un nodo
-público.
+`test/acceptance/` holds the two tests required by `docs/MODELO_AMENAZA.md` §7,
+written from the side of a third party who does not trust OpenPay: they only use
+the published proof, the key served by the portal and the chain as read through
+a public node.
 
-- `transparency.test.ts` (PT): la prueba verifica sin código de OpenPay, lo
-  publicado está anclado, y un tramposo con todos los datos no logra probar un
-  proveedor no autorizado, un total sobre el tope, un pago omitido ni uno
-  modificado. El portal da el mismo veredicto.
-- `privacy.test.ts` (PP): juego de indistinguibilidad sobre monto, proveedor,
-  fecha y número de pagos; fuerza bruta de hojas; búsqueda de datos privados en
-  todo lo publicado. Cada ataque tiene un control que muestra que el ataque
-  funciona cuando las sales son débiles.
+- `transparency.test.ts` (PT): the proof verifies without OpenPay code, what was
+  published is anchored, and a cheater holding all the data cannot prove an
+  unauthorized vendor, a total over the limit, an omitted payment or a modified
+  one. The portal gives the same verdict.
+- `privacy.test.ts` (PP): indistinguishability game over amount, vendor, date
+  and number of payments; brute force of leaves; search for private data in
+  everything published. Each attack has a control showing that the attack does
+  work when the salts are weak.
 
-Un tercero no necesita la ceremonia: `sh scripts/build.sh --solo-compilar`
-alcanza, porque compilar es determinista y las pruebas negativas solo calculan
-testigos. `OPENPAY_SIN_RED=1` salta las lecturas de red.
+A third party does not need the ceremony: `sh scripts/build.sh --solo-compilar`
+is enough, because compiling is deterministic and the negative tests only
+compute witnesses. `OPENPAY_SIN_RED=1` skips the network reads.
 
-## Lo que este circuito NO demuestra
+## What this circuit does NOT prove
 
-- **Que el dinero se haya movido.** Eso lo dice la conciliación bancaria, y el
-  banco sigue siendo la fuente (supuesto S5 de `docs/MODELO_AMENAZA.md`).
-- **Que la lista de proveedores esté bien armada.** Demuestra que los pagos
-  fueron a esa lista, no que esa lista sea la correcta. Quién puede modificarla
-  y con qué control es un problema de la capa de mandatos, no del circuito.
-- **Que el precio pagado fuera razonable.** Es otra regla y todavía no existe.
+- **That the money actually moved.** That is what bank reconciliation says, and
+  the bank remains the source (assumption S5 in `docs/MODELO_AMENAZA.md`).
+- **That the vendor list is the right one.** It proves the payments went to that
+  list, not that the list is correct. Who can change it, and under what control,
+  is a problem for the mandate layer, not for the circuit.
+- **That the price paid was reasonable.** That is a different rule and it does
+  not exist yet.
 
-## Advertencia sobre la ceremonia
+## Warning about the ceremony
 
-La ceremonia que corre `scripts/build.sh` es **de desarrollo**: se genera en una
-sola máquina, con un solo participante. Quien tenga esa aleatoriedad podría
-fabricar pruebas falsas — no destapar datos, pero sí probar cosas que no
-ocurrieron.
+The ceremony run by `scripts/build.sh` is a **development** ceremony: it is
+generated on a single machine, with a single participant. Whoever holds that
+randomness could forge proofs — not uncover data, but prove things that did not
+happen.
 
-Antes de cualquier uso real hay que rehacerla. Los pasos están en
+It must be redone before any real use. The steps are in
 [`docs/CEREMONIA.md`](../../docs/CEREMONIA.md).
 
-## Números del circuito
+## Circuit numbers
 
 | | |
 |---|---|
-| Restricciones | 147.100 |
-| Pagos por lote | 64 |
-| Proveedores por fondo | 64 |
-| Señales públicas | 3 |
-| Entradas privadas | 1.152 |
-| Sistema de prueba | Groth16 sobre BN254 |
-| Función de hash | Poseidon (compatible con circomlib) |
+| Constraints | 147,100 |
+| Payments per batch | 64 |
+| Vendors per fund | 64 |
+| Public signals | 3 |
+| Private inputs | 1,152 |
+| Proof system | Groth16 over BN254 |
+| Hash function | Poseidon (circomlib-compatible) |

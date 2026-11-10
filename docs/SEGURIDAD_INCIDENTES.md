@@ -1,54 +1,58 @@
-# Registro de incidentes de seguridad
+# Security incident log
 
-> Nunca escribir contraseñas, llaves ni tokens en este archivo. Solo qué pasó, dónde y el estado.
+> Never write passwords, keys or tokens in this file. Only what happened, where, and the status.
 
-## INC-001 — Contraseñas de Postgres expuestas en repositorio público
+## INC-001 — Postgres passwords exposed in a public repository
 
-- **Detectado**: 16/09/2026
-- **Severidad**: 🔴 Crítica (repo `SMurciaSanchez/open-pay-mvp` es público en GitHub)
-- **Estado**: ✅ Cerrado — 16/09/2026 (proyectos fuera de línea, repo privado, proyecto y repo nuevos)
+- **Detected**: 2026-09-16
+- **Severity**: 🔴 Critical (the repo `SMurciaSanchez/open-pay-mvp` was public on GitHub)
+- **Status**: ✅ Closed — 2026-09-16 (projects taken offline, repo made private, new project and new repo)
 
-### Credenciales afectadas
+### Affected credentials
 
-| # | Proyecto Supabase | Credencial | Dónde estaba | Commits en historial | Removida del código | Rotada |
+| # | Supabase project | Credential | Where it was | Commits in history | Removed from code | Rotated |
 |---|---|---|---|---|---|---|
-| 1 | `bmfiotbutuslsaxeumik` | Contraseña de Postgres (usuario `postgres.bmfiotbutuslsaxeumik`, pooler `aws-1-us-east-2`) | `packages/web/test-p1.mjs`, `packages/web/test-p2.mjs` | `c502e5e`, `6c1ffff` | ✅ `6f4505e` | ⬜ |
-| 2 | `garzwhnenhtmpfvfntmk` | Contraseña de Postgres (usuario `postgres`, host `db.garzwhnenhtmpfvfntmk.supabase.co`) | `packages/web/VERCEL_DEPLOYMENT.md` (línea 67) | ver `git log -S garzwhnenhtmpfvfntmk` | ✅ `6f4505e` | ⬜ |
+| 1 | `bmfiotbutuslsaxeumik` | Postgres password (user `postgres.bmfiotbutuslsaxeumik`, pooler `aws-1-us-east-2`) | `packages/web/test-p1.mjs`, `packages/web/test-p2.mjs` | `c502e5e`, `6c1ffff` | ✅ `6f4505e` | ⬜ |
+| 2 | `garzwhnenhtmpfvfntmk` | Postgres password (user `postgres`, host `db.garzwhnenhtmpfvfntmk.supabase.co`) | `packages/web/VERCEL_DEPLOYMENT.md` (line 67) | see `git log -S garzwhnenhtmpfvfntmk` | ✅ `6f4505e` | ⬜ |
 
-### Pasos pendientes
+### Steps
 
-- [ ] Rotar contraseña 1: Supabase → proyecto `bmfiotbutuslsaxeumik` → Project Settings → Database → Reset database password.
-- [ ] Rotar contraseña 2: igual, en el proyecto `garzwhnenhtmpfvfntmk`.
-- [ ] Guardar las nuevas contraseñas **solo** en un gestor de contraseñas (Bitwarden, 1Password) y en `.env` locales (ignorados por git).
-- [ ] Actualizar la variable `DATABASE_URL` / `DB_URL` en Vercel si alguno de los proyectos la usa.
-- [ ] Revisar logs de Supabase (Logs → Postgres) por conexiones desconocidas desde la fecha del primer commit.
-- [x] Pasar el repositorio a privado.
-- [ ] (Opcional) Limpiar historial con `git filter-repo` y forzar push. No sustituye la rotación: clones y forks ya pueden tener las claves.
-- [ ] Marcar este incidente como ✅ Cerrado.
+The incident was closed by taking both projects offline and starting over with a
+new Supabase project and a new repository with clean history, instead of
+rotating in place. The original checklist is kept for the record:
 
-### Lecciones
+- [ ] Rotate password 1: Supabase → project `bmfiotbutuslsaxeumik` → Project Settings → Database → Reset database password.
+- [ ] Rotate password 2: same, in project `garzwhnenhtmpfvfntmk`.
+- [ ] Store the new passwords **only** in a password manager (Bitwarden, 1Password) and in local `.env` files (git-ignored).
+- [ ] Update the `DATABASE_URL` / `DB_URL` variable in Vercel if either project uses it.
+- [ ] Review Supabase logs (Logs → Postgres) for unknown connections since the date of the first commit.
+- [x] Make the repository private.
+- [ ] (Optional) Clean the history with `git filter-repo` and force-push. It does not replace rotation: clones and forks may already have the keys.
+- [ ] Mark this incident as ✅ Closed.
 
-- Nunca escribir credenciales en scripts ni documentación; usar variables de entorno y `.env.example` con valores vacíos.
-- El `.gitignore` de la raíz estaba en UTF-16 y git no lo leía: revisar codificación de archivos de configuración.
-- Pendiente: agregar escaneo de secretos (p. ej. `gitleaks` como pre-commit o GitHub secret scanning).
+### Lessons
 
-## INC-002 — Correo y contraseña de un usuario en scripts de prueba
+- Never write credentials in scripts or documentation; use environment variables and an `.env.example` with empty values.
+- The root `.gitignore` was encoded in UTF-16 and git was not reading it: check the encoding of configuration files.
+- Pending: add secret scanning (e.g. `gitleaks` as a pre-commit hook, or GitHub secret scanning).
 
-- **Detectado**: 16/09/2026
-- **Severidad**: 🟢 Baja (confirmado: era una contraseña de prueba, no reutilizada; pública desde 20/04/2025)
-- **Estado**: ✅ Cerrado — 16/09/2026
+## INC-002 — A user's email and password in test scripts
 
-### Qué pasó
+- **Detected**: 2026-09-16
+- **Severity**: 🟢 Low (confirmed: it was a test password, not reused; public since 2025-04-20)
+- **Status**: ✅ Closed — 2026-09-16
 
-`packages/web/test-supabase.js` y `packages/web/test-supabase-queries.js` (commit `fdf3667`, primer commit de `open-pay-mvp`) tenían escrito el correo de un fundador junto con una contraseña de prueba, para iniciar sesión desde el script. También tenían la clave `anon` del proyecto `garzwhnenhtmpfvfntmk` (pública por diseño; se reemplazó igual en la documentación).
+### What happened
 
-### Pasos
+`packages/web/test-supabase.js` and `packages/web/test-supabase-queries.js` (commit `fdf3667`, first commit of `open-pay-mvp`) contained a founder's email together with a test password, used to sign in from the script. They also contained the `anon` key of project `garzwhnenhtmpfvfntmk` (public by design; it was replaced in the documentation anyway).
 
-- [x] Archivos excluidos del repositorio nuevo `open-pay`; clave `anon` reemplazada por `<TU_ANON_KEY>` en `INSTRUCCIONES_VERCEL.md` y `VERCEL_DEPLOYMENT.md`.
-- [x] Confirmado por el titular: la contraseña era de prueba y no se usa en otros servicios.
-- [x] Pasar `open-pay-mvp` a privado.
+### Steps
 
-### Lecciones
+- [x] Files excluded from the new `open-pay` repository; `anon` key replaced by `<TU_ANON_KEY>` in `INSTRUCCIONES_VERCEL.md` and `VERCEL_DEPLOYMENT.md`.
+- [x] Confirmed by the account holder: the password was a test password and is not used on other services.
+- [x] Make `open-pay-mvp` private.
 
-- Los scripts de prueba inician sesión con usuarios de prueba creados para eso, nunca con cuentas personales, y leen las credenciales del entorno.
-- Antes de publicar un repositorio, escanear el árbol completo (no solo los `.env`).
+### Lessons
+
+- Test scripts sign in with test users created for that purpose, never with personal accounts, and read credentials from the environment.
+- Before publishing a repository, scan the whole tree (not only the `.env` files).
