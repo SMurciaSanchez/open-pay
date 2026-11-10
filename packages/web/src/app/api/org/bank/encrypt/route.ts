@@ -8,17 +8,15 @@
  * modo que quién puede escribir lo siguen decidiendo las reglas de la base.
  * Aquí solo se comprueba que quien pide cifrar es tesorero de la organización.
  *
- * Formato: AES-256-GCM, nonce(12) || cifrado || etiqueta(16). El id de la
- * organización va como dato asociado: un cifrado copiado a otra organización
- * no descifra.
+ * El formato (llave por organización, organización y campo como dato
+ * asociado) está en lib/server/bankCrypto.ts.
  */
-import { createCipheriv, randomBytes } from 'crypto';
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { BANK_FIELDS, BANK_KEY_ID, encryptBankValue, type BankField } from '@/lib/server/bankCrypto';
 
 export const runtime = 'nodejs';
 
-const KEY_ID = 'bank-v1';
 const MAX_VALORES = 2000;
 const MAX_LARGO = 500;
 
@@ -36,15 +34,16 @@ export async function POST(req: Request) {
   const token = /^Bearer (.+)$/.exec(req.headers.get('authorization') ?? '')?.[1];
   if (!token) return error('Falta la sesión.', 401);
 
-  let body: { organizationId?: unknown; values?: unknown };
+  let body: { organizationId?: unknown; field?: unknown; values?: unknown };
   try {
     body = await req.json();
   } catch {
     return error('Cuerpo inválido.', 400);
   }
-  const { organizationId, values } = body;
+  const { organizationId, field, values } = body;
   if (
     typeof organizationId !== 'string' ||
+    !BANK_FIELDS.includes(field as BankField) ||
     !Array.isArray(values) ||
     values.length === 0 ||
     values.length > MAX_VALORES ||
@@ -60,14 +59,10 @@ export async function POST(req: Request) {
   });
   if (rolError || esTesorero !== true) return error('Tu rol no permite hacer esto.', 403);
 
-  const ciphers = (values as string[]).map((texto) => {
-    const nonce = randomBytes(12);
-    const cifrador = createCipheriv('aes-256-gcm', key, nonce);
-    cifrador.setAAD(Buffer.from(organizationId, 'utf8'));
-    const cuerpo = Buffer.concat([cifrador.update(texto, 'utf8'), cifrador.final()]);
-    // Formato de bytea que entiende la API de Supabase: \x seguido de hexadecimal
-    return '\\x' + Buffer.concat([nonce, cuerpo, cifrador.getAuthTag()]).toString('hex');
-  });
+  // Formato de bytea que entiende la API de Supabase: \x seguido de hexadecimal
+  const ciphers = (values as string[]).map(
+    (texto) => '\\x' + encryptBankValue(key, organizationId, field as BankField, texto).toString('hex'),
+  );
 
-  return NextResponse.json({ keyId: KEY_ID, ciphers });
+  return NextResponse.json({ keyId: BANK_KEY_ID, ciphers });
 }

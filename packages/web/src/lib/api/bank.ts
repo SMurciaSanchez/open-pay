@@ -51,13 +51,17 @@ export interface Reconciliation {
   reconciledAt: string;
 }
 
-async function cifrar(organizationId: string, values: string[]): Promise<{ keyId: string; ciphers: string[] }> {
+async function cifrar(
+  organizationId: string,
+  field: 'account-number' | 'movement-description',
+  values: string[],
+): Promise<{ keyId: string; ciphers: string[] }> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('No hay sesión');
   const r = await fetch('/api/org/bank/encrypt', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-    body: JSON.stringify({ organizationId, values }),
+    body: JSON.stringify({ organizationId, field, values }),
   });
   const cuerpo = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(cuerpo.error ?? 'No se pudo cifrar el dato bancario.');
@@ -85,7 +89,7 @@ export async function createBankAccount(
 ): Promise<void> {
   const digitos = number.replace(/[\s-]/g, '');
   if (!/^\d{6,20}$/.test(digitos)) throw new Error('El número de cuenta debe tener entre 6 y 20 dígitos.');
-  const { keyId, ciphers } = await cifrar(orgId, [digitos]);
+  const { keyId, ciphers } = await cifrar(orgId, 'account-number', [digitos]);
   await unwrap(
     supabase.from('OrgBankAccount').insert({
       organizationId: orgId,
@@ -158,7 +162,7 @@ export async function importStatement(s: NewStatement): Promise<string> {
   const [yo, hash, cifrado] = await Promise.all([
     myProfileId(),
     sha256Hex(bytes),
-    cifrar(s.organizationId, movimientos.map((m) => m.description || '(sin glosa)')),
+    cifrar(s.organizationId, 'movement-description', movimientos.map((m) => m.description || '(sin glosa)')),
   ]);
 
   const extracto = await unwrap(

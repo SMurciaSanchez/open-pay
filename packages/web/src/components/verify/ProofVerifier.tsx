@@ -19,12 +19,23 @@ import {
   type PublicClaim,
   type VerifyOutcome,
 } from '@/lib/zk/verify';
-import { EXPLORER, REGISTRY, consultarAnclaje, type Anclaje } from '@/lib/zk/registry';
+import {
+  EXPLORER,
+  REGISTRY,
+  ROOT_KIND,
+  consultarAnclaje,
+  consultarPublicacion,
+  fundSubject,
+  type Anclaje,
+} from '@/lib/zk/registry';
 import { supabase } from '@/lib/supabase';
 
 /** Fila de la vista pública PublicBatchProof: lo que la organización publicó de un lote. */
 interface LotePublicado {
   batchId: string;
+  fundId: string;
+  batchTxHash: string;
+  vendorSetTxHash: string;
   fundName: string;
   organizationName: string;
   budgetCategory: string;
@@ -54,6 +65,67 @@ function loteCoincide(l: LotePublicado): boolean {
   );
 }
 
+type Pertenencia = 'consultando' | 'ok' | 'no-coincide' | 'sin-datos';
+
+/**
+ * ¿Las dos raíces se publicaron para ESTE fondo, una como lote de pagos y la
+ * otra como lista de proveedores? Lo responde el recibo de cada transacción,
+ * leído de un nodo público: no la base de OpenPay.
+ */
+function PertenenciaAlFondo({ lote }: { lote: LotePublicado }) {
+  const [estado, setEstado] = useState<Pertenencia>('consultando');
+
+  useEffect(() => {
+    let vigente = true;
+    const fondo = fundSubject(lote.fundId);
+    Promise.all([
+      consultarPublicacion(lote.batchTxHash, lote.batchRoot),
+      consultarPublicacion(lote.vendorSetTxHash, lote.vendorSetRoot),
+    ]).then(([pagos, proveedores]) => {
+      if (!vigente) return;
+      if (pagos.estado === 'error' || proveedores.estado === 'error') return setEstado('sin-datos');
+      const ok =
+        pagos.estado === 'encontrada' &&
+        proveedores.estado === 'encontrada' &&
+        pagos.publicacion.kind === ROOT_KIND.PaymentBatch &&
+        proveedores.publicacion.kind === ROOT_KIND.VendorSet &&
+        pagos.publicacion.subject === fondo &&
+        proveedores.publicacion.subject === fondo;
+      setEstado(ok ? 'ok' : 'no-coincide');
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [lote]);
+
+  if (!REGISTRY) return null;
+  if (estado === 'consultando') {
+    return <p className="mt-3 text-sm text-muted-foreground">Comprobando en la cadena a qué fondo pertenecen las raíces…</p>;
+  }
+  if (estado === 'ok') {
+    return (
+      <p className="mt-3 text-sm text-emerald-800">
+        Comprobado en la cadena: las dos raíces se publicaron para este fondo, una como lote de
+        pagos y la otra como lista de proveedores.
+      </p>
+    );
+  }
+  if (estado === 'no-coincide') {
+    return (
+      <p className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+        <strong>Las raíces no están publicadas para este fondo como dice la organización.</strong>{' '}
+        En las transacciones indicadas no aparecen como lote de pagos y lista de proveedores de
+        este fondo. No confíes en esta página hasta aclararlo.
+      </p>
+    );
+  }
+  return (
+    <p className="mt-3 text-sm text-amber-800">
+      No se pudo consultar la cadena para comprobar a qué fondo pertenecen las raíces.
+    </p>
+  );
+}
+
 type Estado =
   | { fase: 'inicio' }
   | { fase: 'verificando' }
@@ -76,7 +148,7 @@ export function ProofVerifier() {
     if (!id) return;
     supabase
       .from('PublicBatchProof')
-      .select('batchId, fundName, organizationName, budgetCategory, periodStart, batchRoot, vendorSetRoot, budgetLimitMinor, proof, publicSignals')
+      .select('batchId, fundId, batchTxHash, vendorSetTxHash, fundName, organizationName, budgetCategory, periodStart, batchRoot, vendorSetRoot, budgetLimitMinor, proof, publicSignals')
       .eq('batchId', id)
       .maybeSingle<LotePublicado>()
       .then(({ data, error }) => {
@@ -167,6 +239,7 @@ export function ProofVerifier() {
             El nombre, el rubro y el mes los declara la organización. Lo que se comprueba abajo, en
             tu navegador, es la prueba: que los pagos de ese lote cumplen las dos reglas.
           </p>
+          <PertenenciaAlFondo lote={lote} />
         </div>
       )}
 

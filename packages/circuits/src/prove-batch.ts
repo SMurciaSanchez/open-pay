@@ -92,7 +92,10 @@ interface Lote {
   esperado?: { batchRoot: string; vendorSetRoot: string };
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function leerLote(batchId: string): Promise<Lote> {
+  if (!UUID.test(batchId)) throw new Error('El id del lote no tiene forma de id.');
   const [lote] = await rest<
     { id: string; status: string; root: string; budgetId: string | null; vendorSetId: string | null }[]
   >(`PaymentBatch?id=eq.${batchId}&select=id,status,root,budgetId,vendorSetId`);
@@ -109,6 +112,7 @@ async function leerLote(batchId: string): Promise<Lote> {
       `PaymentCommitment?batchId=eq.${batchId}&select=paymentId,leafIndex&order=leafIndex`,
     ),
   ]);
+  if (!lista || lista.status !== 'ANCHORED') throw new Error('La lista de proveedores del lote no está anclada.');
   if (hojas.some((h, i) => h.leafIndex !== i)) throw new Error('Las hojas del lote no son consecutivas.');
 
   const filas = await rest<FilaPago[]>(
@@ -131,6 +135,7 @@ async function leerLote(batchId: string): Promise<Lote> {
 
 /** Lo mismo que hará /api/org/batch al cerrar: pagos por id, proveedores vigentes por id. */
 async function simularLote(budgetId: string, inicio: string): Promise<Lote> {
+  if (!UUID.test(budgetId)) throw new Error('El id del rubro no tiene forma de id.');
   if (!/^\d{4}-(0[1-9]|1[0-2])-01$/.test(inicio)) throw new Error('El período es AAAA-MM-01.');
   const [a, m] = inicio.split('-').map(Number);
   const fin = new Date(Date.UTC(a, m, 0)).toISOString().slice(0, 10);

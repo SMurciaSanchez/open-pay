@@ -5,6 +5,7 @@
  * llegar al navegador. Al contrato solo suben valores de 32 bytes.
  */
 import { Contract, JsonRpcProvider, Wallet, keccak256, toUtf8Bytes } from 'ethers';
+import { publicChainMessage } from './errors';
 
 export const CHAIN_ID = 84532; // Base Sepolia
 
@@ -87,7 +88,8 @@ export async function publishRoot(kind: RootKindValue, subjectHex: string, rootH
     return recibo.hash;
   } catch (e) {
     if (e instanceof ChainError) throw e;
-    const m = (e as { shortMessage?: string; message?: string }).shortMessage ?? (e as Error).message;
-    throw new ChainError(`No se pudo anclar en la cadena: ${m}`);
+    // El mensaje completo puede traer la dirección del nodo (y su clave): solo al registro.
+    console.error('[chain] publishRoot:', (e as Error).message);
+    throw new ChainError(publicChainMessage(e as { shortMessage?: string; message?: string }));
   }
 }

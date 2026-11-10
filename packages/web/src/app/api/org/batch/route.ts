@@ -30,6 +30,7 @@ import {
   pesosToMinorUnits,
   toBytes32,
 } from '@/lib/zk/commitment';
+import { publicDbError } from '@/lib/server/errors';
 import { CHAIN_ID, ChainError, RootKind, fundSubject, isPublished, publishRoot, registryAddress } from '@/lib/server/chain';
 
 export const runtime = 'nodejs';
@@ -45,14 +46,15 @@ class Rechazo extends Error {
 /** bytes32 '0x…' → formato bytea de la API de Supabase. */
 const bytea = (hex: string) => '\\x' + hex.replace(/^0x/, '');
 
-async function db<T>(p: PromiseLike<{ data: T | null; error: { message: string } | null }>): Promise<T> {
+async function db<T>(
+  p: PromiseLike<{ data: T | null; error: { code?: string; message: string } | null }>,
+): Promise<T> {
   const { data, error } = await p;
   if (error) {
-    if (/JWT/i.test(error.message)) throw new Rechazo('La sesión no es válida. Vuelve a iniciar sesión.', 401);
-    if (/row-level security|permission denied|No autorizado/i.test(error.message)) {
-      throw new Rechazo('Tu rol no permite hacer esto.', 403);
-    }
-    throw new Rechazo(error.message);
+    const publico = publicDbError(error);
+    // Lo que no se le muestra al usuario queda aquí para quien opera el servidor.
+    if (publico.status === 500) console.error('[api/org/batch] base:', error.code, error.message);
+    throw new Rechazo(publico.mensaje, publico.status);
   }
   return data as T;
 }
