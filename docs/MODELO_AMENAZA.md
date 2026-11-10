@@ -1,231 +1,231 @@
-# OpenPay — Modelo de amenaza y pruebas de aceptación (MVP)
+# OpenPay — Threat model and acceptance tests (MVP)
 
-> Autores: Sebastián Murcia Sánchez · Nicolás Castillo
-> Versión: 0.2 — 23/09/2026 (0.1: 16/09/2026). La 0.2 ajusta el modelo a lo que se construyó en la Fase 3 (Circom + Groth16, no zkVM) y registra el resultado de las pruebas de aceptación (§7).
-> Relacionado: [`VISION_OPENPAY.md`](./VISION_OPENPAY.md) (sección 6) · [`POLITICA_DATOS.md`](./POLITICA_DATOS.md)
+> Author: Sebastián Murcia Sánchez
+> Version: 0.2 — 2026-09-23 (0.1: 2026-09-16). Version 0.2 adjusts the model to what was built in Phase 3 (Circom + Groth16, not a zkVM) and records the result of the acceptance tests (§7).
+> Related: [`VISION_OPENPAY.md`](./VISION_OPENPAY.md) (section 6) · [`POLITICA_DATOS.md`](./POLITICA_DATOS.md)
 >
-> Sin un modelo de amenaza, "es privado" y "es verificable" son frases de marketing.
-> Este documento define **contra quién**, **bajo qué supuestos** y **con qué prueba** se sostienen.
+> Without a threat model, "it is private" and "it is verifiable" are marketing phrases.
+> This document defines **against whom**, **under which assumptions** and **with which test** they hold.
 
 ---
 
-## 1. Alcance del MVP
+## 1. Scope of the MVP
 
-Flujo cubierto:
+Flow covered:
 
 ```
-Organización registra: Fondo → Contrato (presupuesto) → Proveedores autorizados
+Organization records: Fund → Contract (budget) → Authorized vendors
                                      ↓
-                    Pagos (registrados / importados del banco)
+                    Payments (recorded / imported from the bank)
                                      ↓
-      Hojas con sal → Árbol de Merkle por lote → raíz en CommitmentRegistry (Base)
+      Salted leaves → Merkle tree per batch → root in CommitmentRegistry (Base)
                                      ↓
-   Circuito Circom (Groth16) prueba X → portal público verifica en el navegador
-                 con la clave cuya huella está anclada en CommitmentRegistry
+   Circom circuit (Groth16) proves X → public portal verifies in the browser
+             with the key whose fingerprint is anchored in CommitmentRegistry
 ```
 
-Fuera del alcance del MVP: movimiento real de dinero, conflictos de interés, sobrecostos, actas de entrega, CUFE, divulgación selectiva completa, app móvil.
+Out of scope for the MVP: actual movement of money, conflicts of interest, overpricing, delivery certificates, CUFE (the Colombian e-invoice identifier), full selective disclosure, mobile app.
 
 ---
 
-## 2. Las afirmaciones
+## 2. The claims
 
-### X — lo que debe ser verificable (transparencia)
+### X — what must be verifiable (transparency)
 
-> **X(F, C, P):** "Durante el periodo P, todos los pagos registrados del contrato C del fondo F fueron a proveedores autorizados para C, y su suma no supera el presupuesto de C."
+> **X(F, C, P):** "During period P, every recorded payment of contract C of fund F went to vendors authorized for C, and their sum does not exceed C's budget."
 
-Descompuesta:
-- **X1** — Cada pago del lote pertenece a C y su destinatario está en la lista de proveedores autorizados de C (comprometida en una raíz propia).
-- **X2** — Σ montos de los pagos de C en P ≤ presupuesto(C).
-- **X3** — Los pagos usados en la prueba son exactamente los comprometidos en las raíces ancladas para P (no se omitió ni se inventó ninguno *respecto de lo registrado*).
+Broken down:
+- **X1** — Each payment in the batch belongs to C and its recipient is on C's authorized vendor list (committed in a root of its own).
+- **X2** — Σ amounts of C's payments in P ≤ budget(C).
+- **X3** — The payments used in the proof are exactly those committed in the roots anchored for P (none was omitted or invented *with respect to what was recorded*).
 
-### Y — lo que debe permanecer privado
+### Y — what must remain private
 
-> **Y1:** El monto de cualquier pago individual.
-> **Y2:** La identidad del proveedor que recibió un pago específico.
-> **Y3:** Que una persona o proveedor específico participó en el fondo (cuando su nivel es N2 o superior).
-> **Y4:** El número exacto de pagos y su ritmo (fechas individuales).
-> **Y5:** Cualquier dato N4 (beneficiarios vulnerables), incluso por inferencia.
+> **Y1:** The amount of any individual payment.
+> **Y2:** The identity of the vendor who received a specific payment.
+> **Y3:** That a specific person or vendor took part in the fund (when their level is N2 or higher).
+> **Y4:** The exact number of payments and their rhythm (individual dates).
+> **Y5:** Any N4 data (vulnerable beneficiaries), even by inference.
 
 ---
 
-## 3. Qué es público (lo que tiene el adversario)
+## 3. What is public (what the adversary has)
 
-El adversario conoce **todo** esto:
+The adversary knows **all** of this:
 
-| Fuente | Contenido |
+| Source | Content |
 |---|---|
-| Cadena (Base) | Raíces de Merkle, ID opaco de fondo y lote, timestamp del lote (redondeado), pruebas ZK y sus entradas públicas, hashes de `AccessGrant`/`AccessLog`, dirección del firmante |
-| Portal público | Nombre y propósito del fondo, organización, reglas (N0), agregados N1, resultado de verificación ✓/✗ |
-| Fuentes externas | SECOP II, RUES, noticias, redes sociales, extractos filtrados, conocimiento del sector |
-| Código | Todo el código de OpenPay (código abierto, principio de Kerckhoffs) |
+| Chain (Base) | Merkle roots, opaque fund and batch ID, batch timestamp (rounded), ZK proofs and their public inputs, hashes of `AccessGrant`/`AccessLog`, signer address |
+| Public portal | Fund name and purpose, organization, rules (N0), N1 aggregates, verification result ✓/✗ |
+| External sources | SECOP II (public procurement), RUES (business registry), news, social media, leaked statements, sector knowledge |
+| Code | All of OpenPay's code (open source, Kerckhoffs's principle) |
 
-**Entradas públicas de la prueba ZK (y nada más)** — implementado en `packages/circuits/circuits/authorized_within_budget.circom`:
-- `batchRoot`: raíz del lote de pagos (64 hojas, relleno con ceros)
-- `vendorSetRoot`: raíz de los proveedores autorizados
-- `budgetLimit`: tope del rubro (N1, público por política)
-- la prueba en sí no tiene salida `ok`: o existe y verifica, o no existe
+**Public inputs of the ZK proof (and nothing else)** — implemented in `packages/circuits/circuits/authorized_within_budget.circom`:
+- `batchRoot`: root of the payment batch (64 leaves, zero-padded)
+- `vendorSetRoot`: root of the authorized vendors
+- `budgetLimit`: budget line limit (N1, public by policy)
+- the proof itself has no `ok` output: either it exists and verifies, or it does not exist
 
-El fondo y el período no son entradas del circuito: van en el `subject` y la fecha del anclaje en `CommitmentRegistry`. Diferencias con el diseño 0.1, pendientes para cuando haya varios lotes por período: el circuito cubre **un** lote (no `raiz_pagos[]`), y el tope es público (no hay `commitment(presupuesto)` para contratos N2+).
+The fund and the period are not circuit inputs: they go in the `subject` and the anchoring date in `CommitmentRegistry`. Differences from design 0.1, pending for when there are several batches per period: the circuit covers **one** batch (not `raiz_pagos[]`), and the limit is public (there is no `commitment(budget)` for N2+ contracts).
 
 ---
 
-## 4. Supuestos de confianza
+## 4. Trust assumptions
 
-| # | Supuesto | Qué pasa si falla |
+| # | Assumption | What happens if it fails |
 |---|---|---|
-| S1 | Las primitivas criptográficas (keccak/SHA-256, Groth16) son seguras | Se rompe todo |
-| S2 | El circuito Circom es correcto y la ceremonia Groth16 fue honesta. **Hoy la ceremonia es de un solo participante** ([`CEREMONIA.md`](./CEREMONIA.md)): quien la corrió podría fabricar pruebas falsas | Se podrían "probar" afirmaciones falsas |
-| S3 | Base no reescribe su historial más allá de la finalidad | Se podrían cambiar raíces ancladas |
-| S4 | Las sales son aleatorias (CSPRNG, 32 bytes) y nunca salen de la base privada | Hashes adivinables por fuerza bruta → se rompe Y1/Y2 |
-| S5 | **La organización registra los pagos reales** (en el MVP no hay conexión bancaria verificada) | X es cierta sobre lo registrado, no necesariamente sobre la realidad |
-| S6 | Postgres/Supabase aplica RLS correctamente y las credenciales no están comprometidas | Fuga de N2-N4 (ver `SEGURIDAD_INCIDENTES.md`: INC-001 e INC-002, cerrados) |
+| S1 | The cryptographic primitives (keccak/SHA-256, Groth16) are secure | Everything breaks |
+| S2 | The Circom circuit is correct and the Groth16 ceremony was honest. **Today the ceremony has a single participant** ([`CEREMONIA.md`](./CEREMONIA.md)): whoever ran it could forge proofs | False claims could be "proven" |
+| S3 | Base does not rewrite its history beyond finality | Anchored roots could be changed |
+| S4 | Salts are random (CSPRNG, 32 bytes) and never leave the private database | Hashes guessable by brute force → Y1/Y2 break |
+| S5 | **The organization records the real payments** (the MVP has no verified bank connection) | X is true about what was recorded, not necessarily about reality |
+| S6 | Postgres/Supabase applies RLS correctly and credentials are not compromised | Leak of N2-N4 (see `SEGURIDAD_INCIDENTES.md`: INC-001 and INC-002, closed) |
 
-> ⚠️ **Límite honesto del MVP (S5):** la prueba garantiza que *lo registrado* cumple la regla y que *lo registrado no se alteró después de anclarse*. No garantiza que lo registrado coincida con el banco. Eso se cierra en fases posteriores con extractos firmados, confirmaciones bancarias y CUFE. **Hay que decirlo así en la presentación.**
-
----
-
-## 5. Adversarios
-
-| Adversario | Capacidades | Objetivo | Propiedad amenazada |
-|---|---|---|---|
-| **A1 — Público curioso / analista de cadena** | Todo lo público (sección 3), herramientas de análisis, fuerza bruta razonable | Reconstruir montos, proveedores, patrones | Y1-Y5 |
-| **A2 — Extorsionador / grupo armado** | Lo de A1 + conocimiento local (quién es contratista en qué municipio) | Identificar quién recibe dinero y cuánto | Y2, Y3, Y5 |
-| **A3 — Competidor comercial** | Lo de A1 + sus propios precios | Deducir precios y márgenes del proveedor | Y1, Y2 |
-| **A4 — Administrador corrupto** | Acceso de escritura a los datos de su organización | Pagar a quien no debe o por encima del presupuesto y obtener un ✓ | X1, X2, X3 |
-| **A5 — Operador de OpenPay malicioso o comprometido** | Acceso a la infraestructura, puede generar pruebas y firmar anclajes | Emitir ✓ falsos o alterar registros ya anclados | X1-X3 |
-| **A6 — Auditor abusivo** | Llave N2 legítima | Usar el acceso fuera de su propósito o después de vencer | Y1-Y3 |
-| **A7 — Atacante externo** | Credenciales robadas, vulnerabilidades web | Leer o modificar la base privada | Y1-Y5, X3 |
+> ⚠️ **Honest limit of the MVP (S5):** the proof guarantees that *what was recorded* follows the rule and that *what was recorded was not altered after being anchored*. It does not guarantee that what was recorded matches the bank. That is closed in later phases with signed statements, bank confirmations and CUFE. **It has to be said this way when presenting.**
 
 ---
 
-## 6. Ataques y mitigaciones
+## 5. Adversaries
 
-### Contra la privacidad (Y)
-
-| Ataque | Contra | Mitigación | Estado |
+| Adversary | Capabilities | Goal | Property threatened |
 |---|---|---|---|
-| Fuerza bruta a un hash sin sal (pocos montos/proveedores posibles) | Y1, Y2 | Sal de 32 bytes por hoja (S4), `gen_random_bytes(32)` en la base | Implementado — PP |
-| Contar hojas del árbol → número de pagos | Y4 | Lotes rellenados a tamaño fijo (64 hojas, relleno con ceros; la raíz no delata cuántas son reales) | Implementado — PP |
-| Correlacionar timestamps de anclaje con fechas de pagos conocidas | Y4, Y2 | Una raíz por lote, anclada después de cerrar el período. El timestamp del bloque es exacto (no se puede redondear en la cadena): lo que protege es anclar en fechas que no dependan de los pagos | Parcial — PP comprueba el lote demo; falta automatizar el anclaje a fecha fija |
-| Restar agregados publicados | Y1 | Reglas de agregados (POLITICA_DATOS §4): k ≥ 10, sin celdas dominantes, sin diferencias explotables, publicación periódica | Diseño |
-| Deducir un pago por el cambio del agregado entre dos publicaciones | Y1 | Publicación periódica + redondeo | Diseño |
-| Presupuesto público − agregado ejecutado con un solo pago en el periodo | Y1 | No publicar ejecución de un contrato con menos de k pagos en el periodo | Diseño |
-| Entradas públicas de la prueba filtran datos | Y1-Y4 | Lista cerrada de entradas públicas (§3); revisión de cada circuito | Implementado — PP |
-| Direcciones on-chain vinculables a la organización | Y3 | El firmante es de OpenPay, no de cada organización; IDs de fondo opacos | Diseño |
-| Auditor usa la llave fuera de propósito | Y1-Y3 | Llaves con alcance y vencimiento; `AccessLog` anclado; aprobación por otra persona | Fase 5 |
-| Robo de la base privada | Y1-Y5 | RLS, cifrado por campo, rotación de credenciales, escaneo de secretos | Parcial (INC-001/002 cerrados; falta auditoría externa) |
-
-### Contra la transparencia (X)
-
-| Ataque | Contra | Mitigación | Estado |
-|---|---|---|---|
-| Probar sobre una lista de pagos incompleta | X3 | El circuito recalcula la raíz desde **todas** las hojas del lote; el portal comprueba que esa raíz está anclada en `CommitmentRegistry` | Implementado para un lote — PT. Varios lotes por período: pendiente |
-| Cambiar pagos después de anclarlos | X3 | Raíz inmutable en Base (S3) | Implementado — PT |
-| Agregar un proveedor autorizado "a última hora" | X1 | La lista de proveedores también se compromete y se ancla con fecha; el cambio queda visible como nueva raíz | Implementado — PT |
-| Subir el presupuesto después de pagar | X2 | Presupuesto comprometido y anclado al crear el contrato; cambios quedan como nueva versión visible | Diseño |
-| OpenPay emite un ✓ sin prueba válida | X | El portal **no** muestra el ✓ de la base de datos: verifica en el navegador con snarkjs y consulta el anclaje por un nodo público de Base | Implementado — PT |
-| Pagos por fuera del sistema (nunca registrados) | X | **No mitigado en el MVP** (S5). Futuro: conciliación con extractos firmados / confirmación bancaria | Pendiente |
-| Firmante de OpenPay comprometido ancla raíces falsas | X3 | Multisig para el firmante; la organización también firma sus raíces | Fase 3+ |
+| **A1 — Curious public / chain analyst** | Everything public (section 3), analysis tools, reasonable brute force | Reconstruct amounts, vendors, patterns | Y1-Y5 |
+| **A2 — Extortionist / armed group** | A1 + local knowledge (who is a contractor in which municipality) | Identify who receives money and how much | Y2, Y3, Y5 |
+| **A3 — Commercial competitor** | A1 + their own prices | Deduce the vendor's prices and margins | Y1, Y2 |
+| **A4 — Corrupt administrator** | Write access to their organization's data | Pay someone they should not, or above budget, and get a ✓ | X1, X2, X3 |
+| **A5 — Malicious or compromised OpenPay operator** | Access to the infrastructure, can generate proofs and sign anchorings | Issue false ✓ or alter records already anchored | X1-X3 |
+| **A6 — Abusive auditor** | Legitimate N2 key | Use the access outside its purpose or after it expires | Y1-Y3 |
+| **A7 — External attacker** | Stolen credentials, web vulnerabilities | Read or modify the private database | Y1-Y5, X3 |
 
 ---
 
-## 7. Pruebas de aceptación
+## 6. Attacks and mitigations
 
-Ninguna fase se da por terminada sin pasar las dos. Deben ser **reproducibles por un tercero** con un script del repo.
+### Against privacy (Y)
 
-### PT — Prueba de transparencia
+| Attack | Against | Mitigation | Status |
+|---|---|---|---|
+| Brute force of an unsalted hash (few possible amounts/vendors) | Y1, Y2 | 32-byte salt per leaf (S4), `gen_random_bytes(32)` in the database | Implemented — PP |
+| Counting tree leaves → number of payments | Y4 | Batches padded to a fixed size (64 leaves, zero-padded; the root does not give away how many are real) | Implemented — PP |
+| Correlating anchoring timestamps with known payment dates | Y4, Y2 | One root per batch, anchored after the period closes. The block timestamp is exact (it cannot be rounded on-chain): what protects is anchoring on dates that do not depend on the payments | Partial — PP checks the demo batch; anchoring on a fixed date is not automated yet |
+| Subtracting published aggregates | Y1 | Aggregate rules (POLITICA_DATOS §4): k ≥ 10, no dominant cells, no exploitable differences, periodic publication | Design |
+| Deducing a payment from the change in an aggregate between two publications | Y1 | Periodic publication + rounding | Design |
+| Public budget − executed aggregate with a single payment in the period | Y1 | Do not publish execution of a contract with fewer than k payments in the period | Design |
+| Public inputs of the proof leak data | Y1-Y4 | Closed list of public inputs (§3); review of every circuit | Implemented — PP |
+| On-chain addresses linkable to the organization | Y3 | The signer belongs to OpenPay, not to each organization; opaque fund IDs | Design |
+| Auditor uses the key outside its purpose | Y1-Y3 | Keys with scope and expiry; anchored `AccessLog`; approval by a different person | Phase 5 |
+| Theft of the private database | Y1-Y5 | RLS, per-field encryption, credential rotation, secret scanning | Partial (INC-001/002 closed; external audit missing) |
 
-**Objetivo:** un tercero verifica X sin confiar en OpenPay.
+### Against transparency (X)
 
-Procedimiento:
-1. El verificador obtiene de la cadena, **sin usar la API de OpenPay**, las raíces de los lotes del periodo P y la prueba publicada.
-2. Ejecuta el verificador (snarkjs, en su máquina o en el portal) con la clave de verificación cuya huella está anclada.
-3. Comprueba que las entradas públicas de la prueba coinciden con las raíces ancladas.
+| Attack | Against | Mitigation | Status |
+|---|---|---|---|
+| Proving over an incomplete list of payments | X3 | The circuit recomputes the root from **all** the leaves of the batch; the portal checks that this root is anchored in `CommitmentRegistry` | Implemented for one batch — PT. Several batches per period: pending |
+| Changing payments after anchoring them | X3 | Immutable root on Base (S3) | Implemented — PT |
+| Adding an authorized vendor "at the last minute" | X1 | The vendor list is also committed and anchored with a date; the change is visible as a new root | Implemented — PT |
+| Raising the budget after paying | X2 | Budget committed and anchored when the contract is created; changes show up as a new visible version | Design |
+| OpenPay issues a ✓ without a valid proof | X | The portal does **not** show the ✓ from the database: it verifies in the browser with snarkjs and queries the anchoring through a public Base node | Implemented — PT |
+| Payments outside the system (never recorded) | X | **Not mitigated in the MVP** (S5). Future: reconciliation with signed statements / bank confirmation | Pending |
+| Compromised OpenPay signer anchors false roots | X3 | Multisig for the signer; the organization also signs its roots | Phase 3+ |
 
-Criterio de aceptación:
-- ✅ Una prueba válida devuelve `ok = 1` usando solo datos públicos.
-- ✅ **Casos negativos** (con datos de prueba): un pago a un proveedor no autorizado, un total por encima del presupuesto, y un pago omitido del lote → **no** se puede generar una prueba que verifique como `ok = 1`.
-- ✅ Modificar un pago después de anclado → la prueba nueva no coincide con la raíz anclada.
-- ✅ El portal público muestra el mismo resultado que el verificador independiente.
+---
 
-Script: `packages/circuits/test/acceptance/transparency.test.ts` (va en `circuits` y no en `contracts` porque necesita el circuito y snarkjs; la cadena la lee con `eth_call` crudo).
+## 7. Acceptance tests
 
-### PP — Prueba de privacidad
+No phase is considered finished without passing both. They must be **reproducible by a third party** with a script from the repo.
 
-**Objetivo:** con todo lo público no se deduce Y mejor que antes de observarlo.
+### PT — Transparency test
 
-Procedimiento (juego de indistinguibilidad simplificado):
-1. Se generan dos escenarios de datos **A** y **B** que difieren solo en Y (p. ej. el monto de un pago, o qué proveedor lo recibió), con el mismo resultado de X y los mismos agregados publicables.
-2. Se publica todo lo que OpenPay publicaría para A o para B, elegido al azar.
-3. Un "atacante" (script + revisión manual de otra persona del equipo) recibe **todo** lo público y trata de decir si es A o B.
+**Goal:** a third party verifies X without trusting OpenPay.
 
-Criterio de aceptación:
-- ✅ El atacante no acierta más del ~50% en muchas repeticiones.
-- ✅ Revisión manual: ningún evento on-chain, entrada pública, respuesta de API sin autenticación o página del portal contiene datos N2-N4 (búsqueda de montos, nombres, NIT e IDs de prueba en todo lo publicado).
-- ✅ Fuerza bruta: con una lista de montos y proveedores posibles, no se reproduce ninguna hoja del árbol.
-- ✅ Contar hojas o comparar timestamps no revela el número ni las fechas de los pagos.
-- ✅ Los agregados cumplen las reglas de `POLITICA_DATOS.md` §4 (test automático sobre la vista).
+Procedure:
+1. The verifier obtains from the chain, **without using OpenPay's API**, the roots of the batches of period P and the published proof.
+2. They run the verifier (snarkjs, on their machine or in the portal) with the verification key whose fingerprint is anchored.
+3. They check that the public inputs of the proof match the anchored roots.
 
-Script: `packages/circuits/test/acceptance/privacy.test.ts`. El criterio de agregados lo cubren las pruebas SQL T42-T44 (`30_mandates.sql`) y R42-R45 (`40_reconciliation.sql`) en `packages/web/supabase/tests/`.
+Acceptance criteria:
+- ✅ A valid proof returns `ok = 1` using public data only.
+- ✅ **Negative cases** (with test data): a payment to an unauthorized vendor, a total above the budget, and a payment omitted from the batch → it is **not** possible to generate a proof that verifies as `ok = 1`.
+- ✅ Modifying a payment after it is anchored → the new proof does not match the anchored root.
+- ✅ The public portal shows the same result as the independent verifier.
 
-### Estado — 23/09/2026: las dos pasan
+Script: `packages/circuits/test/acceptance/transparency.test.ts` (it lives in `circuits` and not in `contracts` because it needs the circuit and snarkjs; it reads the chain with a raw `eth_call`).
 
-Cómo reproducirlo (cualquiera, con el repositorio y conexión a internet):
+### PP — Privacy test
+
+**Goal:** with everything public, Y cannot be deduced any better than before observing it.
+
+Procedure (simplified indistinguishability game):
+1. Two data scenarios **A** and **B** are generated that differ only in Y (e.g. the amount of a payment, or which vendor received it), with the same result for X and the same publishable aggregates.
+2. Everything OpenPay would publish for A or for B, chosen at random, is published.
+3. An "attacker" (a script + manual review by a second person) receives **everything** public and tries to say whether it is A or B.
+
+Acceptance criteria:
+- ✅ The attacker is not right more than ~50% of the time over many repetitions.
+- ✅ Manual review: no on-chain event, public input, unauthenticated API response or portal page contains N2-N4 data (search for test amounts, names, tax IDs and IDs in everything published).
+- ✅ Brute force: with a list of possible amounts and vendors, no leaf of the tree can be reproduced.
+- ✅ Counting leaves or comparing timestamps reveals neither the number nor the dates of the payments.
+- ✅ Aggregates follow the rules of `POLITICA_DATOS.md` §4 (automated test on the view).
+
+Script: `packages/circuits/test/acceptance/privacy.test.ts`. The aggregate criterion is covered by SQL tests T42-T44 (`30_mandates.sql`) and R42-R45 (`40_reconciliation.sql`) in `packages/web/supabase/tests/`.
+
+### Status — 2026-09-23: both pass
+
+How to reproduce it (anyone, with the repository and an internet connection):
 
 ```sh
 cd packages/circuits
 npm install
-sh scripts/setup-tools.sh               # baja circom y comprueba su hash
-sh scripts/build.sh --solo-compilar     # compilar es determinista; no toca claves
-npm run aceptacion                      # 95 pruebas: 42 unitarias + 25 PT + 28 PP, ~1,5 min
-sh ../web/supabase/tests/run.sh         # agregados (necesita Docker)
+sh scripts/setup-tools.sh               # downloads circom and checks its hash
+sh scripts/build.sh --solo-compilar     # compiling is deterministic; it touches no keys
+npm run aceptacion                      # 95 tests: 42 unit + 25 PT + 28 PP, ~1.5 min
+sh ../web/supabase/tests/run.sh         # aggregates (needs Docker)
 ```
 
-Con `OPENPAY_SIN_RED=1` se saltan las lecturas de la cadena y del portal (no vale como aceptación).
+With `OPENPAY_SIN_RED=1` the reads from the chain and from the portal are skipped (that does not count as acceptance).
 
-Lo que usa el tercero: la prueba de ejemplo (`test/acceptance/fixtures/demo-proof.json`), la clave que sirve el portal (`packages/web/public/zk/verification_key.json`) y `CommitmentRegistry` en Base Sepolia (`0xCde0Eed0E0c4876f1e9A57F49f5b8E4Af06b350B`, código verificado en Basescan), leído por `https://sepolia.base.org`. Nada de la API ni de la base de OpenPay.
+What the third party uses: the example proof (`test/acceptance/fixtures/demo-proof.json`), the key served by the portal (`packages/web/public/zk/verification_key.json`) and `CommitmentRegistry` on Base Sepolia (`0xCde0Eed0E0c4876f1e9A57F49f5b8E4Af06b350B`, source verified on Basescan), read through `https://sepolia.base.org`. Nothing from OpenPay's API or database.
 
-**PT.** La prueba verifica con snarkjs directo; la raíz del lote, la de proveedores y la huella de la clave están ancladas, cada una con su tipo. Un tramposo que conoce **todos** los datos del lote, sales incluidas, no consigue un testigo válido contra lo publicado en ninguno de los cuatro casos negativos (proveedor no autorizado, total sobre el tope, pago omitido, pago modificado). Cada caso tiene un control que muestra que el mismo testigo sí pasa contra sus propias raíces, que no están ancladas. El portal da el mismo veredicto que el verificador independiente en los cuatro casos probados.
+**PT.** The proof verifies with snarkjs directly; the batch root, the vendor root and the key fingerprint are anchored, each with its kind. A cheater who knows **all** the data of the batch, salts included, cannot obtain a valid witness against what was published in any of the four negative cases (unauthorized vendor, total over the limit, omitted payment, modified payment). Each case has a control showing that the same witness does pass against its own roots, which are not anchored. The portal gives the same verdict as the independent verifier in the four cases tested.
 
-**PP.** Juego de indistinguibilidad, 400 rondas por juego, techo de aceptación 60 % (adivinar = 50 %, desviación 2,5 %):
+**PP.** Indistinguishability game, 400 rounds per game, acceptance ceiling 60% (guessing = 50%, standard deviation 2.5%):
 
-| Y que difiere entre A y B | Atacante con diccionario de sales | Mismo atacante con sales débiles (control) | Atacante que busca sesgo en los bits |
+| Y that differs between A and B | Attacker with a salt dictionary | Same attacker with weak salts (control) | Attacker looking for bias in the bits |
 |---|---|---|---|
-| Y1 — monto de un pago | 48,3 % | 100 % | 50,5 % |
-| Y2 — proveedor de un pago | 51,0 % | 100 % | 50,2 % |
-| Y3 — fecha de un pago | 46,5 % | 100 % | 51,5 % |
-| Y4 — número de pagos (7 contra 6) | 51,7 % | 100 % | 50,5 % |
+| Y1 — amount of a payment | 48.3% | 100% | 50.5% |
+| Y2 — vendor of a payment | 51.0% | 100% | 50.2% |
+| Y3 — date of a payment | 46.5% | 100% | 51.5% |
+| Y4 — number of payments (7 versus 6) | 51.7% | 100% | 50.5% |
 
-Fuerza bruta de hojas, sabiendo todo menos la sal (1.259 sales candidatas por pago): 0 de 7 hojas con sales aleatorias; 7 de 7 con las sales de la demo (control). Búsqueda de montos, fechas, ids, sales y hojas en la prueba publicada, en todo lo anclado y en el HTML de `/verificar`: nada. El lote se ancló una sola vez y después de cerrar su mes.
+Brute force of leaves, knowing everything but the salt (1,259 candidate salts per payment): 0 of 7 leaves with random salts; 7 of 7 with the demo salts (control). Search for amounts, dates, ids, salts and leaves in the published proof, in everything anchored and in the HTML of `/verificar`: nothing. The batch was anchored once only, and after its month had closed.
 
-**Lo que estas pruebas no cubren** (y hay que decirlo):
-- La **revisión manual por otra persona del equipo** que pide el procedimiento de PP: pendiente (Nicolás).
-- El conocimiento cero de Groth16 se supone (es un teorema del esquema), no se mide; y como la ceremonia es de un solo participante, la solidez de PT también depende de S2.
-- Se probó con **un** lote de ejemplo, con datos inventados. Las sales de la demo son patrones a propósito: la demo no sirve como ejemplo de privacidad, y PP lo muestra.
-- Respuestas de la API sin autenticación: cubiertas por las pruebas de RLS en SQL, no por estos scripts.
+**What these tests do not cover** (and it has to be said):
+- The **manual review by a second person** that the PP procedure asks for: pending.
+- Zero knowledge of Groth16 is assumed (it is a theorem of the scheme), not measured; and since the ceremony has a single participant, the soundness of PT also depends on S2.
+- It was tested with **one** example batch, with made-up data. The demo salts are deliberately patterned: the demo is not an example of privacy, and PP shows it.
+- Unauthenticated API responses: covered by the RLS tests in SQL, not by these scripts.
 
-### Redacción de las garantías (usar esta, no otra)
+### Wording of the guarantees (use this one, no other)
 
-- **Transparencia:** "La validez de X puede ser comprobada criptográficamente por un tercero independiente, sin confiar en OpenPay como autoridad sobre el resultado, **respecto de los pagos registrados y anclados**."
-- **Privacidad:** "Bajo el modelo de amenaza definido (adversarios A1-A3 con acceso a toda la información pública), la información pública de OpenPay no permite inferir Y1-Y5 con una ventaja significativa respecto de la información disponible antes de observarla."
-
----
-
-## 8. Riesgos residuales conocidos (decirlos siempre)
-
-1. **Dato de entrada falso (S5):** el MVP verifica lo registrado, no la realidad bancaria.
-2. **Contratos públicos:** si el contrato ya es público en SECOP II con su valor y su contratista único, Y2 no aplica para ese contrato (la información ya es pública por ley). La privacidad protege a los proveedores de contratos privados y a los beneficiarios.
-3. **Organizaciones pequeñas:** con muy pocos pagos, los agregados se suprimen y hay menos que mostrar al público.
-4. **Metadatos fuera de OpenPay:** extractos bancarios, correos o conversaciones pueden revelar Y sin pasar por el sistema.
-5. **Dependencia del circuito y de la ceremonia:** un error en el circuito Circom, en circomlib o en snarkjs afecta la validez; las versiones están fijadas (circom 2.1.9 con hash comprobado). La ceremonia de un solo participante permite, a quien la corrió, fabricar pruebas falsas: antes de cualquier uso real hay que hacerla multiparte ([`CEREMONIA.md`](./CEREMONIA.md)).
-6. **Credenciales:** INC-001 e INC-002 están cerrados; sigue sin haber una auditoría de seguridad externa.
+- **Transparency:** "The validity of X can be cryptographically checked by an independent third party, without trusting OpenPay as an authority on the result, **with respect to the payments recorded and anchored**."
+- **Privacy:** "Under the defined threat model (adversaries A1-A3 with access to all public information), OpenPay's public information does not allow Y1-Y5 to be inferred with a significant advantage over the information available before observing it."
 
 ---
 
-## 9. Revisión
+## 8. Known residual risks (always state them)
 
-Este modelo se revisa:
-- Al agregar cualquier dato nuevo a la cadena o al portal.
-- Al agregar una regla ZK nueva (cada regla define su X y sus entradas públicas).
-- Antes del piloto (Fase 4), con asesoría externa.
+1. **False input data (S5):** the MVP verifies what was recorded, not banking reality.
+2. **Public contracts:** if the contract is already public in SECOP II with its value and its single contractor, Y2 does not apply to that contract (the information is already public by law). Privacy protects the vendors of private contracts and the beneficiaries.
+3. **Small organizations:** with very few payments, aggregates are suppressed and there is less to show the public.
+4. **Metadata outside OpenPay:** bank statements, emails or conversations can reveal Y without going through the system.
+5. **Dependence on the circuit and the ceremony:** a bug in the Circom circuit, in circomlib or in snarkjs affects validity; versions are pinned (circom 2.1.9 with a checked hash). The single-participant ceremony lets whoever ran it forge proofs: before any real use it must be made multi-party ([`CEREMONIA.md`](./CEREMONIA.md)).
+6. **Credentials:** INC-001 and INC-002 are closed; there is still no external security audit.
+
+---
+
+## 9. Review
+
+This model is reviewed:
+- When any new data is added to the chain or to the portal.
+- When a new ZK rule is added (each rule defines its X and its public inputs).
+- Before the pilot (Phase 4), with external advice.

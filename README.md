@@ -42,7 +42,7 @@ This circuit instead **recomputes the batch root from all 64 leaves** and compar
 | [`packages/contracts`](packages/contracts) | `CommitmentRegistry.sol` (Solidity 0.8.24, Hardhat) and the off-chain commitment format (`src/commitment.ts`) shared with the circuit |
 | [`packages/web`](packages/web) | Next.js 15 app: the public verifier, the organization UI, and the Supabase schema (`supabase/migrations`) with its SQL test suite |
 | [`packages/mobile`](packages/mobile) | Expo app from an earlier version of the project. Frozen, not part of the current product |
-| [`docs`](docs) | Vision, threat model, data policy, ceremony notes, security incidents (in Spanish) |
+| [`docs`](docs) | Vision, threat model, data policy, ceremony notes and security incidents, in English. File names and a few internal working notes (project status, plans, interview guide) are in Spanish |
 
 **Stack:** Circom 2.1.9 · snarkjs (Groth16) · Poseidon · Solidity · Hardhat · Base (OP Stack L2) · ethers v6 · Next.js 15 · TypeScript · Supabase (Postgres, RLS, Auth) · Vercel.
 
@@ -115,6 +115,6 @@ More context: [`docs/VISION_OPENPAY.md`](docs/VISION_OPENPAY.md) · [`docs/POLIT
 
 ---
 
-## Authors
+## Author
 
-Built by **Sebastián Murcia Sánchez** and **Nicolás Castillo**.
+Designed and built by **Sebastián Murcia Sánchez**.

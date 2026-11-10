@@ -1,73 +1,75 @@
-# OpenPay — Visión, filosofía, arquitectura y hoja de ruta
+# OpenPay — Vision, philosophy, architecture and roadmap
 
-> Autores: Sebastián Murcia Sánchez · Nicolás Castillo
-> Última actualización: 16/09/2026
-> Estado: **✅ visión oficial, acordada por Sebastián y Nicolás el 16/09/2026.**
-> Reemplaza el plan "efectivo digital" (Arbitrum + DAI + Railgun, mayo 2026).
-> Complementa [`PLAN_OPENPAY_ZK.md`](./PLAN_OPENPAY_ZK.md), que conserva la revisión de código y el checklist de seguridad.
-
----
-
-## 1. Qué es OpenPay
-
-### Lema
-
-> **OpenPay — Privado como el efectivo. Verificable como un libro contable.**
-
-Versión completa:
-
-> **"OpenPay: privado como el efectivo para las personas, verificable como un libro contable para quien administra dinero ajeno."**
-
-Versión corta para producto:
-
-> **"Privacidad para tu dinero. Trazabilidad para el dinero que administras."**
-
-(Reemplaza el slogan anterior "Finanzas claras, corrupción cero", que prometía algo absoluto.)
-
-### Tesis
-
-> **"La transparencia es para el poder, la privacidad es para las personas, y la criptografía permite no tener que elegir."**
-
-### Definición (para un profesor, jurado o inversionista)
-
-> "OpenPay es una infraestructura financiera que busca hacer verificable el uso del dinero ajeno sin convertir el dinero propio en información pública. Utiliza trazabilidad, controles de acceso, compromisos criptográficos y pruebas de conocimiento cero para demostrar que determinadas reglas financieras se cumplen revelando la menor cantidad de información posible."
-
-### La promesa (y lo que no promete)
-
-> **"OpenPay no pide que confíes en que es transparente o privado. Diseña el sistema para que puedas comprobar ambas propiedades."**
-
-OpenPay **no elimina la corrupción**. Reduce el espacio para ocultarla en el recorrido del dinero y da a auditores, donantes y ciudadanos evidencia verificable, sin sacrificar la privacidad de las personas. La tecnología no determina por sí sola que hubo corrupción: hace más difícil ocultar inconsistencias y más fácil demostrar qué ocurrió.
-
----
-
-## 2. El principio fundamental: dinero propio vs. dinero ajeno
-
-> **Privacidad sobre el dinero propio. Transparencia sobre la administración del dinero ajeno.**
+> Author: Sebastián Murcia Sánchez
+> Last updated: 2026-09-16
+> Status: **✅ official vision, adopted on 2026-09-16.**
+> Replaces the "digital cash" plan (Arbitrum + DAI + Railgun, May 2026).
+> Complements [`PLAN_OPENPAY_ZK.md`](./PLAN_OPENPAY_ZK.md) (in Spanish), which keeps the code review and the security checklist.
 >
-> OpenPay protege la privacidad de quien posee el dinero y aumenta la verificabilidad de quien lo administra.
+> Legal and institutional references are Colombian: Law 1581 (personal data protection), Law 1712 (transparency and access to public information), SARLAFT (anti-money-laundering regime), SECOP II (public procurement platform), DIAN (tax authority), CUFE (e-invoice identifier), RUB (beneficial ownership registry), SEDPE (licensed e-money institution).
+
+---
+
+## 1. What OpenPay is
+
+### Tagline
+
+> **OpenPay — Private like cash. Verifiable like a ledger.**
+
+Full version:
+
+> **"OpenPay: private like cash for people, verifiable like a ledger for whoever manages other people's money."**
+
+Short product version:
+
+> **"Privacy for your money. Traceability for the money you manage."**
+
+(Replaces the earlier slogan "Clear finances, zero corruption", which promised something absolute.)
+
+### Thesis
+
+> **"Transparency is for power, privacy is for people, and cryptography means we do not have to choose."**
+
+### Definition (for a professor, a reviewer or an investor)
+
+> "OpenPay is a financial infrastructure that aims to make the use of other people's money verifiable without turning one's own money into public information. It uses traceability, access controls, cryptographic commitments and zero-knowledge proofs to show that certain financial rules are followed while revealing as little information as possible."
+
+### The promise (and what it does not promise)
+
+> **"OpenPay does not ask you to trust that it is transparent or private. It designs the system so that you can check both properties."**
+
+OpenPay **does not eliminate corruption**. It reduces the room to hide it along the path of the money and gives auditors, donors and citizens verifiable evidence, without sacrificing people's privacy. Technology does not determine by itself that corruption took place: it makes inconsistencies harder to hide and makes it easier to show what happened.
+
+---
+
+## 2. The fundamental principle: your own money vs. other people's money
+
+> **Privacy over your own money. Transparency over the management of other people's money.**
+>
+> OpenPay protects the privacy of whoever owns the money and increases the verifiability of whoever manages it.
 
 ```
                  OPENPAY
                     │
           ┌─────────┴─────────┐
           ↓                   ↓
-    DINERO PROPIO        DINERO AJENO
+      OWN MONEY        OTHER PEOPLE'S MONEY
           ↓                   ↓
-      PRIVACIDAD       VERIFICABILIDAD
+       PRIVACY          VERIFIABILITY
           │                   │
           └─────────┬─────────┘
                     ↓
-                CONFIANZA
+                  TRUST
 ```
 
-### 🧑 Dinero propio → privacidad
-Si el dinero es tuyo, tú decides quién conoce tus movimientos. OpenPay no convierte las finanzas personales en información pública. La blockchain está detrás de la infraestructura, pero eso no significa que todo sea visible para todos.
+### 🧑 Your own money → privacy
+If the money is yours, you decide who knows about your movements. OpenPay does not turn personal finances into public information. The blockchain sits behind the infrastructure, but that does not mean everything is visible to everyone.
 
-### 🏢 Dinero ajeno → responsabilidad
-Quien recibe y gestiona dinero de otros (persona, empresa, fundación, entidad) **debe poder demostrar qué hizo con él**:
+### 🏢 Other people's money → accountability
+Whoever receives and manages money from others (a person, a company, a foundation, an entity) **must be able to show what they did with it**:
 
 ```
-Fondos recibidos: $100M
+Funds received: $100M
         │
   ┌─────┼─────┐
   ↓     ↓     ↓
@@ -76,349 +78,349 @@ $40M  $30M  $30M
   A     B     C
 ```
 
-Cuánto recibió, de quién, cuándo, cuánto gastó, a quién pagó, para qué, qué saldo queda y cómo se relacionan los movimientos. **Eso es trazabilidad.**
+How much was received, from whom, when, how much was spent, who was paid, what for, what balance remains and how the movements relate to each other. **That is traceability.**
 
-### Los dos extremos que evitamos
-- **Privacidad absoluta** ("nadie tiene derecho a saber nada") → impide la rendición de cuentas sobre recursos de terceros.
-- **Transparencia absoluta** ("todos ven todas tus transacciones") → destruye la privacidad financiera.
+### The two extremes we avoid
+- **Absolute privacy** ("nobody has the right to know anything") → prevents accountability over third parties' resources.
+- **Absolute transparency** ("everyone sees all your transactions") → destroys financial privacy.
 
-### El papel del blockchain
-No es "usamos blockchain porque es innovador", sino:
-> "Utilizamos tecnologías de registro verificable para construir una infraestructura donde determinados movimientos financieros puedan ser auditados sin depender exclusivamente de la confianza en quien mantiene el registro."
+### The role of the blockchain
+Not "we use blockchain because it is innovative", but:
+> "We use verifiable-record technologies to build an infrastructure where certain financial movements can be audited without depending exclusively on trust in whoever keeps the record."
 
 ---
 
-## 3. Las cuatro puertas de la corrupción
+## 3. The four doors of corruption
 
-OpenPay no promete acabar con la corrupción: se enfoca en **cerrar las cuatro puertas más usadas**.
+OpenPay does not promise to end corruption: it focuses on **closing the four most used doors**.
 
-| Puerta | Qué debe poder probarse (sin exponer) |
+| Door | What must be provable (without exposing) |
 |---|---|
-| **Conflicto de interés** | Que no hay relación prohibida entre el administrador y el proveedor |
-| **Sobrecosto** | Que los precios pagados son razonables frente a referencias |
-| **Pago sin contrato o autorización** | Que cada pago corresponde a un contrato autorizado y respeta el presupuesto |
-| **Obra o servicio no entregado** | Que lo pagado se entregó (actas firmadas, evidencia) |
+| **Conflict of interest** | That there is no forbidden relationship between the administrator and the vendor |
+| **Overpricing** | That the prices paid are reasonable against references |
+| **Payment without a contract or authorization** | That each payment corresponds to an authorized contract and respects the budget |
+| **Work or service not delivered** | That what was paid for was delivered (signed certificates, evidence) |
 
-> "OpenPay protege la privacidad de las personas y exige verificabilidad a quien administra dinero ajeno: prueba sin exponer que no hay conflictos de interés, que cada pago corresponde a un contrato, que los precios son razonables y que lo pagado se entregó."
+> "OpenPay protects people's privacy and demands verifiability from whoever manages other people's money: it proves, without exposing, that there are no conflicts of interest, that each payment corresponds to a contract, that prices are reasonable and that what was paid for was delivered."
 
 ---
 
-## 4. Filosofía
+## 4. Philosophy
 
-### 4.1 Privacidad y transparencia no son opuestos
+### 4.1 Privacy and transparency are not opposites
 
-Las dos son formas de controlar el poder, desde lados distintos:
+Both are ways of controlling power, from different sides:
 
-- **La privacidad protege al débil frente al poderoso.**
-- **La transparencia hace que el poderoso responda ante el débil.**
+- **Privacy protects the weak from the powerful.**
+- **Transparency makes the powerful answer to the weak.**
 
-La pregunta real es **¿quién ve qué de quién?**
+The real question is **who sees what about whom?**
 
-|                          | Poderosos transparentes                     | Poderosos opacos                         |
+|                          | Transparent powerful                        | Opaque powerful                          |
 |--------------------------|---------------------------------------------|------------------------------------------|
-| **Ciudadanos privados**  | ✅ Lo ideal: rendición de cuentas y libertad | Corrupción, pero con libertad individual |
-| **Ciudadanos expuestos** | Sociedad de vigilancia mutua                | ❌ Lo peor: autoritarismo                 |
+| **Private citizens**     | ✅ The ideal: accountability and freedom     | Corruption, but with individual freedom  |
+| **Exposed citizens**     | A society of mutual surveillance            | ❌ The worst: authoritarianism            |
 
-**OpenPay empuja hacia el cuadrante bueno.**
+**OpenPay pushes towards the good quadrant.**
 
-### 4.2 Privacidad no es secreto: es flujo apropiado
+### 4.2 Privacy is not secrecy: it is appropriate flow
 
-Integridad contextual (Helen Nissenbaum): la privacidad se viola cuando la información sale del contexto donde era apropiada. Que el auditor vea un pago es apropiado; que aparezca en internet con el nombre del proveedor, no.
+Contextual integrity (Helen Nissenbaum): privacy is violated when information leaves the context where it was appropriate. The auditor seeing a payment is appropriate; that payment showing up on the internet with the vendor's name is not.
 
-### 4.3 La regla de oro
+### 4.3 The golden rule
 
-> **Cada dato debe responder: quién lo ve, qué exactamente ve, para qué lo ve, cuándo puede verlo y por cuánto tiempo.**
+> **Every piece of data must answer: who sees it, what exactly they see, what for, when they can see it and for how long.**
 
-Evita el error típico de blockchain: *"como podemos registrar todo, registremos todo"*. OpenPay plantea lo contrario:
+It avoids the typical blockchain mistake: *"since we can record everything, let's record everything"*. OpenPay proposes the opposite:
 
-> **"Registremos lo necesario y revelemos lo mínimo necesario."**
+> **"Record what is necessary and reveal the minimum necessary."**
 
-### 4.4 Lo que la tecnología cambió
+### 4.4 What technology changed
 
-Durante siglos, verificar exigía ver. **Las pruebas de conocimiento cero (ZK) rompen ese vínculo**: permiten probar una afirmación sin mostrar los datos que la sustentan. Esa es la oportunidad real de OpenPay, más que el blockchain.
+For centuries, verifying required seeing. **Zero-knowledge (ZK) proofs break that link**: they make it possible to prove a claim without showing the data that supports it. That is OpenPay's real opportunity, more than the blockchain.
 
-### 4.5 Daños de la transparencia mal hecha
-- **Exponer beneficiarios**: víctimas, desplazados, subsidios, donaciones médicas → estigma o riesgo.
-- **Extorsión**: publicar cuánto recibe un contratista y dónde opera lo vuelve blanco de "vacunas".
-- **Secretos comerciales**: publicar precios y márgenes destruye a un proveedor.
-- **Transparencia de fachada**: millones de datos que nadie entiende esconden lo importante.
-- **Permanencia**: lo publicado en blockchain no se borra.
-- **Metadatos**: horarios, frecuencias y relaciones entre direcciones revelan identidades.
+### 4.5 Harms of transparency done badly
+- **Exposing beneficiaries**: victims, displaced people, subsidies, medical donations → stigma or risk.
+- **Extortion**: publishing how much a contractor receives and where they operate makes them a target for protection rackets.
+- **Trade secrets**: publishing prices and margins destroys a vendor.
+- **Façade transparency**: millions of data points nobody understands hide what matters.
+- **Permanence**: what is published on a blockchain cannot be erased.
+- **Metadata**: schedules, frequencies and relationships between addresses reveal identities.
 
-### 4.6 Daños de la privacidad mal hecha
-- **Lavado y financiación ilegal.**
-- **Captura**: usar la "protección de datos" como excusa para no rendir cuentas.
-- **Impunidad**: sin evidencia verificable, palabra contra palabra.
+### 4.6 Harms of privacy done badly
+- **Money laundering and illegal financing.**
+- **Capture**: using "data protection" as an excuse not to be accountable.
+- **Impunity**: without verifiable evidence, it is one word against another.
 
-### 4.7 Privacidad que el regulador puede aceptar (horizonte largo)
+### 4.7 Privacy the regulator can accept (long horizon)
 
-El problema de Railgun y Tornado Cash es que no separan el dinero legítimo del ilícito. **Privacy Pools** (Buterin et al., 2023): con ZK, el usuario prueba que su dinero **no** viene de un conjunto marcado como ilícito, sin revelar su origen exacto.
+The problem with Railgun and Tornado Cash is that they do not separate legitimate money from illicit money. **Privacy Pools** (Buterin et al., 2023): with ZK, the user proves that their money does **not** come from a set flagged as illicit, without revealing its exact origin.
 
-Estado a sep. 2026 (verificar antes de usar): 0xbow en Ethereum mainnet desde mar. 2025 (~US$6M, ~1.500 usuarios), seed de US$3,5M (nov. 2025), integrado en la billetera Kohaku de la Ethereum Foundation. Limitaciones: el *Association Set Provider* es centralizado (0xbow) y opera con cripto, no pesos. → **Fase 7.**
-
----
-
-## 5. Los 8 principios de diseño (obligatorios)
-
-1. **Privado por defecto, transparente por mandato.** Los datos no son públicos solo porque exista una blockchain; se revelan cuando hay una razón legítima y definida.
-2. **Revelación mínima: probar > mostrar.** ❌ Mostrar todos los pagos. ✅ Probar que "el 100% de los pagos auditados son a proveedores autorizados".
-3. **Agregados públicos, individuos privados.** El ciudadano ve "92% del fondo ejecutado", no "Juan Pérez recibió $3.482.000". El auditor autorizado ve el detalle cuando corresponde.
-4. **Beneficiarios vulnerables nunca públicos.** Regla estructural, no configurable.
-5. **Vigilar a quienes vigilan.** Todo acceso a datos privados queda registrado: quién + qué + propósito + cuándo. El acceso también es auditable.
-6. **Acceso con propósito y vencimiento.** No "el auditor ve todo para siempre", sino "esta persona consulta estos datos, de este fondo, para esta auditoría, durante este periodo". Luego expira.
-7. **Nada personal en blockchain.** `Datos personales → base privada → hash / commitment / prueba → blockchain`.
-8. **Seguridad antes que transparencia.** Si revelar un dato genera un riesgo desproporcionado, no se revela. La transparencia es un medio para generar confianza, no un valor absoluto.
+Status as of Sep. 2026 (verify before using): 0xbow on Ethereum mainnet since Mar. 2025 (~US$6M, ~1,500 users), US$3.5M seed round (Nov. 2025), integrated into the Ethereum Foundation's Kohaku wallet. Limitations: the *Association Set Provider* is centralized (0xbow) and it works with crypto, not pesos. → **Phase 7.**
 
 ---
 
-## 6. Pruebas de aceptación (evitar la falsa garantía)
+## 5. The 8 design principles (mandatory)
 
-"Blockchain + ZK" no garantiza nada por sí solo. **Ninguna fase avanza sin pasar estas dos pruebas.**
+1. **Private by default, transparent by mandate.** Data is not public just because a blockchain exists; it is revealed when there is a legitimate, defined reason.
+2. **Minimal disclosure: proving > showing.** ❌ Showing all the payments. ✅ Proving that "100% of the audited payments went to authorized vendors".
+3. **Public aggregates, private individuals.** The citizen sees "92% of the fund executed", not "Juan Pérez received $3,482,000". The authorized auditor sees the detail when appropriate.
+4. **Vulnerable beneficiaries are never public.** A structural rule, not a configurable one.
+5. **Watch the watchers.** Every access to private data is logged: who + what + purpose + when. Access is auditable too.
+6. **Access with a purpose and an expiry.** Not "the auditor sees everything forever", but "this person queries this data, of this fund, for this audit, during this period". Then it expires.
+7. **Nothing personal on the blockchain.** `Personal data → private database → hash / commitment / proof → blockchain`.
+8. **Safety before transparency.** If revealing a piece of data creates a disproportionate risk, it is not revealed. Transparency is a means to build trust, not an absolute value.
 
-| Propiedad | Pregunta | Resultado requerido |
+---
+
+## 6. Acceptance tests (avoiding the false guarantee)
+
+"Blockchain + ZK" guarantees nothing by itself. **No phase moves forward without passing these two tests.**
+
+| Property | Question | Required result |
 |---|---|---|
-| **Transparencia** | ¿Puede un ciudadano o auditor verificar la afirmación **X** sin confiar en OpenPay? | **Sí** |
-| **Privacidad** | ¿Puede alguien con acceso a **todo** lo público deducir **Y** sobre una persona? | **No** |
+| **Transparency** | Can a citizen or auditor verify claim **X** without trusting OpenPay? | **Yes** |
+| **Privacy** | Can someone with access to **everything** public deduce **Y** about a person? | **No** |
 
-### Prueba de transparencia
-Un tercero recibe los commitments + la prueba ZK + los datos públicos → ejecuta el verificador por su cuenta → obtiene válido / no válido. **El resultado no depende de que OpenPay diga que es verdadero.**
+### Transparency test
+A third party receives the commitments + the ZK proof + the public data → runs the verifier on their own → gets valid / not valid. **The result does not depend on OpenPay saying it is true.**
 
 ```
-Contrato → Presupuesto → Regla → Commitment / prueba → Verificador → ✓
+Contract → Budget → Rule → Commitment / proof → Verifier → ✓
 ```
 
-### Prueba de privacidad
-Un tercero recibe absolutamente todo lo que OpenPay publica (incluyendo timestamps, montos agregados, identificadores, contratos y patrones) → intenta reconstruir la información protegida → no puede, bajo el modelo de amenaza definido. No basta con "los nombres están ocultos": hay que preguntar **qué puede inferirse combinando todo**.
+### Privacy test
+A third party receives absolutely everything OpenPay publishes (including timestamps, aggregate amounts, identifiers, contracts and patterns) → tries to reconstruct the protected information → cannot, under the defined threat model. "The names are hidden" is not enough: the question is **what can be inferred by combining everything**.
 
-### Redacción correcta (seguridad, no marketing)
-- ❌ "OpenPay garantiza que nadie puede conocer Y."
-- ✅ **Privacidad**: "Bajo el modelo de amenaza definido, la información pública de OpenPay no debe permitir inferir Y con una ventaja significativa respecto de la información disponible antes de observarla."
-- ✅ **Transparencia**: "La validez de X debe poder ser comprobada criptográficamente por un tercero independiente, sin confiar en OpenPay como autoridad sobre el resultado."
+### Correct wording (security, not marketing)
+- ❌ "OpenPay guarantees that nobody can learn Y."
+- ✅ **Privacy**: "Under the defined threat model, OpenPay's public information must not allow Y to be inferred with a significant advantage over the information available before observing it."
+- ✅ **Transparency**: "The validity of X must be cryptographically checkable by an independent third party, without trusting OpenPay as an authority on the result."
 
-### Para el MVP
-- **X** = "Este pago está vinculado a un contrato autorizado y está dentro del presupuesto."
-- **Y** = "Este ciudadano/proveedor realizó determinada transacción (monto, contraparte)."
+### For the MVP
+- **X** = "This payment is linked to an authorized contract and is within the budget."
+- **Y** = "This citizen/vendor made a given transaction (amount, counterparty)."
 
-### Tres capas conceptuales
-- **Privacidad**: no necesitas exponer a las personas para hacer responsable al sistema.
-- **Transparencia**: no necesitas confiar en el administrador para verificar ciertas afirmaciones.
-- **Evidencia**: ambas propiedades deben demostrarse con pruebas de aceptación.
-
----
-
-## 7. Marco legal como restricción de diseño
-
-Las leyes no son una diapositiva: **son requisitos de arquitectura**.
-
-- **Ley 1712 de 2014** (Transparencia y acceso a la información pública): la información pública debe ser accesible, con excepciones cuando afecta derechos de las personas o la seguridad.
-- **Ley 1581 de 2012** (Protección de datos personales): autorización, finalidad y protección.
-
-Principio: *la transparencia debe coexistir con las restricciones de acceso y protección de datos aplicables.* Esto se traduce en: ¿quién ve qué?, ¿con qué finalidad?, ¿durante cuánto tiempo?, ¿qué debe permanecer privado? (la regla de oro de la sección 4.3).
-
-Argumento de venta: **OpenPay permite cumplir las dos leyes al tiempo.**
-
-### Obligatorio al ir por la solución real
-- Asesoría legal en protección de datos, SARLAFT y licencia / aliado regulado para mover pesos.
-- Evaluación de impacto en privacidad antes de lanzar.
-- Seguridad de nivel financiero, empezando por la contraseña expuesta.
+### Three conceptual layers
+- **Privacy**: you do not need to expose people to hold the system accountable.
+- **Transparency**: you do not need to trust the administrator to verify certain claims.
+- **Evidence**: both properties must be demonstrated with acceptance tests.
 
 ---
 
-## 8. Estrategia: trazabilidad primero, efectivo digital después
+## 7. The legal framework as a design constraint
 
-### Comparación de visiones (resumen de la decisión)
-- **A. Efectivo digital** — ➕ mercado enorme, narrativa fuerte. ➖ riesgo regulatorio muy alto, empezar de cero, billetera propia riesgosa, competencia fuerte.
-- **B. Trazabilidad verificable** — ➕ reutiliza el código, viable ante el regulador, problema real de Colombia, compradores claros. ➖ depende de la calidad del dato de entrada, ZK complejo, ventas B2G lentas.
+Laws are not a slide: **they are architecture requirements**.
 
-**Elegimos B y crecemos hacia A**:
-- B vende primero.
-- B le da usuarios a A (proveedores, donantes y beneficiarios de cada fundación).
-- La tecnología ZK se reutiliza: "este fondo cumplió las reglas" → "mi dinero es legítimo".
+- **Law 1712 of 2014** (Transparency and access to public information): public information must be accessible, with exceptions when it affects people's rights or security.
+- **Law 1581 of 2012** (Personal data protection): consent, purpose and protection.
 
-### Capa de trazabilidad sobre los bancos
-No empezamos como billetera. La organización sigue pagando desde su banco; OpenPay registra, concilia y prueba esos pagos. **No custodiamos dinero → no necesitamos licencia SEDPE para empezar.** La tabla `Account` pasa a ser un espejo conciliado con el banco.
+Principle: *transparency must coexist with the applicable access restrictions and data protection.* This translates into: who sees what? for what purpose? for how long? what must remain private? (the golden rule of section 4.3).
 
-> ⚠️ El punto medio no elimina la necesidad de un aliado regulado para mover pesos, ni hace simple el modo personal privado. Por eso va al final.
+Selling point: **OpenPay makes it possible to comply with both laws at once.**
+
+### Mandatory when going for the real solution
+- Legal advice on data protection, SARLAFT and a license / regulated partner to move pesos.
+- Privacy impact assessment before launching.
+- Financial-grade security, starting with the exposed password.
 
 ---
 
-## 9. Arquitectura
+## 8. Strategy: traceability first, digital cash later
 
-### Vista conceptual
+### Comparison of visions (summary of the decision)
+- **A. Digital cash** — ➕ huge market, strong narrative. ➖ very high regulatory risk, starting from scratch, risky own wallet, strong competition.
+- **B. Verifiable traceability** — ➕ reuses the code, viable before the regulator, a real Colombian problem, clear buyers. ➖ depends on the quality of the input data, complex ZK, slow B2G sales.
+
+**We chose B and grow towards A**:
+- B sells first.
+- B gives A its users (vendors, donors and beneficiaries of each foundation).
+- The ZK technology is reused: "this fund followed the rules" → "my money is legitimate".
+
+### A traceability layer on top of the banks
+We do not start as a wallet. The organization keeps paying from its bank; OpenPay records, reconciles and proves those payments. **We do not hold money → we do not need an e-money (SEDPE) license to start.** The `Account` table becomes a mirror reconciled with the bank.
+
+> ⚠️ The middle ground does not remove the need for a regulated partner to move pesos, nor does it make the private personal mode simple. That is why it goes last.
+
+---
+
+## 9. Architecture
+
+### Conceptual view
 
 ```
                  OPENPAY
                     │
           ┌─────────┴─────────┐
-      PRIVACIDAD          TRAZABILIDAD
+       PRIVACY           TRACEABILITY
           │                   │
-    Política de datos     Mandatos
-          │               Contratos
-      Identidad           Presupuestos
+      Data policy         Mandates
+          │               Contracts
+       Identity           Budgets
           │                   │
-          └──────────→ Rieles de dinero
+          └──────────→   Money rails
                               │
-                          Evidencia
+                          Evidence
                               │
                    ┌──────────┴──────────┐
                Hash/Merkle               ZK
                    └──────────┬──────────┘
-                         Verificación
+                         Verification
                    ┌──────────┼──────────┐
-                Auditor     Admin     Ciudadano
+                Auditor     Admin     Citizen
 ```
 
-### Capas
+### Layers
 
-| Capa | Qué hace | Principio | ¿MVP? |
+| Layer | What it does | Principle | MVP? |
 |---|---|---|---|
-| **0. Política de datos** | Clasifica cada dato: público, agregado, auditor, privado o restringido (beneficiarios vulnerables). Decide qué puede conocer cada actor. | Privado por defecto | ✅ (documento) |
-| **1. Identidad y roles** | Supabase Auth con passkeys; KYC/KYB; separación de funciones (quien configura reglas no aprueba pagos). | Vigilar a los que vigilan | ✅ (roles básicos) |
-| **2. Rieles de dinero** | Inicio: importar pagos del banco (CSV de extractos; las APIs de finanzas abiertas en Colombia aún no son confiables) y conciliarlos. Futuro: aliado regulado. | No custodiar sin licencia | ✅ (CSV / registro manual) |
-| **3. Mandatos** | Fondo, contrato (enlace a SECOP II), presupuesto, proveedores autorizados, reglas y actas de entrega. **Corazón del producto.** | Transparencia para quien administra dinero ajeno | ✅ |
-| **4. Datos privados** | Postgres con RLS y cifrado por campo con llaves por fondo; registro de accesos inmutable. | Revelación mínima | ✅ (RLS + log) |
-| **5. Compromisos** | Hash con sal por registro → árbol de Merkle por lote → `CommitmentRegistry` en Base. | Nada personal en la cadena | ✅ |
-| **6. Pruebas ZK** | Circuito Circom + Groth16 por regla; la prueba la genera la organización y se verifica en el navegador con la clave cuya huella está anclada en Base. (Diseño original: zkVM SP1 / RISC Zero y verificador on-chain.) | Probar antes que mostrar | ✅ (una regla) |
-| **7. Divulgación selectiva** | Llaves con propósito y vencimiento para auditores y autoridades; cada acceso queda anclado. | Acceso con propósito | Visión |
-| **8. Fuentes externas** | CUFE de la DIAN, SECOP II, RUB, confirmaciones bancarias, cada una validada por separado. | Independencia de las fuentes | Visión |
-| **9. Interfaces** | App de la organización, portal de participantes, portal del auditor y **portal público de verificación**. | Agregados en público | ✅ (org + verificador público) |
+| **0. Data policy** | Classifies every piece of data: public, aggregate, auditor, private or restricted (vulnerable beneficiaries). Decides what each actor can know. | Private by default | ✅ (document) |
+| **1. Identity and roles** | Supabase Auth with passkeys; KYC/KYB; separation of duties (whoever configures rules does not approve payments). | Watch the watchers | ✅ (basic roles) |
+| **2. Money rails** | To start: import payments from the bank (CSV statements; open-finance APIs in Colombia are not yet reliable) and reconcile them. Future: regulated partner. | No custody without a license | ✅ (CSV / manual entry) |
+| **3. Mandates** | Fund, contract (link to SECOP II), budget, authorized vendors, rules and delivery certificates. **The heart of the product.** | Transparency for whoever manages other people's money | ✅ |
+| **4. Private data** | Postgres with RLS and per-field encryption with per-fund keys; immutable access log. | Minimal disclosure | ✅ (RLS + log) |
+| **5. Commitments** | Salted hash per record → Merkle tree per batch → `CommitmentRegistry` on Base. | Nothing personal on-chain | ✅ |
+| **6. ZK proofs** | Circom circuit + Groth16 per rule; the proof is generated by the organization and verified in the browser with the key whose fingerprint is anchored on Base. (Original design: SP1 / RISC Zero zkVM and an on-chain verifier.) | Prove before showing | ✅ (one rule) |
+| **7. Selective disclosure** | Keys with a purpose and an expiry for auditors and authorities; every access is anchored. | Access with a purpose | Vision |
+| **8. External sources** | DIAN's CUFE, SECOP II, RUB, bank confirmations, each validated separately. | Independence of sources | Vision |
+| **9. Interfaces** | Organization app, participants' portal, auditor's portal and the **public verification portal**. | Aggregates in public | ✅ (org + public verifier) |
 
-### Decisiones técnicas
-- **Sal = derecho al olvido.** Cada hash on-chain usa una sal guardada solo en Postgres. Borrar la sal hace el hash imposible de vincular (*crypto-shredding*): permite cumplir la supresión de la Ley 1581 aunque la blockchain sea inmutable.
-- **Lotes a intervalos fijos** (p. ej. cada 24 h), no por evento, para no filtrar patrones por metadatos.
-- **Circom + Groth16 en vez de zkVM (decisión 17/09/2026)**: la primera regla es una suma y dos árboles de Merkle, que caben en un circuito de 147.100 restricciones; así la prueba se verifica gratis en el navegador y no hace falta una red de probadores. La zkVM queda para reglas que no quepan cómodas en un circuito. Lo que se decía de ella: SP1 y RISC Zero se consideran listos para producción. Verificar una prueba Groth16 cuesta ~300k de gas (barato en Base). Generar pruebas con red externa (Succinct Prover Network o Bonsai) antes que GPUs propias.
-- **Noir** (pruebas en el navegador): exploración futura.
-- **Cadena**: Base (Sepolia para desarrollo). On-chain solo van raíces de Merkle y pruebas; nunca montos individuales, descripciones ni IDs.
-- Verificar la documentación vigente de cada herramienta antes de empezar.
+### Technical decisions
+- **Salt = right to be forgotten.** Each on-chain hash uses a salt stored only in Postgres. Deleting the salt makes the hash impossible to link (*crypto-shredding*): it allows the erasure required by Law 1581 even though the blockchain is immutable.
+- **Batches at fixed intervals** (e.g. every 24 h), not per event, so as not to leak patterns through metadata.
+- **Circom + Groth16 instead of a zkVM (decision of 2026-09-17)**: the first rule is a sum and two Merkle trees, which fit in a circuit of 147,100 constraints; this way the proof is verified for free in the browser and no prover network is needed. The zkVM is left for rules that do not fit comfortably in a circuit. What was said about it: SP1 and RISC Zero are considered production-ready. Verifying a Groth16 proof costs ~300k gas (cheap on Base). Generate proofs with an external network (Succinct Prover Network or Bonsai) rather than own GPUs.
+- **Noir** (proofs in the browser): future exploration.
+- **Chain**: Base (Sepolia for development). Only Merkle roots and proofs go on-chain; never individual amounts, descriptions or IDs.
+- Check the current documentation of each tool before starting.
 
 ---
 
-## 10. Alcance del proyecto universitario
+## 10. Scope of the first build (university deliverable)
 
-**No se construyen todas las capas.** La arquitectura completa se presenta como visión; se construye:
+**Not all layers are built.** The full architecture is presented as the vision; what is built is:
 
-> **Pago → contrato → presupuesto → regla → evidencia → verificación**
+> **Payment → contract → budget → rule → evidence → verification**
 
-Es decir: la puerta **"pago sin contrato o autorización"** (capas 2 + 3) más **la primera regla ZK** y el verificador público.
+That is: the door **"payment without a contract or authorization"** (layers 2 + 3) plus **the first ZK rule** and the public verifier.
 
-### Regla ZK del MVP
-> "Demostrar que los pagos pertenecen a un contrato autorizado y no superan el presupuesto disponible", sin revelar los pagos individuales.
+### The MVP's ZK rule
+> "Prove that the payments belong to an authorized contract and do not exceed the available budget", without revealing the individual payments.
 
 ```
-Contrato
-   ├── Presupuesto: $100M
-   └── Pagos
+Contract
+   ├── Budget: $100M
+   └── Payments
          ├── $20M ✓
          ├── $30M ✓
          ├── $25M ✓
          └── $25M ✓
                  ↓
-      ZK: "presupuesto respetado" ✓
+      ZK: "budget respected" ✓
 ```
 
-El auditor o ciudadano verifica la afirmación sin recibir los datos subyacentes. Debe pasar las dos pruebas de aceptación (sección 6).
+The auditor or citizen verifies the claim without receiving the underlying data. It must pass both acceptance tests (section 6).
 
-### Línea de investigación (trabajo de grado / publicación)
-**ZK para conflictos de interés**: probar que "este administrador no tiene un conflicto de interés prohibido con este proveedor" sin revelar relaciones personales o empresariales.
+### Research line (thesis / publication)
+**ZK for conflicts of interest**: prove that "this administrator has no forbidden conflict of interest with this vendor" without revealing personal or business relationships.
 
 ```
-Identidad del administrador + Registro de beneficiarios finales (RUB) + Proveedor
+Administrator's identity + Beneficial ownership registry (RUB) + Vendor
                               ↓
                               ZK
                               ↓
-             "Cumple la regla de independencia"
+             "Complies with the independence rule"
 ```
 
-Es original y conecta criptografía + privacidad + contratación pública + gobierno corporativo + Colombia. Se trata como trabajo futuro, no se implementa en el MVP.
+It is original and connects cryptography + privacy + public procurement + corporate governance + Colombia. It is treated as future work and is not implemented in the MVP.
 
 ---
 
-## 11. Qué pasa con el código actual
+## 11. What happens to the existing code
 
-| Se queda | Se congela | Se reemplaza / elimina |
+| Stays | Frozen | Replaced / removed |
 |---|---|---|
-| Web Next.js (`packages/web`) | App móvil (`packages/mobile`) | `TransactionRegistry.sol` → `CommitmentRegistry` (lotes, sin montos) |
-| Supabase (Auth, RLS) | Panel de admin con datos simulados | `Account` como fuente de verdad → espejo conciliado |
-| Patrón Edge Function + Database Webhook | Pago a entidades (`/pay-entity`) | Hash sin sal → hash con sal |
-| Hardhat en `packages/contracts` (**restaurar**) | Chatbot de soporte | Plan "efectivo digital" |
-| `EntityReceiver` → base para `AuthorizedVendor` | `transfer_funds` / `pay_to_entity` (se aseguran y no se tocan más) | `OnChainBadge` → portal de verificación |
+| Next.js web app (`packages/web`) | Mobile app (`packages/mobile`) | `TransactionRegistry.sol` → `CommitmentRegistry` (batches, no amounts) |
+| Supabase (Auth, RLS) | Admin panel with simulated data | `Account` as source of truth → reconciled mirror |
+| Edge Function + Database Webhook pattern | Payment to entities (`/pay-entity`) | Unsalted hash → salted hash |
+| Hardhat in `packages/contracts` (**restore**) | Support chatbot | "Digital cash" plan |
+| `EntityReceiver` → basis for `AuthorizedVendor` | `transfer_funds` / `pay_to_entity` (secured and not touched again) | `OnChainBadge` → verification portal |
 
-> ⚠️ La rama `pivot/efectivo-digital` tiene cambios **sin commit** que implementaban el tear-down del plan anterior (borran contratos, edge function `anchor-transaction`, migraciones on-chain, `OnChainBadge`, pago a entidades). Con esta visión varios de esos elementos se reutilizan: guardar esos cambios aparte (stash) antes de crear la rama nueva.
+> ⚠️ The `pivot/efectivo-digital` branch has **uncommitted** changes that implemented the tear-down of the previous plan (they delete contracts, the `anchor-transaction` edge function, on-chain migrations, `OnChainBadge`, payment to entities). With this vision several of those pieces are reused: set those changes aside (stash) before creating the new branch.
 
 ---
 
-## 12. Hoja de ruta
+## 12. Roadmap
 
-### Fase 0 — Esta semana: apagar incendios
-- [x] Incidente registrado en [`SEGURIDAD_INCIDENTES.md`](./SEGURIDAD_INCIDENTES.md) (INC-001).
-- [x] ~~Rotar la contraseña de Postgres~~ del proyecto Supabase `bmfiotbutuslsaxeumik`. Resuelto de otra forma: proyecto dado de baja y reemplazado por uno nuevo (INC-001 cerrado, 16/09/2026).
-- [x] El repo viejo pasó a privado (`open-pay-mvp`); el público `open-pay` empezó con historial limpio.
-- [x] Guardar el tear-down sin commit (`stash@{0}`), crear la rama `pivot/trazabilidad` y restaurar `packages/contracts`.
-- [x] Aplicar los arreglos del zip: scripts leen `DB_URL` del entorno, `.gitignore` en UTF-8, `.env.example`.
-- [x] Quitar la segunda contraseña filtrada (proyecto `garzwhnenhtmpfvfntmk`) de `packages/web/VERCEL_DEPLOYMENT.md`. Proyecto dado de baja (INC-002 cerrado).
-- [x] Corregir `20260916120000_security_fixes.sql` (validada en Postgres 16 local: bloquea el robo, fuerza saldo 0, idempotente).
-- [x] **Aplicarla** en el SQL Editor de Supabase (proyecto nuevo, 16/09/2026). Cambios hechos:
-  - `DROP FUNCTION` de la versión vieja de `transfer_funds` (firma con emails); si no, queda una sobrecarga sin validar `auth.uid()`.
-  - Renombrar variables `v_*` a `l_*` (bug del SQL Editor, error 42P01).
-  - `SET search_path = public` en las funciones `SECURITY DEFINER`.
-  - Índice único en `Account("profileId", type)`.
-- [ ] Probar: transferencia normal funciona; RPC con el `p_sender_id` de otro usuario devuelve "No autorizado".
-- [x] ~~Confirmar qué proyecto de Supabase usa Vercel~~: ninguno de los dos; Vercel usa el proyecto nuevo (23/09/2026).
-- [x] Decidir la visión con Nicolás (16/09/2026).
-- [x] Autores del README corregidos (Sebastián Murcia Sánchez y Nicolás Castillo), 23/09/2026. Falta el nuevo lema.
+### Phase 0 — This week: putting out fires
+- [x] Incident recorded in [`SEGURIDAD_INCIDENTES.md`](./SEGURIDAD_INCIDENTES.md) (INC-001).
+- [x] ~~Rotate the Postgres password~~ of Supabase project `bmfiotbutuslsaxeumik`. Solved another way: project decommissioned and replaced by a new one (INC-001 closed, 2026-09-16).
+- [x] The old repo was made private (`open-pay-mvp`); the public `open-pay` started with a clean history.
+- [x] Save the uncommitted tear-down (`stash@{0}`), create the `pivot/trazabilidad` branch and restore `packages/contracts`.
+- [x] Apply the fixes from the zip: scripts read `DB_URL` from the environment, `.gitignore` in UTF-8, `.env.example`.
+- [x] Remove the second leaked password (project `garzwhnenhtmpfvfntmk`) from `packages/web/VERCEL_DEPLOYMENT.md`. Project decommissioned (INC-002 closed).
+- [x] Fix `20260916120000_security_fixes.sql` (validated on local Postgres 16: it blocks the theft, forces a 0 balance, idempotent).
+- [x] **Apply it** in the Supabase SQL Editor (new project, 2026-09-16). Changes made:
+  - `DROP FUNCTION` of the old version of `transfer_funds` (signature with emails); otherwise an overload that does not validate `auth.uid()` remains.
+  - Rename `v_*` variables to `l_*` (SQL Editor bug, error 42P01).
+  - `SET search_path = public` in the `SECURITY DEFINER` functions.
+  - Unique index on `Account("profileId", type)`.
+- [ ] Test: a normal transfer works; the RPC with another user's `p_sender_id` returns "No autorizado".
+- [x] ~~Confirm which Supabase project Vercel uses~~: neither of the two; Vercel uses the new project (2026-09-23).
+- [x] Decide on the vision (2026-09-16).
+- [x] README rewritten in English around the current product (2026-11-10).
 
-### Fase 1 — Validación con usuarios (⏸️ POSPUESTA, decisión 16/09/2026)
-> Se salta por ahora para avanzar con el MVP universitario (fases 2 y 3). **Es obligatoria antes de la Fase 4 (piloto real)**:
-> sin ella no hay forma de saber si alguien pagaría ni qué le duele de verdad.
+### Phase 1 — Validation with users (⏸️ POSTPONED, decision of 2026-09-16)
+> Skipped for now in order to move forward with the university MVP (phases 2 and 3). **It is mandatory before Phase 4 (real pilot)**:
+> without it there is no way to know whether anyone would pay or what really hurts them.
 >
-> Material listo (23/09/2026): [`VALIDACION_FASE1.md`](./VALIDACION_FASE1.md) — hipótesis con umbrales, segmentos, guion, plantilla de notas y preguntas legales.
+> Material ready (2026-09-23): [`VALIDACION_FASE1.md`](./VALIDACION_FASE1.md) (in Spanish) — hypotheses with thresholds, segments, script, notes template and legal questions.
 
-- [ ] Entrevistar a 15-20 personas: fundaciones y ONG, revisores fiscales, cooperación internacional, veedurías.
-- [ ] Cómo rinden cuentas hoy, cuánto les cuesta, qué les duele, quién pagaría.
-- [ ] Asesoría legal: Ley 1581, Ley 1712, SARLAFT, licencia. Revisar innovasfc (Superfinanciera) y consultorios jurídicos universitarios.
-- [ ] **Meta**: 2-3 organizaciones dispuestas a un piloto.
+- [ ] Interview 15-20 people: foundations and NGOs, statutory auditors, international cooperation, citizen oversight groups.
+- [ ] How they report today, how much it costs them, what hurts, who would pay.
+- [ ] Legal advice: Law 1581, Law 1712, SARLAFT, license. Look into innovasfc (the financial regulator's innovation hub) and university legal clinics.
+- [ ] **Goal**: 2-3 organizations willing to run a pilot.
 
-### Fase 2 — Cimientos
-- [x] `docs/POLITICA_DATOS.md`: clasificación de datos (capa 0) con la regla de oro.
-- [x] `docs/MODELO_AMENAZA.md`: definición de X, Y, adversario y datos públicos para las pruebas de aceptación.
-- [x] Modelo de mandatos: `Fund`, `Contract`, `Budget`, `AuthorizedVendor`, `FundRule` con RLS + registro de accesos.
-- [x] Registro de pagos y conciliación bancaria (esquema + pruebas SQL). La pantalla de importación CSV sigue pendiente.
-- [x] `CommitmentRegistry` con lotes, reemplazando el contrato que publica montos (desplegado en Base Sepolia y verificado en Basescan).
+### Phase 2 — Foundations
+- [x] `docs/POLITICA_DATOS.md`: data classification (layer 0) with the golden rule.
+- [x] `docs/MODELO_AMENAZA.md`: definition of X, Y, adversary and public data for the acceptance tests.
+- [x] Mandate model: `Fund`, `Contract`, `Budget`, `AuthorizedVendor`, `FundRule` with RLS + access log.
+- [x] Payment recording and bank reconciliation (schema + SQL tests). The CSV import screen is still pending.
+- [x] `CommitmentRegistry` with batches, replacing the contract that published amounts (deployed on Base Sepolia and verified on Basescan).
 
-### Fase 3 — Primera prueba de punta a punta (entregable universitario)
-- [x] Regla ZK: "pagos del contrato autorizados y total ≤ presupuesto" — circuito Circom + Groth16 (no zkVM, ver §9); raíces y huella de la clave ancladas en Base Sepolia.
-- [x] Portal público de verificación (sin cuenta): https://open-pay-one.vercel.app/verificar
-- [x] ✅ Pasar la prueba de transparencia y la prueba de privacidad (23/09/2026; resultado en `MODELO_AMENAZA.md` §7). Falta la revisión manual de PP por otra persona del equipo.
-- [ ] Primera auditoría de seguridad, aunque sea con un tercero conocido.
+### Phase 3 — First end-to-end proof (university deliverable)
+- [x] ZK rule: "the contract's payments are authorized and total ≤ budget" — Circom circuit + Groth16 (not a zkVM, see §9); roots and key fingerprint anchored on Base Sepolia.
+- [x] Public verification portal (no account): https://open-pay-one.vercel.app/verificar
+- [x] ✅ Pass the transparency test and the privacy test (2026-09-23; result in `MODELO_AMENAZA.md` §7). The manual review of PP by a second person is still missing.
+- [ ] First security audit, even if by a known third party.
 
-### Fase 4 — Piloto real
-- [ ] Una organización, datos reales, **sin mover dinero**.
-- [ ] Medir: ¿reduce el tiempo de auditoría? ¿el donante lo usa?
+### Phase 4 — Real pilot
+- [ ] One organization, real data, **without moving money**.
+- [ ] Measure: does it reduce audit time? does the donor use it?
 
-### Fase 5 — Las otras tres puertas
-- [ ] Sobrecosto: alertas de precios frente a referencias (SECOP II).
-- [ ] Obra no entregada: actas de entrega firmadas.
-- [ ] Validación de CUFE y enlace con SECOP II.
-- [ ] Divulgación selectiva con llaves que expiran.
-- [ ] Conflictos de interés con ZK (línea de investigación).
+### Phase 5 — The other three doors
+- [ ] Overpricing: price alerts against references (SECOP II).
+- [ ] Work not delivered: signed delivery certificates.
+- [ ] CUFE validation and link with SECOP II.
+- [ ] Selective disclosure with expiring keys.
+- [ ] Conflicts of interest with ZK (research line).
 
-### Fase 6 — Mover dinero con un aliado regulado
-- [ ] Smart wallet con passkeys para proveedores y beneficiarios.
+### Phase 6 — Moving money with a regulated partner
+- [ ] Smart wallet with passkeys for vendors and beneficiaries.
 
-### Fase 7 — Modo personal privado
-- [ ] Pruebas de legitimidad tipo Privacy Pools, **solo con respaldo legal sólido**.
-
----
-
-## 13. Criterio de éxito
-
-La prueba de que vamos bien **no es tener ZK funcionando**, sino que una organización real diga:
-*"Esto me ahorra la auditoría y le da confianza a mis donantes."*
-La tecnología avanzada solo vale si llega ahí.
+### Phase 7 — Private personal mode
+- [ ] Privacy Pools-style legitimacy proofs, **only with solid legal backing**.
 
 ---
 
-## Fuentes
+## 13. Success criterion
+
+The proof that we are on the right track **is not having ZK working**, but a real organization saying:
+*"This saves me the audit and gives my donors confidence."*
+Advanced technology is only worth it if it gets there.
+
+---
+
+## Sources
 
 - [0xbow Closes $3.5M Round (GlobeNewswire)](https://www.globenewswire.com/news-release/2025/11/18/3190435/0/en/0xbow-Closes-3-5M-Round-for-Compliant-Crypto-Privacy-Technology-Following-Ethereum-Foundation-Integration.html)
 - [0xbow Raises $3.5M (The Defiant)](https://thedefiant.io/news/defi/0xbow-raises-usd3-5-million-to-expand-privacy-pools)
