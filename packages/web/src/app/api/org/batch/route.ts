@@ -5,10 +5,14 @@
  * que ningún rol de cliente puede leer, y publicar en la cadena necesita la
  * llave del publicador. El servidor hace solo eso. Todo lo demás —quién puede,
  * qué pagos entran, que el mes esté cerrado, que el lote esté completo— lo
- * deciden las funciones de la base, llamadas con el token del tesorero.
+ * deciden las funciones de la base.
  *
- * Orden que importa: primero se comprueba el rol con el token del usuario y
- * solo después se usa la llave de servicio para leer las sales.
+ * Orden que importa: primero se valida la sesión y se comprueba el rol con el
+ * token del usuario; solo después se usa la llave de servicio. Con ella se
+ * hacen dos cosas: leer las sales y llamar las funciones que registran y
+ * anclan. Esas funciones no las puede ejecutar ningún cliente —si pudiera, un
+ * tesorero las llamaría directo con una raíz o una transacción inventadas— y
+ * reciben el perfil en cuyo nombre se actúa, cuyo rol vuelven a comprobar.
  *
  * Acciones:
  *   { action: 'anchor-vendors', fundId }
@@ -58,6 +62,28 @@ async function exigirTesorero(user: SupabaseClient, fundId: string) {
   if (ok !== true) throw new Rechazo('Tu rol no permite hacer esto.', 403);
 }
 
+/** El servidor actuando en nombre de alguien cuya sesión ya validó. */
+interface Servidor {
+  admin: SupabaseClient;
+  /** Profile.id de quien hizo la petición. */
+  actor: string;
+}
+
+async function servidorPara(token: string): Promise<Servidor> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) throw new Rechazo('El servidor no tiene configurada la llave de servicio.', 500);
+  const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data.user) throw new Rechazo('La sesión no es válida. Vuelve a iniciar sesión.', 401);
+  const perfil = await db<{ id: string } | null>(
+    admin.from('Profile').select('id').eq('userId', data.user.id).maybeSingle(),
+  );
+  if (!perfil) throw new Rechazo('Tu rol no permite hacer esto.', 403);
+  return { admin, actor: perfil.id };
+}
+
 interface Anclado {
   id: string;
   root: string;
@@ -65,7 +91,7 @@ interface Anclado {
 }
 
 /** Registra la lista vigente de proveedores y la ancla si todavía no lo está. */
-async function anclarProveedores(user: SupabaseClient, fundId: string): Promise<Anclado> {
+async function anclarProveedores(user: SupabaseClient, srv: Servidor, fundId: string): Promise<Anclado> {
   const vigentes = await db<{ id: string }[]>(
     user.from('AuthorizedVendor').select('id').eq('fundId', fundId).is('revokedAt', null),
   );
@@ -77,7 +103,8 @@ async function anclarProveedores(user: SupabaseClient, fundId: string): Promise<
   const subject = fundSubject(fundId);
 
   const id = await db<string>(
-    user.rpc('record_vendor_set', {
+    srv.admin.rpc('record_vendor_set', {
+      p_actor: srv.actor,
       p_fund_id: fundId,
       p_subject: bytea(subject),
       p_root: bytea(root),
@@ -93,7 +120,8 @@ async function anclarProveedores(user: SupabaseClient, fundId: string): Promise<
 
   const txHash = await publishRoot(RootKind.VendorSet, subject, root);
   await db(
-    user.rpc('anchor_vendor_set', {
+    srv.admin.rpc('anchor_vendor_set', {
+      p_actor: srv.actor,
       p_vendor_set_id: id,
       p_chain_id: CHAIN_ID,
       p_contract: registryAddress(),
@@ -108,10 +136,11 @@ function finDeMes(periodStart: string): string {
   return new Date(Date.UTC(a, m, 0)).toISOString().slice(0, 10);
 }
 
-async function anclarLote(user: SupabaseClient, batchId: string, subject: string, root: string): Promise<string> {
+async function anclarLote(srv: Servidor, batchId: string, subject: string, root: string): Promise<string> {
   const txHash = await publishRoot(RootKind.PaymentBatch, subject, root);
   await db(
-    user.rpc('anchor_payment_batch', {
+    srv.admin.rpc('anchor_payment_batch', {
+      p_actor: srv.actor,
       p_batch_id: batchId,
       p_chain_id: CHAIN_ID,
       p_contract: registryAddress(),
@@ -121,7 +150,7 @@ async function anclarLote(user: SupabaseClient, batchId: string, subject: string
   return txHash;
 }
 
-async function cerrarLote(user: SupabaseClient, admin: SupabaseClient, budgetId: string, periodStart: string) {
+async function cerrarLote(user: SupabaseClient, srv: Servidor, budgetId: string, periodStart: string) {
   if (!/^\d{4}-(0[1-9]|1[0-2])-01$/.test(periodStart)) {
     throw new Rechazo('El período tiene que ser el primer día de un mes (AAAA-MM-01).');
   }
@@ -148,17 +177,17 @@ async function cerrarLote(user: SupabaseClient, admin: SupabaseClient, budgetId:
       return { batchId: previo.id, batchRoot: rootPrevio, batchTxHash: previo.txHash, yaEstaba: true };
     }
     if (await isPublished(rootPrevio)) {
-      const txHash = await anclarLote(user, previo.id, subject, rootPrevio);
+      const txHash = await anclarLote(srv, previo.id, subject, rootPrevio);
       return { batchId: previo.id, batchRoot: rootPrevio, batchTxHash: txHash, yaEstaba: false };
     }
-    await db(user.rpc('discard_unanchored_batch', { p_batch_id: previo.id }));
+    await db(srv.admin.rpc('discard_unanchored_batch', { p_actor: srv.actor, p_batch_id: previo.id }));
   }
 
-  const lista = await anclarProveedores(user, rubro.fundId);
+  const lista = await anclarProveedores(user, srv, rubro.fundId);
 
-  // Único uso de la llave de servicio: leer las sales de los pagos del lote.
+  // Las sales de los pagos del lote: ningún rol de cliente las puede leer.
   const pagos = await db<{ id: string; amount: number | string; vendorId: string; paidOn: string; salt: string }[]>(
-    admin
+    srv.admin
       .from('Payment')
       .select('id, amount, vendorId, paidOn, salt')
       .eq('budgetId', budgetId)
@@ -184,7 +213,8 @@ async function cerrarLote(user: SupabaseClient, admin: SupabaseClient, budgetId:
   const root = toBytes32(buildMerkleTree(compromisos).root);
 
   const batchId = await db<string>(
-    user.rpc('record_budget_batch', {
+    srv.admin.rpc('record_budget_batch', {
+      p_actor: srv.actor,
       p_budget_id: budgetId,
       p_vendor_set_id: lista.id,
       p_subject: bytea(subject),
@@ -199,7 +229,7 @@ async function cerrarLote(user: SupabaseClient, admin: SupabaseClient, budgetId:
     }),
   );
 
-  const txHash = await anclarLote(user, batchId, subject, root);
+  const txHash = await anclarLote(srv, batchId, subject, root);
   return { batchId, batchRoot: root, batchTxHash: txHash, vendorSetRoot: lista.root, yaEstaba: false };
 }
 
@@ -214,16 +244,12 @@ export async function POST(req: Request) {
 
     if (body.action === 'anchor-vendors' && typeof body.fundId === 'string') {
       await exigirTesorero(user, body.fundId);
-      const lista = await anclarProveedores(user, body.fundId);
+      const lista = await anclarProveedores(user, await servidorPara(token), body.fundId);
       return NextResponse.json({ vendorSetId: lista.id, vendorSetRoot: lista.root, txHash: lista.txHash });
     }
 
     if (body.action === 'close' && typeof body.budgetId === 'string' && typeof body.periodStart === 'string') {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      if (!url || !serviceKey) throw new Rechazo('El servidor no tiene configurada la llave de servicio.', 500);
-      const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
-      return NextResponse.json(await cerrarLote(user, admin, body.budgetId, body.periodStart));
+      return NextResponse.json(await cerrarLote(user, await servidorPara(token), body.budgetId, body.periodStart));
     }
 
     throw new Rechazo('Acción inválida.');

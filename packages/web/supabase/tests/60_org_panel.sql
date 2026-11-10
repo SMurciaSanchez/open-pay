@@ -71,32 +71,32 @@ VALUES ('pl-1', 'fund-1', 'bud-p', 'ven-1', 1000000, 'Resmas',     '2026-07-10',
        ('pl-3', 'fund-1', 'bud-p', 'ven-1', 3000000, 'Sin conciliar', '2026-07-25', 'APPROVED', 'p-tes', 'p-apr', NOW()),
        ('pl-4', 'fund-1', 'bud-p', 'ven-2',  500000, 'Proveedor revocado', '2026-06-15', 'RECONCILED', 'p-tes', 'p-apr', NOW());
 
-SET ROLE authenticated;
+SET ROLE service_role;  -- el servidor, en nombre del tesorero (p-tes)
 SELECT login('00000000-0000-0000-0000-000000000003');  -- p-tes
 
-SELECT expect_error($$SELECT record_vendor_set('fund-1', decode(repeat('01', 32), 'hex'),
+SELECT expect_error($$SELECT record_vendor_set('p-tes', 'fund-1', decode(repeat('01', 32), 'hex'),
                         decode(repeat('a1', 32), 'hex'), 6, ARRAY['ven-1', 'ven-2'])$$,
                     'no coincide', 'P17 no se ancla una lista con un proveedor revocado');
-SELECT expect_error($$SELECT record_vendor_set('fund-1', decode(repeat('01', 32), 'hex'),
+SELECT expect_error($$SELECT record_vendor_set('p-tes', 'fund-1', decode(repeat('01', 32), 'hex'),
                         decode(repeat('a1', 32), 'hex'), 6, ARRAY['ven-1', 'ven-1'])$$,
                     'no coincide', 'P18 ni con uno repetido');
-SELECT record_vendor_set('fund-1', decode(repeat('01', 32), 'hex'),
+SELECT record_vendor_set('p-tes', 'fund-1', decode(repeat('01', 32), 'hex'),
                          decode(repeat('a1', 32), 'hex'), 6, ARRAY['ven-1']) AS lista \gset
-SELECT ok(record_vendor_set('fund-1', decode(repeat('01', 32), 'hex'),
+SELECT ok(record_vendor_set('p-tes', 'fund-1', decode(repeat('01', 32), 'hex'),
                             decode(repeat('a1', 32), 'hex'), 6, ARRAY['ven-1']) = :'lista',
           'P19 la misma lista no se duplica');
 
 -- Antes de anclar la lista no se arma el lote
-SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repeat('01', 32), 'hex'),
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
                         decode(repeat('b1', 32), 'hex'), 6, '2026-07-01',
                         '[{"paymentId": "pl-1", "leafIndex": 0, "commitment": "\\x%s"}]'::jsonb)$$,
                         :'lista', repeat('aa', 32)),
                     'tiene que estar anclada', 'P20 la lista se ancla antes que el lote');
 
-SELECT anchor_vendor_set(:'lista', 84532, '0x' || repeat('c', 40), '0x' || repeat('d', 64));
+SELECT anchor_vendor_set('p-tes', :'lista', 84532, '0x' || repeat('c', 40), '0x' || repeat('d', 64));
 SELECT ok((SELECT status = 'ANCHORED' FROM "VendorSetSnapshot" WHERE id = :'lista'),
           'P21 la lista queda anclada');
-SELECT expect_error(format($$SELECT anchor_vendor_set(%L, 84532, '0x%s', '0x%s')$$,
+SELECT expect_error(format($$SELECT anchor_vendor_set('p-tes', %L, 84532, '0x%s', '0x%s')$$,
                         :'lista', repeat('c', 40), repeat('e', 64)),
                     'ya está anclada', 'P22 no se ancla dos veces');
 RESET ROLE;
@@ -105,28 +105,28 @@ SELECT expect_error(format($$UPDATE "VendorSetSnapshot" SET "vendorIds" = ARRAY[
 
 -- ════════════════ Lotes por rubro ════════════════
 
-SET ROLE authenticated;
+SET ROLE service_role;
 SELECT login('00000000-0000-0000-0000-000000000003');  -- p-tes
 
-SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repeat('01', 32), 'hex'),
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
                         decode(repeat('b1', 32), 'hex'), 6, %L,
                         '[{"paymentId": "pl-1", "leafIndex": 0, "commitment": "\\x%s"}]'::jsonb)$$,
                         :'lista', date_trunc('month', NOW())::date, repeat('aa', 32)),
                     'todavía no ha cerrado', 'P24 no se arma el lote de un mes abierto');
-SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repeat('01', 32), 'hex'),
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
                         decode(repeat('b1', 32), 'hex'), 6, '2026-07-02',
                         '[{"paymentId": "pl-1", "leafIndex": 0, "commitment": "\\x%s"}]'::jsonb)$$,
                         :'lista', repeat('aa', 32)),
                     'primer día del mes', 'P25 el período es un mes calendario');
 
 -- Omitir un pago conciliado: la trampa que esta función existe para impedir
-SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repeat('01', 32), 'hex'),
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
                         decode(repeat('b1', 32), 'hex'), 6, '2026-07-01',
                         '[{"paymentId": "pl-1", "leafIndex": 0, "commitment": "\\x%s"}]'::jsonb)$$,
                         :'lista', repeat('aa', 32)),
                     'exactamente los pagos conciliados', 'P26 no se puede dejar afuera un pago conciliado');
 -- Colar uno sin conciliar
-SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repeat('01', 32), 'hex'),
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
                         decode(repeat('b1', 32), 'hex'), 6, '2026-07-01',
                         jsonb_build_array(
                           jsonb_build_object('paymentId', 'pl-1', 'leafIndex', 0, 'commitment', '\x' || repeat('aa', 32)),
@@ -135,12 +135,12 @@ SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repe
                         :'lista'),
                     'exactamente los pagos conciliados', 'P27 no se cuela un pago sin conciliar');
 -- Junio: el único pago fue a un proveedor que ya no está en la lista
-SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repeat('01', 32), 'hex'),
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
                         decode(repeat('b2', 32), 'hex'), 6, '2026-06-01',
                         '[{"paymentId": "pl-4", "leafIndex": 0, "commitment": "\\x%s"}]'::jsonb)$$,
                         :'lista', repeat('aa', 32)),
                     'no están en la lista anclada', 'P28 todo pago del lote va a un proveedor de la lista');
-SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repeat('01', 32), 'hex'),
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
                         decode(repeat('b1', 32), 'hex'), 1, '2026-07-01',
                         jsonb_build_array(
                           jsonb_build_object('paymentId', 'pl-1', 'leafIndex', 0, 'commitment', '\x' || repeat('aa', 32)),
@@ -149,7 +149,20 @@ SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repe
                         :'lista'),
                     'no cabe', 'P29 el lote cabe en el árbol');
 
-SELECT record_budget_batch('bud-p', :'lista', decode(repeat('01', 32), 'hex'),
+-- pl-3 está aprobado, declarado en julio y sin conciliar: julio no se cierra.
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
+                        decode(repeat('b1', 32), 'hex'), 6, '2026-07-01',
+                        jsonb_build_array(
+                          jsonb_build_object('paymentId', 'pl-1', 'leafIndex', 0, 'commitment', '\x' || repeat('aa', 32)),
+                          jsonb_build_object('paymentId', 'pl-2', 'leafIndex', 1, 'commitment', '\x' || repeat('bb', 32))))$$,
+                        :'lista'),
+                    'aprobados sin conciliar', 'P29b un mes no se cierra con pagos aprobados sin conciliar');
+-- El pago resultó ser de octubre: sale de julio.
+RESET ROLE;
+UPDATE "Payment" SET "paidOn" = '2026-10-05' WHERE id = 'pl-3';
+SET ROLE service_role;
+
+SELECT record_budget_batch('p-tes', 'bud-p', :'lista', decode(repeat('01', 32), 'hex'),
          decode(repeat('b1', 32), 'hex'), 6, '2026-07-01',
          jsonb_build_array(
            jsonb_build_object('paymentId', 'pl-1', 'leafIndex', 0, 'commitment', '\x' || repeat('aa', 32)),
@@ -158,33 +171,35 @@ SELECT ok((SELECT "budgetId" = 'bud-p' AND "vendorSetId" = :'lista' AND "periodE
            FROM "PaymentBatch" WHERE id = :'lote'),
           'P30 el lote queda con su rubro, su lista y el mes completo');
 
-SELECT expect_error(format($$SELECT record_budget_batch('bud-p', %L, decode(repeat('01', 32), 'hex'),
+SELECT expect_error(format($$SELECT record_budget_batch('p-tes', 'bud-p', %L, decode(repeat('01', 32), 'hex'),
                         decode(repeat('b3', 32), 'hex'), 6, '2026-07-01',
                         '[{"paymentId": "pl-1", "leafIndex": 0, "commitment": "\\x%s"}]'::jsonb)$$,
                         :'lista', repeat('aa', 32)),
                     'exactamente los pagos conciliados', 'P31 un pago no entra en dos lotes');
 
 -- Descartar un lote que no se ancló libera los pagos
-SELECT discard_unanchored_batch(:'lote');
+SELECT discard_unanchored_batch('p-tes', :'lote');
 SELECT ok(NOT EXISTS (SELECT 1 FROM "PaymentCommitment" WHERE "paymentId" IN ('pl-1', 'pl-2')),
           'P32 descartar un lote sin anclar libera sus pagos');
 
-SELECT record_budget_batch('bud-p', :'lista', decode(repeat('01', 32), 'hex'),
+SELECT record_budget_batch('p-tes', 'bud-p', :'lista', decode(repeat('01', 32), 'hex'),
          decode(repeat('b1', 32), 'hex'), 6, '2026-07-01',
          jsonb_build_array(
            jsonb_build_object('paymentId', 'pl-1', 'leafIndex', 0, 'commitment', '\x' || repeat('aa', 32)),
            jsonb_build_object('paymentId', 'pl-2', 'leafIndex', 1, 'commitment', '\x' || repeat('bb', 32)))) AS lote \gset
-SELECT anchor_payment_batch(:'lote', 84532, '0x' || repeat('c', 40), '0x' || repeat('f', 64));
-SELECT expect_error(format($$SELECT discard_unanchored_batch(%L)$$, :'lote'),
+SELECT anchor_payment_batch('p-tes', :'lote', 84532, '0x' || repeat('c', 40), '0x' || repeat('f', 64));
+SELECT expect_error(format($$SELECT discard_unanchored_batch('p-tes', %L)$$, :'lote'),
                     'ya está anclado', 'P33 un lote anclado no se descarta');
 
 SELECT login('00000000-0000-0000-0000-000000000001');  -- p-conf: miembro, no tesorero
-SELECT expect_error(format($$SELECT discard_unanchored_batch(%L)$$, :'lote'),
+SELECT expect_error(format($$SELECT discard_unanchored_batch('p-conf', %L)$$, :'lote'),
                     'No autorizado', 'P34 solo tesorería arma y descarta lotes');
 SELECT login('00000000-0000-0000-0000-000000000006');  -- p-otro: de otra organización
-SELECT expect_error($$SELECT record_vendor_set('fund-1', decode(repeat('01', 32), 'hex'),
+SELECT expect_error($$SELECT record_vendor_set('p-otro', 'fund-1', decode(repeat('01', 32), 'hex'),
                         decode(repeat('a9', 32), 'hex'), 6, ARRAY['ven-1'])$$,
                     'No autorizado', 'P35 nadie ancla listas de un fondo ajeno');
+RESET ROLE;
+SET ROLE authenticated;
 SELECT ok((SELECT count(*) FROM "VendorSetSnapshot") = 0, 'P36 ni ve las listas de un fondo ajeno');
 RESET ROLE;
 

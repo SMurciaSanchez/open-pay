@@ -10,7 +10,7 @@ INSERT INTO "Payment" (id, "fundId", "budgetId", "vendorId", amount, concept, "p
 VALUES ('rec-dos', 'fund-1', 'bud-1', 'ven-1', 900000, 'Transporte agosto', '2026-08-21',
         'APPROVED', 'p-tes', 'p-apr', '2026-08-05');
 
-SET ROLE authenticated;
+-- Como servidor: desde 20261110120000 ningún cliente arma ni ancla lotes.
 SELECT login('00000000-0000-0000-0000-000000000003');  -- tesorero
 SELECT ok(reconcile_payment('rec-dos', 'mv-2') IS NOT NULL, 'C01 segundo pago conciliado');
 
@@ -64,16 +64,16 @@ SELECT expect_error($$SELECT record_payment_batch('fund-1',
 
 -- ── Anclar ──
 SELECT login('00000000-0000-0000-0000-000000000002');  -- aprobador
-SELECT expect_error(format($$SELECT anchor_payment_batch(%L, 84532,
+SELECT expect_error(format($$SELECT anchor_payment_batch('p-apr', %L, 84532,
                         '0x101eB09d656f2c90f485eEC5Ef2F53A9F51F0f3c', '0x%s')$$, :'batch', repeat('ab', 32)),
                     'No autorizado', 'C09 solo tesorería ancla');
 SELECT login('00000000-0000-0000-0000-000000000003');
 
-SELECT anchor_payment_batch(:'batch', 84532,
+SELECT anchor_payment_batch('p-tes', :'batch', 84532,
        '0x101eB09d656f2c90f485eEC5Ef2F53A9F51F0f3c', '0x' || repeat('ab', 32));
 SELECT ok((SELECT status = 'ANCHORED' AND "anchoredAt" IS NOT NULL FROM "PaymentBatch" WHERE id = :'batch'),
           'C10 el lote queda anclado');
-SELECT expect_error(format($$SELECT anchor_payment_batch(%L, 84532,
+SELECT expect_error(format($$SELECT anchor_payment_batch('p-tes', %L, 84532,
                         '0x101eB09d656f2c90f485eEC5Ef2F53A9F51F0f3c', '0x%s')$$, :'batch', repeat('cd', 32)),
                     'ya está anclado', 'C11 no se ancla dos veces');
 
@@ -144,5 +144,5 @@ SELECT expect_error($$SELECT record_payment_batch('fund-1',
                         '2026-08-01', '2026-08-31',
                         jsonb_build_array(jsonb_build_object(
                           'paymentId', 'rec-dos', 'leafIndex', 0, 'commitment', '\x' || repeat('ef', 32))))$$,
-                    'No autorizado', 'C27 nadie arma lotes de un fondo ajeno');
+                    'permission denied', 'C27 ningún cliente arma lotes');
 RESET ROLE;
